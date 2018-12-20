@@ -1,0 +1,1033 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		86554A6621C01D110071447E /* Expression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86554A6421C01D110071447E /* Expression.cpp */; };
+		86554A6D21C108C20071447E /* ExpVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86554A6C21C108C20071447E /* ExpVector.cpp */; };
+		86554A7021C13DBA0071447E /* Operator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86554A6E21C13DBA0071447E /* Operator.cpp */; };
+		86554A7421C23B220071447E /* All-Operators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86554A7221C23B220071447E /* All-Operators.cpp */; };
+		86892BC521B6BF4700EC24EF /* StrUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86892BC421B6BF4700EC24EF /* StrUtils.cpp */; };
+		8694B72421B2E653006EF947 /* Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B72221B2E652006EF947 /* Assembler.cpp */; };
+		8694B72921B43873006EF947 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B72721B43873006EF947 /* Parser.cpp */; };
+		8694B72F21B47FAE006EF947 /* Z80-Instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B72D21B47FAE006EF947 /* Z80-Instructions.cpp */; };
+		8694B73521B4A390006EF947 /* All-Directives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B73321B4A390006EF947 /* All-Directives.cpp */; };
+		869B4C0A21AC4F8000E65FE7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C0921AC4F8000E65FE7 /* AppDelegate.swift */; };
+		869B4C0C21AC4F8000E65FE7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C0B21AC4F8000E65FE7 /* ViewController.swift */; };
+		869B4C0E21AC4F8000E65FE7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 869B4C0D21AC4F8000E65FE7 /* Assets.xcassets */; };
+		869B4C1121AC4F8000E65FE7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 869B4C0F21AC4F8000E65FE7 /* Main.storyboard */; };
+		869B4C3F21AC4FB300E65FE7 /* Computer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C1B21AC4FB200E65FE7 /* Computer.cpp */; };
+		869B4C4021AC4FB300E65FE7 /* MemoryMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C1D21AC4FB200E65FE7 /* MemoryMgr.cpp */; };
+		869B4C4121AC4FB300E65FE7 /* PortModule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C1E21AC4FB200E65FE7 /* PortModule.cpp */; };
+		869B4C4221AC4FB300E65FE7 /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C2021AC4FB200E65FE7 /* Module.cpp */; };
+		869B4C4B21AC4FB300E65FE7 /* MemoryModule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C2C21AC4FB200E65FE7 /* MemoryModule.cpp */; };
+		869B4C4C21AC4FB300E65FE7 /* Peripheral.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C2F21AC4FB200E65FE7 /* Peripheral.cpp */; };
+		869B4C4D21AC4FB300E65FE7 /* CPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C3021AC4FB200E65FE7 /* CPU.cpp */; };
+		869B4C5021AC4FB300E65FE7 /* dummy_yaze.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C3821AC4FB300E65FE7 /* dummy_yaze.cpp */; };
+		869B4C5121AC4FB300E65FE7 /* simz80.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C3921AC4FB300E65FE7 /* simz80.cpp */; };
+		869B4C5221AC4FB300E65FE7 /* mem_mmu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C3B21AC4FB300E65FE7 /* mem_mmu.cpp */; };
+		869B4C5421AC50F600E65FE7 /* MuzBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C5321AC50F600E65FE7 /* MuzBridge.mm */; };
+		869B4C5E21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C5D21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm */; };
+		86C121B321AEC742005A5C36 /* PortMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86C121B121AEC742005A5C36 /* PortMgr.cpp */; };
+		86C121B621AED01D005A5C36 /* ROMPagingPort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86C121B521AED01D005A5C36 /* ROMPagingPort.cpp */; };
+		86D4D26B21CBB50E0091B0E0 /* réduction expression.numbers in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26821CBB50E0091B0E0 /* réduction expression.numbers */; };
+		86D4D26C21CBB50E0091B0E0 /* binary comparison.numbers in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */; };
+		86D4D26D21CBB50E0091B0E0 /* Evaluation expression.md in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		869B4C6021AD8B3F00E65FE7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 869B4BFE21AC4F8000E65FE7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 869B4C0521AC4F8000E65FE7;
+			remoteInfo = "MUZ-Workshop";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		8642232C21C6442D0053E02F /* Expressions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Expressions.asm; sourceTree = "<group>"; };
+		8642232E21C862490053E02F /* CodeLine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CodeLine.h; sourceTree = "<group>"; };
+		8642239F21CB964E0053E02F /* Alpha.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Alpha.asm; sourceTree = "<group>"; };
+		864223A021CB964E0053E02F /* Idle.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Idle.asm; sourceTree = "<group>"; };
+		864223A321CB964E0053E02F /* Config.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config.asm; sourceTree = "<group>"; };
+		864223A421CB964E0053E02F /* Z80_CTC.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Z80_CTC.asm; sourceTree = "<group>"; };
+		864223A521CB964E0053E02F /* GSL.hex */ = {isa = PBXFileReference; lastKnownFileType = text; path = GSL.hex; sourceTree = "<group>"; };
+		864223A621CB964E0053E02F /* ConfigReg.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ConfigReg.asm; sourceTree = "<group>"; };
+		864223A721CB964E0053E02F /* ROM_Info.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info.asm; sourceTree = "<group>"; };
+		864223A821CB964E0053E02F /* !Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Manager.asm"; sourceTree = "<group>"; };
+		864223A921CB964E0053E02F /* Z80_SIO.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Z80_SIO.asm; sourceTree = "<group>"; };
+		864223AA21CB964E0053E02F /* ROM_Info_L1_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_L1_Bank1.asm; sourceTree = "<group>"; };
+		864223AC21CB964E0053E02F /* Terminal.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Terminal.asm; sourceTree = "<group>"; };
+		864223AD21CB964E0053E02F /* Config.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config.asm; sourceTree = "<group>"; };
+		864223AE21CB964E0053E02F /* ConfigReg.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ConfigReg.asm; sourceTree = "<group>"; };
+		864223AF21CB964E0053E02F /* ROM_Info.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info.asm; sourceTree = "<group>"; };
+		864223B021CB964E0053E02F /* !Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Manager.asm"; sourceTree = "<group>"; };
+		864223B121CB964E0053E02F /* Printer.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Printer.asm; sourceTree = "<group>"; };
+		864223B221CB964E0053E02F /* ROM_Info_W1_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_W1_Bank1.asm; sourceTree = "<group>"; };
+		864223B421CB964E0053E02F /* ROM_Info_R2_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_R2_Bank1.asm; sourceTree = "<group>"; };
+		864223B521CB964E0053E02F /* Config.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config.asm; sourceTree = "<group>"; };
+		864223B621CB964E0053E02F /* ROM_Info_R4_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_R4_Bank1.asm; sourceTree = "<group>"; };
+		864223B721CB964E0053E02F /* ROM_Info_R3_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_R3_Bank1.asm; sourceTree = "<group>"; };
+		864223B821CB964E0053E02F /* Serial6850.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Serial6850.asm; sourceTree = "<group>"; };
+		864223B921CB964E0053E02F /* ROM_Info.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info.asm; sourceTree = "<group>"; };
+		864223BA21CB964E0053E02F /* !Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Manager.asm"; sourceTree = "<group>"; };
+		864223BB21CB964E0053E02F /* ROM_Info_R1_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_R1_Bank1.asm; sourceTree = "<group>"; };
+		864223BC21CB964E0053E02F /* SerialSIO2.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = SerialSIO2.asm; sourceTree = "<group>"; };
+		864223BE21CB964E0053E02F /* ROM_Info_T1_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_T1_Bank1.asm; sourceTree = "<group>"; };
+		864223BF21CB964E0053E02F /* ROM_Info_T1_Bank2.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_T1_Bank2.asm; sourceTree = "<group>"; };
+		864223C021CB964E0053E02F /* Config.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config.asm; sourceTree = "<group>"; };
+		864223C121CB964E0053E02F /* ROM_Info.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info.asm; sourceTree = "<group>"; };
+		864223C221CB964E0053E02F /* !Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Manager.asm"; sourceTree = "<group>"; };
+		864223C321CB964E0053E02F /* Paging.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Paging.asm; sourceTree = "<group>"; };
+		864223C421CB964E0053E02F /* Z80_SIO.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Z80_SIO.asm; sourceTree = "<group>"; };
+		864223C621CB964E0053E02F /* Config.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config.asm; sourceTree = "<group>"; };
+		864223C721CB964E0053E02F /* ROM_Info_Z2_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_Z2_Bank1.asm; sourceTree = "<group>"; };
+		864223C821CB964E0053E02F /* Serial6850.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Serial6850.asm; sourceTree = "<group>"; };
+		864223C921CB964E0053E02F /* ROM_Info.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info.asm; sourceTree = "<group>"; };
+		864223CA21CB964E0053E02F /* !Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Manager.asm"; sourceTree = "<group>"; };
+		864223CB21CB964E0053E02F /* SerialSIO2.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = SerialSIO2.asm; sourceTree = "<group>"; };
+		864223CD21CB964E0053E02F /* Config.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config.asm; sourceTree = "<group>"; };
+		864223CE21CB964E0053E02F /* BankedRAM.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = BankedRAM.asm; sourceTree = "<group>"; };
+		864223CF21CB964E0053E02F /* ROM_Info.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info.asm; sourceTree = "<group>"; };
+		864223D021CB964E0053E02F /* !Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Manager.asm"; sourceTree = "<group>"; };
+		864223D121CB964E0053E02F /* ROM_Info_S2_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_S2_Bank1.asm; sourceTree = "<group>"; };
+		864223D221CB964E0053E02F /* SerialBB.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = SerialBB.asm; sourceTree = "<group>"; };
+		864223D321CB964E0053E02F /* Selftest.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Selftest.asm; sourceTree = "<group>"; };
+		864223D521CB964E0053E02F /* ROM_Info_T1_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_T1_Bank1.asm; sourceTree = "<group>"; };
+		864223D621CB964E0053E02F /* zConfig.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = zConfig.asm; sourceTree = "<group>"; };
+		864223D721CB964E0053E02F /* ROM_Info_T1_Bank2.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_T1_Bank2.asm; sourceTree = "<group>"; };
+		864223D821CB964E0053E02F /* Config.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config.asm; sourceTree = "<group>"; };
+		864223D921CB964E0053E02F /* zZ80_SIO.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = zZ80_SIO.asm; sourceTree = "<group>"; };
+		864223DA21CB964E0053E02F /* ROM_Info.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info.asm; sourceTree = "<group>"; };
+		864223DB21CB964E0053E02F /* !Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Manager.asm"; sourceTree = "<group>"; };
+		864223DC21CB964E0053E02F /* Paging.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Paging.asm; sourceTree = "<group>"; };
+		864223DD21CB964E0053E02F /* Z80_SIO.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Z80_SIO.asm; sourceTree = "<group>"; };
+		864223DF21CB964E0053E02F /* Config.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config.asm; sourceTree = "<group>"; };
+		864223E021CB964E0053E02F /* ROM_Info_S1_Bank1.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_S1_Bank1.asm; sourceTree = "<group>"; };
+		864223E121CB964E0053E02F /* ROM_Info.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info.asm; sourceTree = "<group>"; };
+		864223E221CB964E0053E02F /* !Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Manager.asm"; sourceTree = "<group>"; };
+		864223E421CB964E0053E02F /* Config_R0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config_R0.asm; sourceTree = "<group>"; };
+		864223E521CB964E0053E02F /* ROM_Info_W0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_W0.asm; sourceTree = "<group>"; };
+		864223E621CB964E0053E02F /* Config_00.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config_00.asm; sourceTree = "<group>"; };
+		864223E721CB964E0053E02F /* Config_S0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config_S0.asm; sourceTree = "<group>"; };
+		864223E821CB964E0053E02F /* ROM_Info_Z0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_Z0.asm; sourceTree = "<group>"; };
+		864223E921CB964E0053E02F /* Config_T0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config_T0.asm; sourceTree = "<group>"; };
+		864223EA21CB964E0053E02F /* Config_L0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config_L0.asm; sourceTree = "<group>"; };
+		864223EB21CB964E0053E02F /* ROM_Info_R0.asm.bak */ = {isa = PBXFileReference; lastKnownFileType = text; path = ROM_Info_R0.asm.bak; sourceTree = "<group>"; };
+		864223EC21CB964E0053E02F /* Config_Z0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config_Z0.asm; sourceTree = "<group>"; };
+		864223ED21CB964E0053E02F /* ROM_Info_S0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_S0.asm; sourceTree = "<group>"; };
+		864223EE21CB964E0053E02F /* !Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Manager.asm"; sourceTree = "<group>"; };
+		864223EF21CB964E0053E02F /* Config_W0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Config_W0.asm; sourceTree = "<group>"; };
+		864223F021CB964E0053E02F /* ROM_Info_W0.asm.bak */ = {isa = PBXFileReference; lastKnownFileType = text; path = ROM_Info_W0.asm.bak; sourceTree = "<group>"; };
+		864223F121CB964E0053E02F /* ROM_Info_00.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_00.asm; sourceTree = "<group>"; };
+		864223F221CB964E0053E02F /* ROM_Info_R0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_R0.asm; sourceTree = "<group>"; };
+		864223F321CB964E0053E02F /* ROM_Info_L0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_L0.asm; sourceTree = "<group>"; };
+		864223F421CB964E0053E02F /* ROM_Info_T0.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = ROM_Info_T0.asm; sourceTree = "<group>"; };
+		864223F521CB964E0053E02F /* FDOS.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = FDOS.asm; sourceTree = "<group>"; };
+		864223F621CB964E0053E02F /* HexLoader.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = HexLoader.asm; sourceTree = "<group>"; };
+		864223F721CB964E0053E02F /* main.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = main.asm; sourceTree = "<group>"; };
+		864223F821CB964E0053E02F /* MonitorInfo.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = MonitorInfo.asm; sourceTree = "<group>"; };
+		864223F921CB964E0053E02F /* !Main.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "!Main.asm"; sourceTree = "<group>"; };
+		864223FA21CB964E0053E02F /* API.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = API.asm; sourceTree = "<group>"; };
+		864223FB21CB964E0053E02F /* Disassembler.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Disassembler.asm; sourceTree = "<group>"; };
+		864223FC21CB964E0053E02F /* DisData.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = DisData.asm; sourceTree = "<group>"; };
+		864223FD21CB964E0053E02F /* Console.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Console.asm; sourceTree = "<group>"; };
+		864223FE21CB964E0053E02F /* History.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = History.txt; sourceTree = "<group>"; };
+		864223FF21CB964E0053E02F /* Script.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Script.asm; sourceTree = "<group>"; };
+		8642240021CB964E0053E02F /* Strings.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Strings.asm; sourceTree = "<group>"; };
+		8642240121CB964E0053E02F /* Commands.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Commands.asm; sourceTree = "<group>"; };
+		8642240221CB964E0053E02F /* Monitor.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Monitor.asm; sourceTree = "<group>"; };
+		8642240321CB964E0053E02F /* Selftest.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Selftest.asm; sourceTree = "<group>"; };
+		8642240421CB964E0053E02F /* RomFS.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = RomFS.asm; sourceTree = "<group>"; };
+		8642240521CB964E0053E02F /* Ports.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Ports.asm; sourceTree = "<group>"; };
+		8642240621CB964E0053E02F /* Breakpoint.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Breakpoint.asm; sourceTree = "<group>"; };
+		8642240721CB964E0053E02F /* !Main.asm.bak */ = {isa = PBXFileReference; lastKnownFileType = text; path = "!Main.asm.bak"; sourceTree = "<group>"; };
+		8642240821CB964E0053E02F /* Utilities.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Utilities.asm; sourceTree = "<group>"; };
+		8642240921CB964E0053E02F /* Assembler.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Assembler.asm; sourceTree = "<group>"; };
+		86554A6421C01D110071447E /* Expression.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Expression.cpp; sourceTree = "<group>"; };
+		86554A6521C01D110071447E /* Expression.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Expression.h; sourceTree = "<group>"; };
+		86554A6721C022A30071447E /* TokenType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TokenType.h; sourceTree = "<group>"; };
+		86554A6821C024900071447E /* ParseToken.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParseToken.h; sourceTree = "<group>"; };
+		86554A6A21C0F6D00071447E /* ExpVector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ExpVector.h; sourceTree = "<group>"; };
+		86554A6C21C108C20071447E /* ExpVector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ExpVector.cpp; sourceTree = "<group>"; };
+		86554A6E21C13DBA0071447E /* Operator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Operator.cpp; sourceTree = "<group>"; };
+		86554A6F21C13DBA0071447E /* Operator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Operator.h; sourceTree = "<group>"; };
+		86554A7121C13FA80071447E /* Operators.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = Operators.md; path = "WIP - work and design docs/Operators.md"; sourceTree = "<group>"; };
+		86554A7221C23B220071447E /* All-Operators.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "All-Operators.cpp"; sourceTree = "<group>"; };
+		86554A7321C23B220071447E /* All-Operators.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "All-Operators.h"; sourceTree = "<group>"; };
+		86554A7521C24C9E0071447E /* Asm-Exceptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Asm-Exceptions.h"; sourceTree = "<group>"; };
+		86892BBE21B590C600EC24EF /* Name.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Name.h; sourceTree = "<group>"; };
+		86892BC321B6BC1600EC24EF /* StrUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StrUtils.h; sourceTree = "<group>"; };
+		86892BC421B6BF4700EC24EF /* StrUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StrUtils.cpp; sourceTree = "<group>"; };
+		86892BC621B703B500EC24EF /* Errors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Errors.h; sourceTree = "<group>"; };
+		86892BC721B7FE8000EC24EF /* ParsingMode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParsingMode.h; sourceTree = "<group>"; };
+		86892BC821B95B6700EC24EF /* conditionnal assembling.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = "conditionnal assembling.md"; path = "WIP - work and design docs/conditionnal assembling.md"; sourceTree = "<group>"; };
+		86892BCA21BA72F100EC24EF /* Conditionnals.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Conditionnals.asm; sourceTree = "<group>"; };
+		8694B71B21B13EE6006EF947 /* Assembler.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = Assembler.md; path = "WIP - work and design docs/Assembler.md"; sourceTree = "<group>"; };
+		8694B71D21B19468006EF947 /* design.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = design.md; path = "WIP - work and design docs/design.md"; sourceTree = "<group>"; };
+		8694B72021B2E484006EF947 /* AddressZone.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddressZone.h; sourceTree = "<group>"; };
+		8694B72121B2E59F006EF947 /* Label.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Label.h; sourceTree = "<group>"; };
+		8694B72221B2E652006EF947 /* Assembler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Assembler.cpp; sourceTree = "<group>"; };
+		8694B72321B2E652006EF947 /* Assembler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Assembler.h; sourceTree = "<group>"; };
+		8694B72621B2E802006EF947 /* DefSymbol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DefSymbol.h; sourceTree = "<group>"; };
+		8694B72721B43873006EF947 /* Parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
+		8694B72821B43873006EF947 /* Parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
+		8694B72B21B47E88006EF947 /* Instruction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Instruction.h; sourceTree = "<group>"; };
+		8694B72D21B47FAE006EF947 /* Z80-Instructions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "Z80-Instructions.cpp"; sourceTree = "<group>"; };
+		8694B72E21B47FAE006EF947 /* Z80-Instructions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Z80-Instructions.h"; sourceTree = "<group>"; };
+		8694B73121B4A293006EF947 /* Directive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Directive.h; sourceTree = "<group>"; };
+		8694B73321B4A390006EF947 /* All-Directives.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "All-Directives.cpp"; sourceTree = "<group>"; };
+		8694B73421B4A390006EF947 /* All-Directives.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "All-Directives.h"; sourceTree = "<group>"; };
+		869B4C0621AC4F8000E65FE7 /* MUZ-Workshop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MUZ-Workshop.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		869B4C0921AC4F8000E65FE7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		869B4C0B21AC4F8000E65FE7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		869B4C0D21AC4F8000E65FE7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		869B4C1021AC4F8000E65FE7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		869B4C1221AC4F8000E65FE7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		869B4C1321AC4F8000E65FE7 /* MUZ_Workshop.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MUZ_Workshop.entitlements; sourceTree = "<group>"; };
+		869B4C1B21AC4FB200E65FE7 /* Computer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Computer.cpp; sourceTree = "<group>"; };
+		869B4C1D21AC4FB200E65FE7 /* MemoryMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryMgr.cpp; sourceTree = "<group>"; };
+		869B4C1E21AC4FB200E65FE7 /* PortModule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PortModule.cpp; sourceTree = "<group>"; };
+		869B4C1F21AC4FB200E65FE7 /* Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Types.h; sourceTree = "<group>"; };
+		869B4C2021AC4FB200E65FE7 /* Module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
+		869B4C2121AC4FB200E65FE7 /* Exceptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Exceptions.h; sourceTree = "<group>"; };
+		869B4C2321AC4FB200E65FE7 /* MemoryMgr_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryMgr_test.cpp; sourceTree = "<group>"; };
+		869B4C2621AC4FB200E65FE7 /* MemoryModule_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryModule_test.cpp; sourceTree = "<group>"; };
+		869B4C2921AC4FB200E65FE7 /* Computer_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Computer_test.cpp; sourceTree = "<group>"; };
+		869B4C2B21AC4FB200E65FE7 /* Computer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Computer.h; sourceTree = "<group>"; };
+		869B4C2C21AC4FB200E65FE7 /* MemoryModule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryModule.cpp; sourceTree = "<group>"; };
+		869B4C2D21AC4FB200E65FE7 /* CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPU.h; sourceTree = "<group>"; };
+		869B4C2E21AC4FB200E65FE7 /* MemoryModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryModule.h; sourceTree = "<group>"; };
+		869B4C2F21AC4FB200E65FE7 /* Peripheral.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Peripheral.cpp; sourceTree = "<group>"; };
+		869B4C3021AC4FB200E65FE7 /* CPU.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CPU.cpp; sourceTree = "<group>"; };
+		869B4C3121AC4FB200E65FE7 /* Module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Module.h; sourceTree = "<group>"; };
+		869B4C3221AC4FB200E65FE7 /* Peripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Peripheral.h; sourceTree = "<group>"; };
+		869B4C3321AC4FB300E65FE7 /* MemoryMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryMgr.h; sourceTree = "<group>"; };
+		869B4C3521AC4FB300E65FE7 /* PortModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PortModule.h; sourceTree = "<group>"; };
+		869B4C3721AC4FB300E65FE7 /* yaze.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = yaze.c; sourceTree = "<group>"; };
+		869B4C3821AC4FB300E65FE7 /* dummy_yaze.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dummy_yaze.cpp; sourceTree = "<group>"; };
+		869B4C3921AC4FB300E65FE7 /* simz80.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = simz80.cpp; sourceTree = "<group>"; };
+		869B4C3A21AC4FB300E65FE7 /* yaze.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = yaze.h; sourceTree = "<group>"; };
+		869B4C3B21AC4FB300E65FE7 /* mem_mmu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mem_mmu.cpp; sourceTree = "<group>"; };
+		869B4C3C21AC4FB300E65FE7 /* mem_mmu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mem_mmu.h; sourceTree = "<group>"; };
+		869B4C3D21AC4FB300E65FE7 /* simz80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = simz80.h; sourceTree = "<group>"; };
+		869B4C3E21AC4FB300E65FE7 /* ytypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ytypes.h; sourceTree = "<group>"; };
+		869B4C5321AC50F600E65FE7 /* MuzBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = MuzBridge.mm; path = "MUZ-Workshop/MuzBridge.mm"; sourceTree = SOURCE_ROOT; };
+		869B4C5521AC517C00E65FE7 /* MuzBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MuzBridge.h; path = "MUZ-Workshop/MuzBridge.h"; sourceTree = SOURCE_ROOT; };
+		869B4C5621AC57F300E65FE7 /* MUZ-Workshop-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MUZ-Workshop-Bridging-Header.h"; sourceTree = "<group>"; };
+		869B4C5B21AD8B3F00E65FE7 /* MUZ-WorkshopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MUZ-WorkshopTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		869B4C5D21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MUZ_WorkshopTests.mm; sourceTree = "<group>"; };
+		869B4C5F21AD8B3F00E65FE7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		86C121B121AEC742005A5C36 /* PortMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PortMgr.cpp; sourceTree = "<group>"; };
+		86C121B221AEC742005A5C36 /* PortMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PortMgr.h; sourceTree = "<group>"; };
+		86C121B421AED01D005A5C36 /* ROMPagingPort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ROMPagingPort.h; sourceTree = "<group>"; };
+		86C121B521AED01D005A5C36 /* ROMPagingPort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ROMPagingPort.cpp; sourceTree = "<group>"; };
+		86C121EE21B0344D005A5C36 /* muz_simz80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muz_simz80.h; sourceTree = "<group>"; };
+		86C121EF21B0344E005A5C36 /* muz_mmu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muz_mmu.h; sourceTree = "<group>"; };
+		86D4D26821CBB50E0091B0E0 /* réduction expression.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; name = "réduction expression.numbers"; path = "WIP - work and design docs/réduction expression.numbers"; sourceTree = "<group>"; };
+		86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; name = "binary comparison.numbers"; path = "WIP - work and design docs/binary comparison.numbers"; sourceTree = "<group>"; };
+		86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = "Evaluation expression.md"; path = "WIP - work and design docs/Evaluation expression.md"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		869B4C0321AC4F8000E65FE7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		869B4C5821AD8B3F00E65FE7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8642232B21C3D60C0053E02F /* MUZ-Computer */ = {
+			isa = PBXGroup;
+			children = (
+				86C121B521AED01D005A5C36 /* ROMPagingPort.cpp */,
+				86C121B421AED01D005A5C36 /* ROMPagingPort.h */,
+				869B4C1B21AC4FB200E65FE7 /* Computer.cpp */,
+				869B4C2B21AC4FB200E65FE7 /* Computer.h */,
+				869B4C3021AC4FB200E65FE7 /* CPU.cpp */,
+				869B4C2D21AC4FB200E65FE7 /* CPU.h */,
+				869B4C1D21AC4FB200E65FE7 /* MemoryMgr.cpp */,
+				869B4C3321AC4FB300E65FE7 /* MemoryMgr.h */,
+				869B4C2C21AC4FB200E65FE7 /* MemoryModule.cpp */,
+				869B4C2E21AC4FB200E65FE7 /* MemoryModule.h */,
+				869B4C2021AC4FB200E65FE7 /* Module.cpp */,
+				869B4C3121AC4FB200E65FE7 /* Module.h */,
+				869B4C2F21AC4FB200E65FE7 /* Peripheral.cpp */,
+				869B4C3221AC4FB200E65FE7 /* Peripheral.h */,
+				86C121B121AEC742005A5C36 /* PortMgr.cpp */,
+				86C121B221AEC742005A5C36 /* PortMgr.h */,
+				869B4C1E21AC4FB200E65FE7 /* PortModule.cpp */,
+				869B4C3521AC4FB300E65FE7 /* PortModule.h */,
+			);
+			path = "MUZ-Computer";
+			sourceTree = "<group>";
+		};
+		8642233121CB96120053E02F /* SC Monitor Sources */ = {
+			isa = PBXGroup;
+			children = (
+				8642239E21CB964E0053E02F /* Source */,
+			);
+			name = "SC Monitor Sources";
+			path = "../../SC Monitor Sources";
+			sourceTree = "<group>";
+		};
+		8642239E21CB964E0053E02F /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				8642239F21CB964E0053E02F /* Alpha.asm */,
+				864223A021CB964E0053E02F /* Idle.asm */,
+				864223A121CB964E0053E02F /* Hardware */,
+				864223F521CB964E0053E02F /* FDOS.asm */,
+				864223F621CB964E0053E02F /* HexLoader.asm */,
+				864223F721CB964E0053E02F /* main.asm */,
+				864223F821CB964E0053E02F /* MonitorInfo.asm */,
+				864223F921CB964E0053E02F /* !Main.asm */,
+				864223FA21CB964E0053E02F /* API.asm */,
+				864223FB21CB964E0053E02F /* Disassembler.asm */,
+				864223FC21CB964E0053E02F /* DisData.asm */,
+				864223FD21CB964E0053E02F /* Console.asm */,
+				864223FE21CB964E0053E02F /* History.txt */,
+				864223FF21CB964E0053E02F /* Script.asm */,
+				8642240021CB964E0053E02F /* Strings.asm */,
+				8642240121CB964E0053E02F /* Commands.asm */,
+				8642240221CB964E0053E02F /* Monitor.asm */,
+				8642240321CB964E0053E02F /* Selftest.asm */,
+				8642240421CB964E0053E02F /* RomFS.asm */,
+				8642240521CB964E0053E02F /* Ports.asm */,
+				8642240621CB964E0053E02F /* Breakpoint.asm */,
+				8642240721CB964E0053E02F /* !Main.asm.bak */,
+				8642240821CB964E0053E02F /* Utilities.asm */,
+				8642240921CB964E0053E02F /* Assembler.asm */,
+			);
+			path = Source;
+			sourceTree = "<group>";
+		};
+		864223A121CB964E0053E02F /* Hardware */ = {
+			isa = PBXGroup;
+			children = (
+				864223A221CB964E0053E02F /* LiNC80 */,
+				864223AB21CB964E0053E02F /* Workshop */,
+				864223B321CB964E0053E02F /* RC2014 */,
+				864223BD21CB964E0053E02F /* TomsSBC */,
+				864223C521CB964E0053E02F /* Z80SBCRC */,
+				864223CC21CB964E0053E02F /* SC114 */,
+				864223D421CB964E0053E02F /* Z280RC */,
+				864223DE21CB964E0053E02F /* SC101 */,
+				864223E321CB964E0053E02F /* Custom */,
+			);
+			path = Hardware;
+			sourceTree = "<group>";
+		};
+		864223A221CB964E0053E02F /* LiNC80 */ = {
+			isa = PBXGroup;
+			children = (
+				864223A321CB964E0053E02F /* Config.asm */,
+				864223A421CB964E0053E02F /* Z80_CTC.asm */,
+				864223A521CB964E0053E02F /* GSL.hex */,
+				864223A621CB964E0053E02F /* ConfigReg.asm */,
+				864223A721CB964E0053E02F /* ROM_Info.asm */,
+				864223A821CB964E0053E02F /* !Manager.asm */,
+				864223A921CB964E0053E02F /* Z80_SIO.asm */,
+				864223AA21CB964E0053E02F /* ROM_Info_L1_Bank1.asm */,
+			);
+			path = LiNC80;
+			sourceTree = "<group>";
+		};
+		864223AB21CB964E0053E02F /* Workshop */ = {
+			isa = PBXGroup;
+			children = (
+				864223AC21CB964E0053E02F /* Terminal.asm */,
+				864223AD21CB964E0053E02F /* Config.asm */,
+				864223AE21CB964E0053E02F /* ConfigReg.asm */,
+				864223AF21CB964E0053E02F /* ROM_Info.asm */,
+				864223B021CB964E0053E02F /* !Manager.asm */,
+				864223B121CB964E0053E02F /* Printer.asm */,
+				864223B221CB964E0053E02F /* ROM_Info_W1_Bank1.asm */,
+			);
+			path = Workshop;
+			sourceTree = "<group>";
+		};
+		864223B321CB964E0053E02F /* RC2014 */ = {
+			isa = PBXGroup;
+			children = (
+				864223B421CB964E0053E02F /* ROM_Info_R2_Bank1.asm */,
+				864223B521CB964E0053E02F /* Config.asm */,
+				864223B621CB964E0053E02F /* ROM_Info_R4_Bank1.asm */,
+				864223B721CB964E0053E02F /* ROM_Info_R3_Bank1.asm */,
+				864223B821CB964E0053E02F /* Serial6850.asm */,
+				864223B921CB964E0053E02F /* ROM_Info.asm */,
+				864223BA21CB964E0053E02F /* !Manager.asm */,
+				864223BB21CB964E0053E02F /* ROM_Info_R1_Bank1.asm */,
+				864223BC21CB964E0053E02F /* SerialSIO2.asm */,
+			);
+			path = RC2014;
+			sourceTree = "<group>";
+		};
+		864223BD21CB964E0053E02F /* TomsSBC */ = {
+			isa = PBXGroup;
+			children = (
+				864223BE21CB964E0053E02F /* ROM_Info_T1_Bank1.asm */,
+				864223BF21CB964E0053E02F /* ROM_Info_T1_Bank2.asm */,
+				864223C021CB964E0053E02F /* Config.asm */,
+				864223C121CB964E0053E02F /* ROM_Info.asm */,
+				864223C221CB964E0053E02F /* !Manager.asm */,
+				864223C321CB964E0053E02F /* Paging.asm */,
+				864223C421CB964E0053E02F /* Z80_SIO.asm */,
+			);
+			path = TomsSBC;
+			sourceTree = "<group>";
+		};
+		864223C521CB964E0053E02F /* Z80SBCRC */ = {
+			isa = PBXGroup;
+			children = (
+				864223C621CB964E0053E02F /* Config.asm */,
+				864223C721CB964E0053E02F /* ROM_Info_Z2_Bank1.asm */,
+				864223C821CB964E0053E02F /* Serial6850.asm */,
+				864223C921CB964E0053E02F /* ROM_Info.asm */,
+				864223CA21CB964E0053E02F /* !Manager.asm */,
+				864223CB21CB964E0053E02F /* SerialSIO2.asm */,
+			);
+			path = Z80SBCRC;
+			sourceTree = "<group>";
+		};
+		864223CC21CB964E0053E02F /* SC114 */ = {
+			isa = PBXGroup;
+			children = (
+				864223CD21CB964E0053E02F /* Config.asm */,
+				864223CE21CB964E0053E02F /* BankedRAM.asm */,
+				864223CF21CB964E0053E02F /* ROM_Info.asm */,
+				864223D021CB964E0053E02F /* !Manager.asm */,
+				864223D121CB964E0053E02F /* ROM_Info_S2_Bank1.asm */,
+				864223D221CB964E0053E02F /* SerialBB.asm */,
+				864223D321CB964E0053E02F /* Selftest.asm */,
+			);
+			path = SC114;
+			sourceTree = "<group>";
+		};
+		864223D421CB964E0053E02F /* Z280RC */ = {
+			isa = PBXGroup;
+			children = (
+				864223D521CB964E0053E02F /* ROM_Info_T1_Bank1.asm */,
+				864223D621CB964E0053E02F /* zConfig.asm */,
+				864223D721CB964E0053E02F /* ROM_Info_T1_Bank2.asm */,
+				864223D821CB964E0053E02F /* Config.asm */,
+				864223D921CB964E0053E02F /* zZ80_SIO.asm */,
+				864223DA21CB964E0053E02F /* ROM_Info.asm */,
+				864223DB21CB964E0053E02F /* !Manager.asm */,
+				864223DC21CB964E0053E02F /* Paging.asm */,
+				864223DD21CB964E0053E02F /* Z80_SIO.asm */,
+			);
+			path = Z280RC;
+			sourceTree = "<group>";
+		};
+		864223DE21CB964E0053E02F /* SC101 */ = {
+			isa = PBXGroup;
+			children = (
+				864223DF21CB964E0053E02F /* Config.asm */,
+				864223E021CB964E0053E02F /* ROM_Info_S1_Bank1.asm */,
+				864223E121CB964E0053E02F /* ROM_Info.asm */,
+				864223E221CB964E0053E02F /* !Manager.asm */,
+			);
+			path = SC101;
+			sourceTree = "<group>";
+		};
+		864223E321CB964E0053E02F /* Custom */ = {
+			isa = PBXGroup;
+			children = (
+				864223E421CB964E0053E02F /* Config_R0.asm */,
+				864223E521CB964E0053E02F /* ROM_Info_W0.asm */,
+				864223E621CB964E0053E02F /* Config_00.asm */,
+				864223E721CB964E0053E02F /* Config_S0.asm */,
+				864223E821CB964E0053E02F /* ROM_Info_Z0.asm */,
+				864223E921CB964E0053E02F /* Config_T0.asm */,
+				864223EA21CB964E0053E02F /* Config_L0.asm */,
+				864223EB21CB964E0053E02F /* ROM_Info_R0.asm.bak */,
+				864223EC21CB964E0053E02F /* Config_Z0.asm */,
+				864223ED21CB964E0053E02F /* ROM_Info_S0.asm */,
+				864223EE21CB964E0053E02F /* !Manager.asm */,
+				864223EF21CB964E0053E02F /* Config_W0.asm */,
+				864223F021CB964E0053E02F /* ROM_Info_W0.asm.bak */,
+				864223F121CB964E0053E02F /* ROM_Info_00.asm */,
+				864223F221CB964E0053E02F /* ROM_Info_R0.asm */,
+				864223F321CB964E0053E02F /* ROM_Info_L0.asm */,
+				864223F421CB964E0053E02F /* ROM_Info_T0.asm */,
+			);
+			path = Custom;
+			sourceTree = "<group>";
+		};
+		86892BC221B6BC0300EC24EF /* MUZ-Common */ = {
+			isa = PBXGroup;
+			children = (
+				869B4C2121AC4FB200E65FE7 /* Exceptions.h */,
+				869B4C1F21AC4FB200E65FE7 /* Types.h */,
+				86892BC321B6BC1600EC24EF /* StrUtils.h */,
+				86892BC421B6BF4700EC24EF /* StrUtils.cpp */,
+			);
+			path = "MUZ-Common";
+			sourceTree = "<group>";
+		};
+		86892BC921BA72BA00EC24EF /* TestSources */ = {
+			isa = PBXGroup;
+			children = (
+				86892BCA21BA72F100EC24EF /* Conditionnals.asm */,
+				8642232C21C6442D0053E02F /* Expressions.asm */,
+			);
+			path = TestSources;
+			sourceTree = "<group>";
+		};
+		8694B71A21B13ECF006EF947 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */,
+				86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */,
+				86D4D26821CBB50E0091B0E0 /* réduction expression.numbers */,
+				8694B71B21B13EE6006EF947 /* Assembler.md */,
+				86892BC821B95B6700EC24EF /* conditionnal assembling.md */,
+				8694B71D21B19468006EF947 /* design.md */,
+				86554A7121C13FA80071447E /* Operators.md */,
+			);
+			path = Documentation;
+			sourceTree = "<group>";
+		};
+		8694B71C21B193C4006EF947 /* MUZ-Assembler */ = {
+			isa = PBXGroup;
+			children = (
+				8642232E21C862490053E02F /* CodeLine.h */,
+				8694B72021B2E484006EF947 /* AddressZone.h */,
+				8694B73321B4A390006EF947 /* All-Directives.cpp */,
+				8694B73421B4A390006EF947 /* All-Directives.h */,
+				86554A6E21C13DBA0071447E /* Operator.cpp */,
+				86554A6F21C13DBA0071447E /* Operator.h */,
+				86554A7221C23B220071447E /* All-Operators.cpp */,
+				86554A7321C23B220071447E /* All-Operators.h */,
+				86554A7521C24C9E0071447E /* Asm-Exceptions.h */,
+				8694B72221B2E652006EF947 /* Assembler.cpp */,
+				8694B72321B2E652006EF947 /* Assembler.h */,
+				8694B72621B2E802006EF947 /* DefSymbol.h */,
+				8694B73121B4A293006EF947 /* Directive.h */,
+				86892BC621B703B500EC24EF /* Errors.h */,
+				86554A6421C01D110071447E /* Expression.cpp */,
+				86554A6521C01D110071447E /* Expression.h */,
+				86554A6C21C108C20071447E /* ExpVector.cpp */,
+				86554A6A21C0F6D00071447E /* ExpVector.h */,
+				8694B72B21B47E88006EF947 /* Instruction.h */,
+				8694B72121B2E59F006EF947 /* Label.h */,
+				86892BBE21B590C600EC24EF /* Name.h */,
+				8694B72721B43873006EF947 /* Parser.cpp */,
+				8694B72821B43873006EF947 /* Parser.h */,
+				86554A6821C024900071447E /* ParseToken.h */,
+				86892BC721B7FE8000EC24EF /* ParsingMode.h */,
+				86554A6721C022A30071447E /* TokenType.h */,
+				8694B72D21B47FAE006EF947 /* Z80-Instructions.cpp */,
+				8694B72E21B47FAE006EF947 /* Z80-Instructions.h */,
+			);
+			path = "MUZ-Assembler";
+			sourceTree = "<group>";
+		};
+		869B4BFD21AC4F8000E65FE7 = {
+			isa = PBXGroup;
+			children = (
+				8642233121CB96120053E02F /* SC Monitor Sources */,
+				869B4C1921AC4F8C00E65FE7 /* MUZ */,
+				869B4C0821AC4F8000E65FE7 /* MUZ-Workshop */,
+				869B4C5C21AD8B3F00E65FE7 /* MUZ-WorkshopTests */,
+				869B4C0721AC4F8000E65FE7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		869B4C0721AC4F8000E65FE7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				869B4C0621AC4F8000E65FE7 /* MUZ-Workshop.app */,
+				869B4C5B21AD8B3F00E65FE7 /* MUZ-WorkshopTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		869B4C0821AC4F8000E65FE7 /* MUZ-Workshop */ = {
+			isa = PBXGroup;
+			children = (
+				869B4C0921AC4F8000E65FE7 /* AppDelegate.swift */,
+				869B4C0B21AC4F8000E65FE7 /* ViewController.swift */,
+				869B4C0D21AC4F8000E65FE7 /* Assets.xcassets */,
+				869B4C0F21AC4F8000E65FE7 /* Main.storyboard */,
+				869B4C1221AC4F8000E65FE7 /* Info.plist */,
+				869B4C1321AC4F8000E65FE7 /* MUZ_Workshop.entitlements */,
+				869B4C5321AC50F600E65FE7 /* MuzBridge.mm */,
+				869B4C5521AC517C00E65FE7 /* MuzBridge.h */,
+				869B4C5621AC57F300E65FE7 /* MUZ-Workshop-Bridging-Header.h */,
+			);
+			path = "MUZ-Workshop";
+			sourceTree = "<group>";
+		};
+		869B4C1921AC4F8C00E65FE7 /* MUZ */ = {
+			isa = PBXGroup;
+			children = (
+				86892BC921BA72BA00EC24EF /* TestSources */,
+				8694B71A21B13ECF006EF947 /* Documentation */,
+				869B4C3621AC4FB300E65FE7 /* YAZE */,
+				869B4C1A21AC4FB200E65FE7 /* MUZ */,
+			);
+			name = MUZ;
+			path = ../../MUZ;
+			sourceTree = "<group>";
+		};
+		869B4C1A21AC4FB200E65FE7 /* MUZ */ = {
+			isa = PBXGroup;
+			children = (
+				8642232B21C3D60C0053E02F /* MUZ-Computer */,
+				86892BC221B6BC0300EC24EF /* MUZ-Common */,
+				8694B71C21B193C4006EF947 /* MUZ-Assembler */,
+				869B4C2221AC4FB200E65FE7 /* Tests */,
+			);
+			path = MUZ;
+			sourceTree = "<group>";
+		};
+		869B4C2221AC4FB200E65FE7 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				869B4C2321AC4FB200E65FE7 /* MemoryMgr_test.cpp */,
+				869B4C2621AC4FB200E65FE7 /* MemoryModule_test.cpp */,
+				869B4C2921AC4FB200E65FE7 /* Computer_test.cpp */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		869B4C3621AC4FB300E65FE7 /* YAZE */ = {
+			isa = PBXGroup;
+			children = (
+				86C121EF21B0344E005A5C36 /* muz_mmu.h */,
+				86C121EE21B0344D005A5C36 /* muz_simz80.h */,
+				869B4C3721AC4FB300E65FE7 /* yaze.c */,
+				869B4C3821AC4FB300E65FE7 /* dummy_yaze.cpp */,
+				869B4C3921AC4FB300E65FE7 /* simz80.cpp */,
+				869B4C3A21AC4FB300E65FE7 /* yaze.h */,
+				869B4C3B21AC4FB300E65FE7 /* mem_mmu.cpp */,
+				869B4C3C21AC4FB300E65FE7 /* mem_mmu.h */,
+				869B4C3D21AC4FB300E65FE7 /* simz80.h */,
+				869B4C3E21AC4FB300E65FE7 /* ytypes.h */,
+			);
+			path = YAZE;
+			sourceTree = "<group>";
+		};
+		869B4C5C21AD8B3F00E65FE7 /* MUZ-WorkshopTests */ = {
+			isa = PBXGroup;
+			children = (
+				869B4C5D21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm */,
+				869B4C5F21AD8B3F00E65FE7 /* Info.plist */,
+			);
+			path = "MUZ-WorkshopTests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		869B4C0521AC4F8000E65FE7 /* MUZ-Workshop */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 869B4C1621AC4F8000E65FE7 /* Build configuration list for PBXNativeTarget "MUZ-Workshop" */;
+			buildPhases = (
+				869B4C0221AC4F8000E65FE7 /* Sources */,
+				869B4C0321AC4F8000E65FE7 /* Frameworks */,
+				869B4C0421AC4F8000E65FE7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MUZ-Workshop";
+			productName = "MUZ-Workshop";
+			productReference = 869B4C0621AC4F8000E65FE7 /* MUZ-Workshop.app */;
+			productType = "com.apple.product-type.application";
+		};
+		869B4C5A21AD8B3F00E65FE7 /* MUZ-WorkshopTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 869B4C6221AD8B3F00E65FE7 /* Build configuration list for PBXNativeTarget "MUZ-WorkshopTests" */;
+			buildPhases = (
+				869B4C5721AD8B3F00E65FE7 /* Sources */,
+				869B4C5821AD8B3F00E65FE7 /* Frameworks */,
+				869B4C5921AD8B3F00E65FE7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				869B4C6121AD8B3F00E65FE7 /* PBXTargetDependency */,
+			);
+			name = "MUZ-WorkshopTests";
+			productName = "MUZ-WorkshopTests";
+			productReference = 869B4C5B21AD8B3F00E65FE7 /* MUZ-WorkshopTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		869B4BFE21AC4F8000E65FE7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1010;
+				LastUpgradeCheck = 1010;
+				ORGANIZATIONNAME = "Francis Pierot";
+				TargetAttributes = {
+					869B4C0521AC4F8000E65FE7 = {
+						CreatedOnToolsVersion = 10.1;
+					};
+					869B4C5A21AD8B3F00E65FE7 = {
+						CreatedOnToolsVersion = 10.1;
+						TestTargetID = 869B4C0521AC4F8000E65FE7;
+					};
+				};
+			};
+			buildConfigurationList = 869B4C0121AC4F8000E65FE7 /* Build configuration list for PBXProject "MUZ-Workshop" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 869B4BFD21AC4F8000E65FE7;
+			productRefGroup = 869B4C0721AC4F8000E65FE7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				869B4C0521AC4F8000E65FE7 /* MUZ-Workshop */,
+				869B4C5A21AD8B3F00E65FE7 /* MUZ-WorkshopTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		869B4C0421AC4F8000E65FE7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				869B4C0E21AC4F8000E65FE7 /* Assets.xcassets in Resources */,
+				86D4D26B21CBB50E0091B0E0 /* réduction expression.numbers in Resources */,
+				86D4D26D21CBB50E0091B0E0 /* Evaluation expression.md in Resources */,
+				869B4C1121AC4F8000E65FE7 /* Main.storyboard in Resources */,
+				86D4D26C21CBB50E0091B0E0 /* binary comparison.numbers in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		869B4C5921AD8B3F00E65FE7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		869B4C0221AC4F8000E65FE7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				869B4C4B21AC4FB300E65FE7 /* MemoryModule.cpp in Sources */,
+				86892BC521B6BF4700EC24EF /* StrUtils.cpp in Sources */,
+				86554A7421C23B220071447E /* All-Operators.cpp in Sources */,
+				869B4C0C21AC4F8000E65FE7 /* ViewController.swift in Sources */,
+				869B4C5421AC50F600E65FE7 /* MuzBridge.mm in Sources */,
+				869B4C4221AC4FB300E65FE7 /* Module.cpp in Sources */,
+				869B4C4121AC4FB300E65FE7 /* PortModule.cpp in Sources */,
+				8694B72421B2E653006EF947 /* Assembler.cpp in Sources */,
+				86554A6D21C108C20071447E /* ExpVector.cpp in Sources */,
+				86554A6621C01D110071447E /* Expression.cpp in Sources */,
+				86C121B321AEC742005A5C36 /* PortMgr.cpp in Sources */,
+				869B4C4021AC4FB300E65FE7 /* MemoryMgr.cpp in Sources */,
+				86C121B621AED01D005A5C36 /* ROMPagingPort.cpp in Sources */,
+				869B4C5021AC4FB300E65FE7 /* dummy_yaze.cpp in Sources */,
+				8694B72921B43873006EF947 /* Parser.cpp in Sources */,
+				869B4C4D21AC4FB300E65FE7 /* CPU.cpp in Sources */,
+				86554A7021C13DBA0071447E /* Operator.cpp in Sources */,
+				869B4C5121AC4FB300E65FE7 /* simz80.cpp in Sources */,
+				869B4C3F21AC4FB300E65FE7 /* Computer.cpp in Sources */,
+				869B4C4C21AC4FB300E65FE7 /* Peripheral.cpp in Sources */,
+				8694B73521B4A390006EF947 /* All-Directives.cpp in Sources */,
+				869B4C0A21AC4F8000E65FE7 /* AppDelegate.swift in Sources */,
+				869B4C5221AC4FB300E65FE7 /* mem_mmu.cpp in Sources */,
+				8694B72F21B47FAE006EF947 /* Z80-Instructions.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		869B4C5721AD8B3F00E65FE7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				869B4C5E21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		869B4C6121AD8B3F00E65FE7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 869B4C0521AC4F8000E65FE7 /* MUZ-Workshop */;
+			targetProxy = 869B4C6021AD8B3F00E65FE7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		869B4C0F21AC4F8000E65FE7 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				869B4C1021AC4F8000E65FE7 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		869B4C1421AC4F8000E65FE7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../MUZ\"",
+					"\"$(SRCROOT)/../../MUZ/MUZ\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OBJC_BRIDGING_HEADER = "MUZ-Workshop/MUZ-Workshop-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		869B4C1521AC4F8000E65FE7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"\"$(SRCROOT)/../../MUZ\"",
+					"\"$(SRCROOT)/../../MUZ/MUZ\"",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OBJC_BRIDGING_HEADER = "MUZ-Workshop/MUZ-Workshop-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		869B4C1721AC4F8000E65FE7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "MUZ-Workshop/MUZ_Workshop.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				INFOPLIST_FILE = "MUZ-Workshop/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fpierot.MUZ-Workshop";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		869B4C1821AC4F8000E65FE7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "MUZ-Workshop/MUZ_Workshop.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				INFOPLIST_FILE = "MUZ-Workshop/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fpierot.MUZ-Workshop";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Release;
+		};
+		869B4C6321AD8B3F00E65FE7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				INFOPLIST_FILE = "MUZ-WorkshopTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fpierot.MUZ-WorkshopTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MUZ-Workshop.app/Contents/MacOS/MUZ-Workshop";
+			};
+			name = Debug;
+		};
+		869B4C6421AD8B3F00E65FE7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				INFOPLIST_FILE = "MUZ-WorkshopTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fpierot.MUZ-WorkshopTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MUZ-Workshop.app/Contents/MacOS/MUZ-Workshop";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		869B4C0121AC4F8000E65FE7 /* Build configuration list for PBXProject "MUZ-Workshop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				869B4C1421AC4F8000E65FE7 /* Debug */,
+				869B4C1521AC4F8000E65FE7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		869B4C1621AC4F8000E65FE7 /* Build configuration list for PBXNativeTarget "MUZ-Workshop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				869B4C1721AC4F8000E65FE7 /* Debug */,
+				869B4C1821AC4F8000E65FE7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		869B4C6221AD8B3F00E65FE7 /* Build configuration list for PBXNativeTarget "MUZ-WorkshopTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				869B4C6321AD8B3F00E65FE7 /* Debug */,
+				869B4C6421AD8B3F00E65FE7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 869B4BFE21AC4F8000E65FE7 /* Project object */;
+}
