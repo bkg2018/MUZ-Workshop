@@ -29,20 +29,26 @@ namespace MUZ {
 			return false;
 		}
 		// skip directive
-		parser.ResolveNextSymbols();
-		parser.JumpNextToken();
+		parser.JumpTokens(1);
+		// resolve expression parts
+		parser.ResolveNextSymbols(); // skips symbol before resolving
 		
 		// undefine the symbol if it exists
 		as.DeleteDefSymbol(symbol.source);
 		// create the #DEFINE symbol
+		std::string value;
 		if (parser.ExistMoreToken(1)) {
-			parser.JumpNextToken();
-			std::string value = parser.EvaluateString();
-			as.CreateDefSymbol(symbol.source, value);
-		} else {
-			as.CreateDefSymbol(symbol.source, ""); // define as a single value
+			parser.JumpNextToken();// skip symbol
+			value = parser.EvaluateString();
 		}
-		return true;
+		DefSymbol* defsymbol = as.CreateDefSymbol(symbol.source, value);
+		if (defsymbol) {
+			defsymbol->line.file = codeline.file;
+			defsymbol->line.line = codeline.line;
+			return true;
+		}
+		msg.push_back({ errorTypeERROR, "couldn't create #DEFINE symbol", "", codeline.line});
+		return false;
 	}
 
 	/** #UNDEF <symbol>

@@ -40,25 +40,28 @@ namespace MUZ {
 		inSingleQuotes		,			// in a single quoted string
 		inSpace				,			// in a sequence of white space
 		inDirective			,			// in a '.' or "#' directive name
-		inFilename						// in a filename following an #INCLUDE directive
+		inFilename			,			// in a filename following an #INCLUDE directive
 	} ;
 	
-	/** Structure for the various states of parser.*/
+	/** Structure for the code line parser.  It works on one line at a time. */
 	class Parser {
 		
-		ParsingStatus status = inNothing;				/// Current parsing status
-		ResultFlag resultFlag = hasNOTHING;				/// Result flags for some directives
-		std::string word;								/// current token string
-		TokenType type = tokenTypeUNKNOWN;				/// current token type
+		std::string* source; 							/// original source
 		
-		std::string* source; 								/// original source
-		int pos = 0;									/// current position
+		// parsing status variable
+		int pos = 0;									/// current position in source
 		char c = '\0';									/// current character
-		char upperc = '\0';								/// current character, in uppercase
+		char upperc = '\0';								/// current character uppercase (identical if not a letter)
 		bool hasNext = true;							/// tell if there is a next character (false at the last character)
 		char nextc = '\0';								/// next character in string - if hasNext is true
 		char uppernextc = '\0';							/// next character in string in uppercase - if hasNext is true
+		ParsingStatus status = inNothing;				/// main parsing status
+		ResultFlag resultFlag = hasNOTHING;				/// remember if there is a significant directive in this line
+		std::string word;								/// current token string
+		TokenType type = tokenTypeUNKNOWN;				/// current token type
+		bool doubleQuoted = false;						/// true if parsing a string between double quotes, also works for filenames
 		
+		// shortcut to usefull objects
 		class Directive* lastDirective = nullptr;		/// Direct directive access for conditionnal and including directives
 		class Assembler* as = nullptr;					/// Direct assembler access
 		
@@ -68,9 +71,15 @@ namespace MUZ {
 		/** Checks if current character match the given operator and if so, store it */
 		bool findOperator(char token, TokenType tokentype);
 		
-		/** Checks if current and next characters are hex digits only until space. Set skip to ignore current character and some more if needed. */
+		/** Checks if current and next characters are hex digits ('0'-'F') only until space. Set skip to ignore current character and some more if needed. */
 		bool findHexNumberSkip(int skip = 0);
-		
+		/** Checks if current and next characters are decimal digits ('0'-'9') only until space. Set skip to ignore current character and some more if needed. */
+		bool findDecimalNumberSkip(int skip );
+		/** Checks if current and next characters are octal digits ('0'-'7') only until space. Set skip to ignore current character and some more if needed. */
+		bool findOctalNumberSkip(int skip );
+		/** Checks if current and next characters are binary digits ('0'-'1') only until space. Set skip to ignore current character and some more if needed. */
+		bool findBinaryNumberSkip(int skip );
+
 		/** Stores a new token given a string and a type.
 		 In some cases no token will be added, e.g. a number with empty content.
 		 In any cases, the parsing status is prepared for next token by reseting

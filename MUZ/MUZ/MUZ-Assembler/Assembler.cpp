@@ -53,15 +53,16 @@ namespace MUZ {
 #endif
 			// split into non-prefixed absolute or relative path and name
 			splitpath(file, filepath, filename);
-			if (filepath.size() < 2) return false; // TODO: error?
-			
-			// is it an absolute path?
-			absolute = (filepath[0] == NORMAL_DIR_SEPARATOR) || (filepath[0] == ALTERNATE_ROOTDIR);
-			
-			// if not absolute, prefix with parent path
-			if (!absolute) {
-				//TODO: handle parent prefix?
-				filepath = parent->filepath + NORMAL_DIR_SEPARATOR + filepath;
+			if (filepath.size() == 0) {
+				filepath = parent->filepath;
+			} else {
+				// is it an absolute path?
+				absolute = (filepath[0] == NORMAL_DIR_SEPARATOR) || (filepath[0] == ALTERNATE_ROOTDIR);
+				// if not absolute, prefix with parent path
+				if (!absolute) {
+					//TODO: handle parent prefix?
+					filepath = parent->filepath + NORMAL_DIR_SEPARATOR + filepath;
+				}
 			}
 		} else {
 			// main file, simply cut into parts
@@ -262,11 +263,8 @@ namespace MUZ {
 		SourceFile* sourcefile = new SourceFile;
 		if (!sourcefile->Set(file, included && (codeline.file >= 0) ? m_files[codeline.file] : nullptr)) return false;
 		
-		// For included files, put the #include in listing because it will be loosed
-		// And for master file, prepare the listing file
-		if (included) {
-			GenerateListing(codeline, msg);
-		} else {
+		// If it's a master file, initialize the listing file
+		if (!included) {
 			PrepareListing(msg);
 		}
 		
@@ -278,11 +276,6 @@ namespace MUZ {
 			throw MUZ::NoFileException();
 		}
 
-		// print the full file path in listing
-		if (m_listingfile) {
-			fprintf(m_listingfile, "%s\n", file.c_str());
-		}
-		
 		// Store this file definition
 		size_t filenum = m_files.size();
 		m_files.push_back(sourcefile);
@@ -291,30 +284,50 @@ namespace MUZ {
 			sf->parentfile = codeline.file;
 			sf->parentline = codeline.line;
 			sf->included = (sf->parentfile >= 0);
+			// For included files, put the #include in listing here before the included source is listed
+			GenerateListing(codeline, msg);
 		}
 		
-		// now explore line by line
+		// print the full file path in listing
+		if (m_listingfile) {
+			fprintf(m_listingfile, "                 %s\n", file.c_str()); // 17 spaces before file path
+		}
+		
+	// now explore line by line
 		BYTE* buffer = nullptr;
 		int linesize = 0;
 		long offset = ftell(f);
 		while (fgetline(&buffer, &linesize, f)) {
 			// store
-			CodeLine codeline;
-			codeline.address = 0;
-			codeline.assembled = false;
-			codeline.file = (int)filenum;
-			codeline.offset = offset;
-			codeline.line = (int)sf->lines.size()  + 1;
-			codeline.size = linesize;
-			codeline.source = string((char*)buffer);
+			CodeLine cl;
+			cl.address = 0;
+			cl.assembled = false;
+			cl.file = (int)filenum;
+			cl.offset = offset;
+			cl.line = (int)sf->lines.size()  + 1;
+			cl.size = linesize;
+			cl.source = string((char*)buffer);
 			// Assemble this line, will include another file if #INCLUDE is met
-			codeline.assembled = Assemble(codeline, msg);
-			if (codeline.assembled) {
-				codeline.address = m_status.curaddress;
+			cl.assembled = Assemble(cl, msg);
+			if (cl.assembled) {
+				cl.address = m_status.curaddress;
 			}
-			GenerateListing( codeline, msg);
+			// Add the assembled line to listing, or display parent filename if it was an #INCLUDE directive
+			if (cl.tokens.size() > 0) {
+				ParseToken& token = cl.tokens.at(0);
+				if (cl.assembled && (token.type == tokenTypeDIRECTIVE) && (token.source == "#INCLUDE")) {
+					// list current parent file to show that include if finished
+					fprintf(m_listingfile, "                 %s\n", file.c_str()); // 17 spaces before file path
+				} else {
+					// not assembled, or not an include directive: show normal listing
+					GenerateListing( cl, msg);
+				}
+			} else {
+				// no token: shoud be empty line, list it
+				GenerateListing( cl, msg);
+			}
 			// Store assembly result and go next line
-			sf->lines.push_back(codeline); // each line index in m_files[filenum].lines is its line number in file
+			sf->lines.push_back(cl); // each line index in m_files[filenum].lines is its line number in file
 			offset = ftell(f);
 		}
 

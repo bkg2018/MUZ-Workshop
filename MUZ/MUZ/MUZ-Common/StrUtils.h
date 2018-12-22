@@ -36,6 +36,15 @@ unsigned int dec_to_unsigned(std::string s);
 /** Convert an address to an hexa string. */
 std::string address_to_hex(MUZ::ADDRESSTYPE address);
 
+/** Tells if a character is a binary digit. */
+inline bool isBinDigit(char c) { return c == '0' || c == '1'; }
+/** Tells if a character is an octal digit. */
+inline bool isDecDigit(char c) { return c >= '0' && c <= '7'; }
+/** Tells if a character is a decimal digit. */
+inline bool isOctDigit(char c) { return c >= '0' && c <= '9'; }
+/** Tells if a character is an hexadecimal digit. */
+inline bool isHexDigit(char c) { return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'); }
+
 /** Unescapes the escape sequences in a character string.
  Escape sequences begin with a \ backshlash and are followed by:
  '\t' : replaced by the $09 tabulation character

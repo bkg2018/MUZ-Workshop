@@ -520,7 +520,8 @@ namespace MUZ {
 		// final stored tokens
 		{9999, &nop, tokenTypeCOMMENT},	// ';' and all that follows on line
 		{9999, &nop, tokenTypeDIRECTIVE},// a '.' or '#' directive
-		{9999, &nop, tokenTypeSTRING},	// a " or ' delimited string
+		{9999, &nop, tokenTypeSTRING},	// a " delimited string
+		{9999, &nop, tokenTypeCHAR},	// a ' delimited character
 		{9999, &nop, tokenTypeDECNUMBER},// a non prefixed and non suffixed decimal number
 		{9999, &nop, tokenTypeCOMMA},	// a ','
 		{9999, &nop, tokenTypePAROPEN},	// (

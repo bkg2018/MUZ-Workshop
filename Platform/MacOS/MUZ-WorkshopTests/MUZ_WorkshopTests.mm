@@ -22,17 +22,18 @@ using std::cout;
 
 @implementation MUZ_WorkshopTests
 
+const std::string SourcesRootDir = "/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/MUZ-GIT/MUZ/TestSources/";
 std::string RomHexFilePath ;
 std::string SourceFilePath;
 std::string ConditionnalsSourcePath;
 std::string ExpressionsSourcePath;
 
 - (void)setUp {
-    // Put setup code here. This method is called before the invocation of each test method in the class.
+	
 	RomHexFilePath = "/Users/bkg2018/Desktop/IntelHex.hex";
 	SourceFilePath = "/Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm";
-	ConditionnalsSourcePath = "/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/MUZ-Workshop/MUZ/TestSources/Conditionnals.asm";
-	ExpressionsSourcePath = "/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/MUZ-Workshop/MUZ/TestSources/Expressions.asm";
+	ConditionnalsSourcePath = SourcesRootDir + "Conditionnals.asm";
+	ExpressionsSourcePath = SourcesRootDir + "Expressions.asm";
 }
 
 - (void)tearDown {
@@ -252,7 +253,7 @@ std::string ExpressionsSourcePath;
 	MUZ::ErrorList msg;
 	MUZ::CodeLine codeline;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
-	as.SetListingFilename("listing.txt");
+	as.SetListingFilename("testAssembler.LST");
 	try {
 		as.Assemble(SourceFilePath,msg, false, codeline); // false = not included
 	} catch (std::exception &e) {
@@ -264,6 +265,8 @@ std::string ExpressionsSourcePath;
 	MUZ::Assembler as;
 	MUZ::ErrorList msg;
 	MUZ::CodeLine codeline;
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetListingFilename("testConditionnalsAssembler.LST");
 	as.Assemble(ConditionnalsSourcePath, msg, false,codeline); // false = not included
 }
 
@@ -271,6 +274,8 @@ std::string ExpressionsSourcePath;
 	MUZ::Assembler as;
 	MUZ::ErrorList msg;
 	MUZ::CodeLine codeline;
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetListingFilename("testExpressionsAssembler.LST");
 	as.Assemble(ExpressionsSourcePath, msg, false,codeline); // false = not included
 }
 
@@ -278,6 +283,8 @@ std::string ExpressionsSourcePath;
 	MUZ::Assembler as;
 	MUZ::CodeLine codeline;
 	MUZ::ErrorList msg;
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetListingFilename("testInclude.LST");
 	codeline = as.Assemble("#INCLUDE    /Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/Hardware\\Custom\\Config_R0.asm", msg);
 }
 

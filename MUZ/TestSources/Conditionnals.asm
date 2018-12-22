@@ -5,14 +5,10 @@
 ;  Created by Francis Pierot on 07/12/2018.
 ;  Copyright © 2018 Francis Pierot. All rights reserved.
 ;
-;IF expression tests
-#if ! ( 3 * ( 1 + 2 * (3 + 4)))
-#endif
-
 ; define some symbols
-#DEFINE DEFINED
-#DEFINE DEFINED_TOO
-#DEFINE DEFSTRING "MUZ"
+#DEFINE BUILD R0
+#DEFINE DEFINED_EMPTY
+
 
 ; root if true
 #IFDEF DEFINED

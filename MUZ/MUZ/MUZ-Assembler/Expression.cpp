@@ -148,8 +148,10 @@ namespace MUZ {
 			switch( token.type ) {
 					
 				case tokenTypePAROPEN:
-				case tokenTypeBOOL:	// <- bool should never happen, this is just in case
-				case tokenTypeSTRING:
+				case tokenTypeBOOL:			// <- bool should never happen, this is just in case
+				case tokenTypeSTRING:		// explicitely enquoted strings
+				case tokenTypeCHAR:			// 'c'
+				case tokenTypeLETTERS: 		// <- letters asked for evaluation are considered as string
 				case tokenTypeDECNUMBER:
 				case tokenTypePARCLOSE:
 				case tokenTypeOP_LSHIFT:
@@ -202,7 +204,7 @@ namespace MUZ {
 		//TODO: parenthesis error
 		return nop;
 	}
-	
+
 	/** Check parenthesis levels are paired. */
 	bool ExpressionEvaluator::CheckParenthesis(ExpVector& tokens)
 	{

@@ -25,7 +25,8 @@ namespace MUZ {
 		// final stored tokens
 		tokenTypeCOMMENT,	/// ';' and all that follows on line
 		tokenTypeDIRECTIVE,	/// a '.' or '#' directive
-		tokenTypeSTRING,	/// a " or ' delimited string
+		tokenTypeSTRING,	/// a " delimited string
+		tokenTypeCHAR,		/// a ' delimited character
 		tokenTypeDECNUMBER,	/// a non prefixed and non suffixed decimal number
 		tokenTypeCOMMA,		/// a ','
 		tokenTypePAROPEN,	/// (

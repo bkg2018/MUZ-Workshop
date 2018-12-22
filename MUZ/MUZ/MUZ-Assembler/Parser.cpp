@@ -56,7 +56,7 @@ namespace MUZ {
 		while (onlyhex && (nextpos < source->size()-1)) {
 			nextpos += 1;
 			nextc = source->at(nextpos);
-			char nextupperc = upperchar(c);
+			char nextupperc = upperchar(nextc);
 			if (nextc >= '0' && nextc<= '9') continue;
 			if (nextupperc >= 'A' && nextupperc <= 'F') continue;
 			if (nextupperc == 'H') return true; // hexa suffix
@@ -65,6 +65,41 @@ namespace MUZ {
 		return onlyhex; // all hexx digits and no sufffix
 	}
 	
+	/** Checks if current and next characters are decimal digits only until space. Set skip to ignore current character and some more if needed. */
+	bool Parser::findDecimalNumberSkip(int skip ) {
+		int nextpos = pos + skip - 1; // incremented at first loop
+		char nextc=0;
+		while (nextpos < source->size()-1) {
+			nextpos += 1;
+			nextc = source->at(nextpos);
+			if (nextc < '0' || nextc > '9') return false;
+		}
+		return true; // all octal digits
+	}
+
+	/** Checks if current and next characters are octal digits only until space. Set skip to ignore current character and some more if needed. */
+	bool Parser::findOctalNumberSkip(int skip ) {
+		int nextpos = pos + skip - 1; // incremented at first loop
+		char nextc=0;
+		while (nextpos < source->size()-1) {
+			nextpos += 1;
+			nextc = source->at(nextpos);
+			if (nextc < '0' || nextc > '7') return false;
+		}
+		return true; // all octal digits
+	}
+	
+	/** Checks if current and next characters are binary digits only until space. Set skip to ignore current character and some more if needed. */
+	bool Parser::findBinaryNumberSkip(int skip ) {
+		int nextpos = pos + skip - 1; // incremented at first loop
+		char nextc=0;
+		while (nextpos < source->size()-1) {
+			nextpos += 1;
+			nextc = source->at(nextpos);
+			if (nextc < '0' || nextc > '1') return false;
+		}
+		return true; // all binary digits
+	}
 	/** Stores a new token given a string and a type.
 	 In some cases no token will be added, e.g. a number with empty content.
 	 In any cases, the parsing status is prepared for next token by reseting
@@ -82,6 +117,7 @@ namespace MUZ {
 				if (type==tokenTypeCOMMENT) return;
 				if (type==tokenTypeDIRECTIVE) return;
 				if (type==tokenTypeSTRING) return;
+				if (type==tokenTypeCHAR) return;
 				if (type==tokenTypeHEXNUMBER) return;
 				if (type==tokenTypeBINNUMBER) return;
 				if (type==tokenTypeDECNUMBER) return;
@@ -91,7 +127,7 @@ namespace MUZ {
 			if (type == tokenTypeFILENAME) {
 				string filepath, filename;
 				splitpath(word, filepath, filename);
-				word = filepath + NORMAL_DIR_SEPARATOR + filename;
+				word = (!filepath.empty() ? filepath + NORMAL_DIR_SEPARATOR : "") + filename;
 			}
 			
 			// Store the token, use upper case for directives
@@ -119,17 +155,15 @@ namespace MUZ {
 						pos++;
 					}
 					// handle quotes
-					if (source->at(pos) == '"' || source->at(pos) == '\'') {
-						status = inSpace;
-						pos -= 1;
-						word.clear();
-						type = tokenTypeUNKNOWN;
-						return;
+					char ch =source->at(pos);
+					doubleQuoted = (ch == '"');
+					if (doubleQuoted) {
+						pos += 1; // skip double quote
+					} else {
+						word = ch; // retain fifrst character in filename
 					}
-					// setup filename parsing
-					status = inFilename;
-					word = source->at(pos);
 					type = tokenTypeFILENAME;
+					status = inFilename;
 					return;
 				}
 				else if (token.source == "#INSERTHEX") resultFlag = hasINSERTHEX;
@@ -187,6 +221,13 @@ namespace MUZ {
 			token.type = tokenTypeDECNUMBER;
 			return;
 		}
+		// translate characters in bytes
+		if (token.type == tokenTypeCHAR) {
+			token.source = unescape(token.source); // take care of escaped characters
+			unsigned int uint = token.source.size() > 0 ? token.source.at(0) : 0; // '' will be 00
+			token.source = std::to_string(uint);
+			token.type = tokenTypeDECNUMBER;
+		}
 		// translate escape sequences in strings
 		if (token.type == tokenTypeSTRING) {
 			token.source = unescape(token.source);
@@ -243,6 +284,23 @@ namespace MUZ {
 			
 			// include filenames have absolute priority over anything else
 			if (status == inFilename) {
+				// take care of possible double quoting
+				if (doubleQuoted) {
+					if (c == '"') {
+						StoreToken(); // filename is finished
+						pos += 1 ; // skip double quote
+						continue;
+					}
+					// running within double quoted filename
+					word += c;
+					continue;
+				}
+				// end of filename by space or tab
+				if (c == ' ' || c == '\t') {
+					StoreToken();
+					status = inSpace;
+					continue;
+				}
 				word += c;
 				continue;
 			}
@@ -282,6 +340,7 @@ namespace MUZ {
 			if (status == inDoubleQuotes) {
 				if (c == '"') {
 					StoreToken();
+					doubleQuoted = false;
 					continue; // finished the double quoted string
 				}
 				// else continue to add
@@ -302,6 +361,7 @@ namespace MUZ {
 			if (c == '"') {
 				StoreToken();
 				status = inDoubleQuotes;
+				doubleQuoted = true;
 				type = tokenTypeSTRING;
 				continue;
 			}
@@ -309,7 +369,7 @@ namespace MUZ {
 			if (c == '\'') {
 				StoreToken();
 				status = inSingleQuotes;
-				type = tokenTypeSTRING;
+				type = tokenTypeCHAR;
 				continue;
 			}
 			hasNext = (pos + 1 < s.length());
@@ -323,49 +383,99 @@ namespace MUZ {
 				StoreToken();
 				continue;
 			}
-			// "0x" prefix of hex numbers?
-			if ((status != inDigits) && (c == '0') && hasNext && (uppernextc == 'X')) {
-				// start an hex number
-				StoreToken();
-				status = inDigits;
-				type = tokenTypeHEXNUMBER;
-				pos += 1; // skip "x"
-				continue;
-			}
-			// "0b" prefix of binary numbers?
-			if ((status != inDigits) && (c == '0') && (uppernextc == 'B')) {
-				// start a binary number
-				StoreToken();
-				status = inDigits;
-				type = tokenTypeBINNUMBER;
-				pos += 1; // skip "B"
-				continue;
-			}
-			// "0" prefix on octal numbers
-			if ((status != inDigits) && (c == '0') && (nextc >= '0') && (nextc <= '7')) {
-				StoreToken();
-				status = inDigits ;
-				type = tokenTypeOCTNUMBER;
-				continue;
+
+			// check if it is starting a new binary, octal, decimal or hexa number
+			//bool bindigit = (c >='0') && (c <= '1');
+			//bool octdigit = (c >='0') && (c <= '7');
+			//bool decdigit = (c >='0') && (c <= '9');
+			//bool hexdigit = (upperc >= 'A') && (upperc <= 'F');
+			if (status != inDigits) {
+			
+				// "0x" prefix of hex numbers?
+				if ((c == '0') && hasNext && (uppernextc == 'X') && findHexNumberSkip(2)) {
+					// start an hex number
+					StoreToken();
+					status = inDigits;
+					type = tokenTypeHEXNUMBER;
+					pos += 1; // skip "x"
+					continue;
+				}
+				// "0b" prefix of binary numbers?
+				if ((c == '0') && hasNext && (uppernextc == 'B') && findBinaryNumberSkip(2)) {
+					// start a binary number
+					StoreToken();
+					status = inDigits;
+					type = tokenTypeBINNUMBER;
+					pos += 1; // skip "B"
+					continue;
+				}
+				// "0" prefix on octal numbers?
+				if ((c == '0') && hasNext && findOctalNumberSkip(1)) {
+					StoreToken();
+					status = inDigits ;
+					type = tokenTypeOCTNUMBER;
+					continue;
+				}
+
+				// no prefix: starting hex number suffixed by 'h' ?
+				if (word.empty() && findHexNumberSkip(0)) {
+					StoreToken();
+					word = c;
+					status = inDigits;
+					type = tokenTypeHEXNUMBER;
+					continue;
+				}
+				// no prefix: starting a decimal number?
+				if (word.empty() && findDecimalNumberSkip(0)) {
+					StoreToken();
+					word = c;
+					status = inDigits;
+					type = tokenTypeDECNUMBER;
+					continue;
+				}
+				// no prefix: starting a binary number?
+				if (word.empty() && findBinaryNumberSkip(0)) {
+					StoreToken();
+					word = c;
+					status = inDigits;
+					type = tokenTypeBINNUMBER;
+					continue;
+				}
 			}
 
-			// H suffix after digits?
-			if ((status == inDigits) && (upperc == 'H')) {
-				type = tokenTypeHEXNUMBER;
-				StoreToken();
-				continue;
-			}
-			// B suffix after digits?
-			if ((status == inDigits) && (upperc == 'B')) {
-				type = tokenTypeBINNUMBER;
-				StoreToken();
-				continue;
-			}
+			// End a running number?
+			if (status == inDigits) {
 
-			// continue digit sequence?
-			bool decdigit = (c >='0') && (c <= '9');
-			bool hexdigit = (upperc >= 'A') && (upperc <= 'F');
-			if ((status == inDigits) && (decdigit || hexdigit)) {
+				// H suffix after hex digits?
+				if (upperc == 'H') {
+					type = tokenTypeHEXNUMBER;
+					StoreToken();
+					continue;
+				}
+				// B suffix after digits?
+				if (upperc == 'B') {
+					type = tokenTypeBINNUMBER;
+					StoreToken();
+					continue;
+				}
+
+				// continuing digit sequence?
+				if (isHexDigit(upperc) && (type == tokenTypeHEXNUMBER)) {
+					word += c;
+					continue;
+				}
+				if (isDecDigit(c) && (type == tokenTypeDECNUMBER)) {
+					word += c;
+					continue;
+				}
+				if (isBinDigit(c) && (type == tokenTypeBINNUMBER)) {
+					word += c;
+					continue;
+				}
+			
+				// PROBLEM, cannot continue as a number!
+				msg.push_back({errorTypeWARNING, "wrong number notation", "", -1});
+				type = tokenTypeLETTERS;
 				word += c;
 				continue;
 			}
@@ -387,29 +497,6 @@ namespace MUZ {
 				word = c;
 				type = tokenTypeLETTERS; // default type
 				continue;
-			}
-			
-			// digits? always starts with a 0-9 digit and can be followed by dec/ex digits
-			if (word.empty() && (decdigit || ((status == inDigits) && hexdigit))) {
-				// start new digits sequence?
-				if (status != inDigits) {
-					StoreToken();
-					type = tokenTypeDIGITS;
-					status = inDigits;
-				}
-				word += c;
-				continue;
-			}
-			
-			// Special case: we found an hex letter-digit first, but no prefix: check if the following are only hex digits and 'h' prefix
-			if (word.empty() && (status != inDigits) && hexdigit) {
-				if (findHexNumberSkip(1)) {
-					StoreToken();
-					word = c;
-					status = inDigits;
-					type = tokenTypeHEXNUMBER;
-					continue;
-				}
 			}
 			
 			// space?
@@ -491,27 +578,13 @@ namespace MUZ {
 			if (findOperator('^', tokenTypeOP_BINXOR))
 				continue;
 			
-			// nothing particular has been found, it must be a running sequence or a new text sequence
-			
-			// decimal digits?
-			//TODO: not sure of this
-			if ((status == inDigits) && !decdigit) {
-				// hex and binary suffixes have been checked already, so current token should have been a decimal number
-				type = tokenTypeDECNUMBER;
-				StoreToken();
-				// start a letters sequence
-				word = c;
-				type = tokenTypeLETTERS;
-				continue;
-			}
-			
-			// continue running sequence
+			// continue running text sequence?
 			if (status == inLetters || status == inDirective) {
 				word += c;
 				continue;
 			}
 			
-			// start a new text sequence
+			// nothing special found, start a new text sequence
 			StoreToken();
 			type = tokenTypeLETTERS;
 			word = c;
@@ -559,7 +632,7 @@ namespace MUZ {
 	{
 		ExpressionEvaluator eval;
 		ParseToken evaluated = eval.Evaluate(*result, *curtoken);
-		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
+		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER) || (evaluated.type == tokenTypeLETTERS)) {
 			return evaluated.source;
 		}
 		if (evaluated.type == tokenTypeBOOL) {
