@@ -106,12 +106,14 @@ string address_to_hex(MUZ::ADDRESSTYPE address)
 	unsigned int value = address;
 	char result[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	char* last = result + sizeof(result) - 2; // points to last digit before ending 0
-	while (value > 0) {
+	int count = 4;
+	while (count > 0) {
 		*last = hexchar[value % 16];
 		value = value / 16;
 		last -= 1;
+		count -= 1;
 	};
-	string sresult = string(last);
+	string sresult = string(last + 1);
 	return sresult;
 }
 

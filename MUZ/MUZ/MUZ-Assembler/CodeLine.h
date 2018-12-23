@@ -45,6 +45,7 @@ namespace MUZ {
 		ADDRESSTYPE			address = 0;				// starting address for this code
 		CodeType			codetype = codeTypeUNKNOWN;	// type of data for this code
 		int					includefile = 0;			// > 0 when this line includes another sourcefile
+		class Label*		label = nullptr;			// label if there is one on this line
 	};
 
 }

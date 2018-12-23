@@ -177,6 +177,7 @@ namespace MUZ {
 			label->SetAddress(address);
 			label->equate = true;
 			parser.JumpTokens(1);
+			codeline.label = label;
 			return true;
 		}
 		// TODO: return error

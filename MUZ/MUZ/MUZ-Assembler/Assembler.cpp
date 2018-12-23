@@ -183,7 +183,7 @@ namespace MUZ {
 		}
 	}
 
-	/** Reset the assembly. */
+	/** Resets the assembler. */
 	void Assembler::Reset() {
 		m_defsymbols.clear();
 		m_labels.clear();
@@ -192,7 +192,6 @@ namespace MUZ {
 		m_status.curaddress = 0;
 		m_status.curname = nullptr;
 		m_modes = ParsingModeStack();// resets
-		
 	}
 
 	/** Sets the directory where MUZ places the output files and listings. */
@@ -226,7 +225,7 @@ namespace MUZ {
 		m_symbolsfilename = filename;
 	}
 	
-	/** Prepare listing file, close previous if any. */
+	/** Initializes listing file, close previous if any. */
 	void Assembler::PrepareListing(ErrorList& msg)
 	{
 		if ( ! m_outputdir.empty() && ! m_listingfilename.empty()) {
@@ -242,11 +241,13 @@ namespace MUZ {
 	}
 	
 	/** Assembles a source file as a main or included file.
+	 
 	 	A source file name is split into three parts:
-	 	- a prefix, which may include UNC "\\?\" and/or "<unit>:" on Windows
-	 	- an absolute path starting with a / or \
-	 	- a filename.ext part
-	 	Absolute pathes for included files are created when needed by prepending them with their parent file path.
+	 	- a prefix, which may include UNC "\\?\" and/or "<unit>:" on Windows, can be empty for relative pathes
+	 	- an absolute path starting with a / or \, can be empty for relative pathes
+	 	- a filename.ext part, cannot be empty
+	 
+	 	Absolute pathes for included files are prepended with their parent file path.
 	 
 	 	@param file the file path to the source to assemble, can be relative to parent file path if included
 	 	@param msg the stack of error and warnings returned by the assembler
@@ -692,7 +693,7 @@ namespace MUZ {
 	// NNNNN at pos 20-23                   : line number with 4 digits, left 0-padded
 	// Source at pos 26                     : source text
 
-	// return the 12 characters part of byte codes
+	// Returns the 12 characters part of byte codes
 	string buildCodes(vector<BYTE> code, int firstcode, int nbcodes)
 	{
 		// 0 codes: all spaces
@@ -716,10 +717,15 @@ namespace MUZ {
 		return result;
 	}
 	
-	// build one listing line from a code index (0, 4, 8...)
-	string buildOneListingLine(ADDRESSTYPE address, vector<BYTE> code, int firstcode = 0, int nbcodes = 4, int line = -1, string source = "")
+	// Builds one listing line from a code index (0, 4, 8...)
+	string buildOneListingLine(ADDRESSTYPE address, vector<BYTE> code, int firstcode = 0, int nbcodes = 4, Label* label = nullptr, int line = -1, string source = "")
 	{
-		string thisline = (code.empty()) ? spaces(5) : address_to_hex(address) + ": ";
+		string thisline;
+		if (code.empty() && label != nullptr) {
+			thisline = address_to_hex(label->address) + ":";
+		} else {
+			thisline = (code.empty()) ? spaces(5) : address_to_hex(address) + ":";
+		}
 		
 		//prepare line number
 		string linenum = "";
@@ -760,19 +766,22 @@ namespace MUZ {
 	
 	/** Build one or two lines of listing for the codes given. */
 	
-	vector<string> buildListingLines(ADDRESSTYPE address, vector<BYTE> code, int line, string source)
+	vector<string> buildListingLines(CodeLine& codeline)
 	{
 		vector<string> result;
+		vector<BYTE>& code = codeline.code;
+		int codesize = (int)code.size();
 
 		// first line complete with 0 to 4 bytes of code
-		result.push_back(buildOneListingLine(address, code, 0, std::min<int>(4, (int)code.size()), line, source));
+		result.push_back(buildOneListingLine(codeline.address, code, 0, std::min<int>(4, codesize), codeline.label, codeline.line, codeline.source));
 		
-		if (code.size() >= 5 && code.size() <= 8) {
+		// second line depend on the number of codes
+		if (codesize >= 5 && codesize <= 8) {
 			// second line with 1 to 4 bytes of code
-			result.push_back(buildOneListingLine(address + 4, code, 4, (int)code.size() - 4));
-		} else if (code.size() >= 9) {
+			result.push_back(buildOneListingLine(codeline.address + 4, code, 4, codesize - 4));
+		} else if (codeline.code.size() >= 9) {
 			// second line with 1 or 2 bytes and ".."
-			result.push_back(buildOneListingLine(address + 4, code, 4, 2));
+			result.push_back(buildOneListingLine(codeline.address + 4, code, 4, 2));
 		}
 		return result;
 	}
@@ -784,10 +793,10 @@ namespace MUZ {
 		vector<string> lines ;
 		
 		if (codeline.assembled) {
-			lines = buildListingLines(codeline.address, codeline.code, codeline.line, codeline.source);
+			lines = buildListingLines(codeline);
 		} else {
 			vector<BYTE> emptycode;
-			lines.push_back(buildOneListingLine(codeline.address, emptycode,  0, 0, codeline.line, codeline.source));
+			lines.push_back(buildOneListingLine(codeline.address, emptycode,  0, 0, nullptr, codeline.line, codeline.source));
 		}
 
 		// write to listing file

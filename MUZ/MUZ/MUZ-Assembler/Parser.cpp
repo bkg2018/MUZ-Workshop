@@ -48,31 +48,63 @@ namespace MUZ {
 		return false;
 	}
 	
-	/** Checks if current and next characters are hex digits only until space or 'h' suffix. Set skip to ignore current character and some more if needed. */
-	bool Parser::findHexNumberSkip(int skip ) {
+	/** Checks if current and next characters are hex digits only until non letter.
+	 @param skip number of character to ignore, including the current one
+	 @return true if an hex number without 'h' suffix has been detected
+	 */
+	bool Parser::findHexNumberNoSuffixSkip(int skip ) {
 		int nextpos = pos + skip - 1; // incremented at first loop
 		bool onlyhex = true;
 		char nextc=0;
-		while (onlyhex && (nextpos < source->size()-1)) {
+		int count = 0;
+		const int sourcesize = (int)source->size();
+		while (onlyhex && (nextpos + 1 < sourcesize)) {
 			nextpos += 1;
 			nextc = source->at(nextpos);
 			char nextupperc = upperchar(nextc);
-			if (nextc >= '0' && nextc<= '9') continue;
-			if (nextupperc >= 'A' && nextupperc <= 'F') continue;
-			if (nextupperc == 'H') return true; // hexa suffix
-			return false; // not an hexa digit or suffix
+			if (nextc >= '0' && nextc<= '9') { count += 1; continue; }
+			if (nextupperc >= 'A' && nextupperc <= 'F')  { count += 1; continue; }
+			if (nextupperc >= 'G' && nextupperc <= 'Z') return false; // another letter, don't accept
+			// any other character is probably a separator so if we have at least one digit it's a non-suffixed hex number
+			return (count >= 1);
 		}
-		return onlyhex; // all hexx digits and no sufffix
+		return onlyhex; // all hex digits and no sufffix
+	}
+	
+	/** Checks if current and next characters are hex digits only until 'h' suffix.
+	 @param skip number of character to ignore including the current one
+	 @return true if a possible hex number has been detected
+	 */
+	bool Parser::findHexNumberWithSuffixSkip(int skip ) {
+		int nextpos = pos + skip - 1; // incremented at first loop
+		bool onlyhex = true;
+		char nextc=0;
+		int count = 0;
+		while (onlyhex && (nextpos + 1 < source->size())) {
+			nextpos += 1;
+			nextc = source->at(nextpos);
+			char nextupperc = upperchar(nextc);
+			if (nextc >= '0' && nextc<= '9') { count += 1; continue; }
+			if (nextupperc >= 'A' && nextupperc <= 'F')  { count += 1; continue; }
+			if (nextupperc == 'H') return (count >= 1); // hexa suffix
+			break; // other character, wrong
+		}
+		return false; // all hexx digits and no sufffix
 	}
 	
 	/** Checks if current and next characters are decimal digits only until space. Set skip to ignore current character and some more if needed. */
 	bool Parser::findDecimalNumberSkip(int skip ) {
 		int nextpos = pos + skip - 1; // incremented at first loop
 		char nextc=0;
-		while (nextpos < source->size()-1) {
+		int count = 0;
+		while (nextpos + 1 < source->size()) {
 			nextpos += 1;
 			nextc = source->at(nextpos);
-			if (nextc < '0' || nextc > '9') return false;
+			if (nextc >= '0' && nextc <= '9') { count += 1; continue; }
+			char nextupperc = upperchar(nextc);
+			if (nextupperc >= 'A' && nextupperc <= 'Z') return false; // letter, don't accept
+			// any other separator is ok iuf we have at least 1 digit
+			return (count >= 1);
 		}
 		return true; // all octal digits
 	}
@@ -81,7 +113,7 @@ namespace MUZ {
 	bool Parser::findOctalNumberSkip(int skip ) {
 		int nextpos = pos + skip - 1; // incremented at first loop
 		char nextc=0;
-		while (nextpos < source->size()-1) {
+		while (nextpos + 1 < source->size()) {
 			nextpos += 1;
 			nextc = source->at(nextpos);
 			if (nextc < '0' || nextc > '7') return false;
@@ -89,17 +121,64 @@ namespace MUZ {
 		return true; // all octal digits
 	}
 	
-	/** Checks if current and next characters are binary digits only until space. Set skip to ignore current character and some more if needed. */
+	/** Checks if current and next characters are binary digits only until space or 'B' suffix. Set skip to ignore current character and some more if needed. */
 	bool Parser::findBinaryNumberSkip(int skip ) {
 		int nextpos = pos + skip - 1; // incremented at first loop
+		bool onlybin = true;
 		char nextc=0;
-		while (nextpos < source->size()-1) {
+		int count = 0;
+		while (onlybin && (nextpos + 1 < source->size())) {
 			nextpos += 1;
 			nextc = source->at(nextpos);
-			if (nextc < '0' || nextc > '1') return false;
+			if (nextc == '0' || nextc == '1') { count += 1; continue; }
+			char nextupperc = upperchar(nextc);
+			if (nextupperc == 'B') return (count >= 1); // binary suffix
+			if (nextupperc == 'A' || (nextupperc >= 'C'&& nextupperc <= 'Z')) return false; // another letter, suspicious
+			// any other character is probably a separator so if we have at least one digit it's an hex number
+			return (count >= 1);
 		}
-		return true; // all binary digits
+		return onlybin; // all hexx digits and no sufffix
 	}
+	
+	/** Defines each possible state subparsing function. */
+	bool Parser::stateParseNothing(void) {
+		return true;
+	};
+	bool Parser::stateParseLetters(void) {
+		return true;
+	};
+	bool Parser::stateParseHexDigits(void) {
+		return true;
+	};
+	bool Parser::stateParseDecDigits(void) {
+		return true;
+	};
+	bool Parser::stateParseOctDigits(void) {
+		return true;
+	};
+	bool Parser::stateParseBinDigits(void) {
+		return true;
+	};
+	bool Parser::stateParseDoubleQuote(void) {
+		return true;
+	};
+	bool Parser::stateParseSingleQuote(void) {
+		return true;
+	};
+	bool Parser::stateParseSpace(void) {
+		return true;
+	};
+	bool Parser::stateParseDirective(void) {
+		return true;
+	};
+	bool Parser::stateParseFilename(void) {
+		return true;
+	};
+	
+	
+	
+	
+	
 	/** Stores a new token given a string and a type.
 	 In some cases no token will be added, e.g. a number with empty content.
 	 In any cases, the parsing status is prepared for next token by reseting
@@ -172,6 +251,7 @@ namespace MUZ {
 		word.clear();
 		type = tokenTypeUNKNOWN;
 		status = inNothing;
+		currentState = &Parser::stateParseNothing;
 	}
 	
 	
@@ -391,55 +471,60 @@ namespace MUZ {
 			//bool hexdigit = (upperc >= 'A') && (upperc <= 'F');
 			if (status != inDigits) {
 			
-				// "0x" prefix of hex numbers?
-				if ((c == '0') && hasNext && (uppernextc == 'X') && findHexNumberSkip(2)) {
-					// start an hex number
-					StoreToken();
-					status = inDigits;
-					type = tokenTypeHEXNUMBER;
-					pos += 1; // skip "x"
-					continue;
-				}
-				// "0b" prefix of binary numbers?
-				if ((c == '0') && hasNext && (uppernextc == 'B') && findBinaryNumberSkip(2)) {
-					// start a binary number
-					StoreToken();
-					status = inDigits;
-					type = tokenTypeBINNUMBER;
-					pos += 1; // skip "B"
-					continue;
-				}
-				// "0" prefix on octal numbers?
-				if ((c == '0') && hasNext && findOctalNumberSkip(1)) {
-					StoreToken();
-					status = inDigits ;
-					type = tokenTypeOCTNUMBER;
-					continue;
+				// prefixed?
+				if ((c == '0') && hasNext) {
+					// "0x" prefix of hex numbers?
+					if ((uppernextc == 'X') && findHexNumberNoSuffixSkip(2)) { // request NO suffix
+						// start an hex number
+						StoreToken();
+						status = inDigits;
+						type = tokenTypeHEXNUMBER;
+						pos += 1; // skip "x"
+						continue;
+					}
+					// "0b" prefix of binary numbers?
+					if ((uppernextc == 'B') && findBinaryNumberSkip(2)) {
+						// start a binary number
+						StoreToken();
+						status = inDigits;
+						type = tokenTypeBINNUMBER;
+						pos += 1; // skip "B"
+						continue;
+					}
+					// "0" prefix on octal numbers?
+					if (findOctalNumberSkip(1)) {
+						StoreToken();
+						status = inDigits ;
+						type = tokenTypeOCTNUMBER;
+						continue;
+					}
 				}
 
 				// no prefix: starting hex number suffixed by 'h' ?
-				if (word.empty() && findHexNumberSkip(0)) {
-					StoreToken();
-					word = c;
-					status = inDigits;
-					type = tokenTypeHEXNUMBER;
-					continue;
-				}
-				// no prefix: starting a decimal number?
-				if (word.empty() && findDecimalNumberSkip(0)) {
-					StoreToken();
-					word = c;
-					status = inDigits;
-					type = tokenTypeDECNUMBER;
-					continue;
-				}
-				// no prefix: starting a binary number?
-				if (word.empty() && findBinaryNumberSkip(0)) {
-					StoreToken();
-					word = c;
-					status = inDigits;
-					type = tokenTypeBINNUMBER;
-					continue;
+				if (word.empty()) {
+					if (findHexNumberWithSuffixSkip(0)) {
+						StoreToken();
+						word = c;
+						status = inDigits;
+						type = tokenTypeHEXNUMBER;
+						continue;
+					}
+					// no prefix: starting a decimal number?
+					if (findDecimalNumberSkip(0)) {
+						StoreToken();
+						word = c;
+						status = inDigits;
+						type = tokenTypeDECNUMBER;
+						continue;
+					}
+					// no prefix: starting a binary number?
+					if (findBinaryNumberSkip(0)) {
+						StoreToken();
+						word = c;
+						status = inDigits;
+						type = tokenTypeBINNUMBER;
+						continue;
+					}
 				}
 			}
 
@@ -473,16 +558,17 @@ namespace MUZ {
 					continue;
 				}
 			
-				// PROBLEM, cannot continue as a number!
-				msg.push_back({errorTypeWARNING, "wrong number notation", "", -1});
-				type = tokenTypeLETTERS;
-				word += c;
+				// end of number
+				StoreToken();
+				// parse again from this position
+				pos -= 1;
+				status = inNothing;
 				continue;
 			}
 			
 			// "$" prefix of hex numbers?
 			if (word == "$") {
-				if (findHexNumberSkip(0)) {
+				if (findHexNumberNoSuffixSkip(0)) {
 					// forget the "$" and start an hex number
 					word = c;
 					status = inDigits;

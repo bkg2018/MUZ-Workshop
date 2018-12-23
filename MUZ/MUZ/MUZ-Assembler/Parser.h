@@ -42,11 +42,28 @@ namespace MUZ {
 		inDirective			,			// in a '.' or "#' directive name
 		inFilename			,			// in a filename following an #INCLUDE directive
 	} ;
+
 	
 	/** Structure for the code line parser.  It works on one line at a time. */
 	class Parser {
 		
-		std::string* source; 							/// original source
+		/** Type for subparsing functions. */
+		typedef bool subParserFunction(void);
+		
+		/** Defines each possible state subparsing function. */
+		bool stateParseNothing(void);
+		bool stateParseLetters(void);
+		bool stateParseHexDigits(void);
+		bool stateParseDecDigits(void);
+		bool stateParseOctDigits(void);
+		bool stateParseBinDigits(void);
+		bool stateParseDoubleQuote(void);
+		bool stateParseSingleQuote(void);
+		bool stateParseSpace(void);
+		bool stateParseDirective(void);
+		bool stateParseFilename(void);
+		
+		std::string* source; 							/// points to the original source string
 		
 		// parsing status variable
 		int pos = 0;									/// current position in source
@@ -61,6 +78,9 @@ namespace MUZ {
 		TokenType type = tokenTypeUNKNOWN;				/// current token type
 		bool doubleQuoted = false;						/// true if parsing a string between double quotes, also works for filenames
 		
+		// current parsing state function
+		bool (Parser::*currentState)() ;				/// the current state function
+	
 		// shortcut to usefull objects
 		class Directive* lastDirective = nullptr;		/// Direct directive access for conditionnal and including directives
 		class Assembler* as = nullptr;					/// Direct assembler access
@@ -71,8 +91,16 @@ namespace MUZ {
 		/** Checks if current character match the given operator and if so, store it */
 		bool findOperator(char token, TokenType tokentype);
 		
-		/** Checks if current and next characters are hex digits ('0'-'F') only until space. Set skip to ignore current character and some more if needed. */
-		bool findHexNumberSkip(int skip = 0);
+		/** Checks if current and next characters are hex digits only until space.
+		 @param skip number of character to ignore including the ciurrent one
+		 @return true if a possible hex number has been detected
+		 */
+		bool findHexNumberNoSuffixSkip(int skip );
+		/** Checks if current and next characters are hex digits only until 'h' suffix.
+		 @param skip number of character to ignore including the ciurrent one
+		 @return true if a possible hex number has been detected
+		 */
+		bool findHexNumberWithSuffixSkip(int skip );
 		/** Checks if current and next characters are decimal digits ('0'-'9') only until space. Set skip to ignore current character and some more if needed. */
 		bool findDecimalNumberSkip(int skip );
 		/** Checks if current and next characters are octal digits ('0'-'7') only until space. Set skip to ignore current character and some more if needed. */
@@ -97,6 +125,7 @@ namespace MUZ {
 			result = nullptr;
 			curtoken = nullptr;
 			as = &assembler;
+			currentState = &Parser::stateParseNothing;
 		}
 		
 		/** Init to work on a vector of tokens.*/
