@@ -58,7 +58,7 @@ namespace MUZ {
 			}
 			throw ASMOperandTypeException();
 		}
-	} opNOT;
+	} opNOT; // singleton
 	
 	// MUL number number
 	struct OperatorMUL : public Operator
@@ -69,7 +69,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opMUL;
+	} opMUL; // singleton
 	
 	// DIV number number
 	struct OperatorDIV : public Operator
@@ -80,7 +80,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opDIV;
+	} opDIV; // singleton
 	
 	// MOD number number
 	struct OperatorMOD : public Operator
@@ -91,7 +91,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opMOD;
+	} opMOD; // singleton
 	
 	// + number number
 	// + bool bool (or)
@@ -120,7 +120,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opADD;
+	} opADD; // singleton
 	
 	// SUB number number
 	struct OperatorSUB : public Operator
@@ -131,7 +131,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opSUB;
+	} opSUB; // singleton
 	
 	// LSHIFT number number
 	struct OperatorLSHIFT : public Operator
@@ -142,7 +142,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opLSHIFT;
+	} opLSHIFT; // singleton
 	
 	// RSHIFT number number
 	struct OperatorRSHIFT : public Operator
@@ -153,7 +153,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opRSHIFT;
+	} opRSHIFT; // singleton
 	
 	// AND number number
 	// AND boolean boolean
@@ -170,7 +170,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opAND;
+	} opAND; // singleton
 	
 	// OR number number
 	// OR boolean boolean
@@ -187,7 +187,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opOR;
+	} opOR; // singleton
 	
 	// XOR number number
 	// XOR boolean boolean
@@ -204,7 +204,7 @@ namespace MUZ {
 			to_numtoken(n, result);
 			return result;
 		}
-	} opXOR;
+	} opXOR; // singleton
 	
 	// LT number number
 	// LT string string
@@ -253,7 +253,7 @@ namespace MUZ {
 			to_booltoken(inferior, result);
 			return result;
 		}
-	} opLT;
+	} opLT; // singleton
 
 	// GT number number
 	// GT string string
@@ -305,7 +305,7 @@ namespace MUZ {
 			to_booltoken(inferior, result);
 			return result;
 		}
-	} opGT;
+	} opGT; // singleton
 	
 	// LTE number number
 	// LTE string string
@@ -353,7 +353,7 @@ namespace MUZ {
 			to_booltoken(inferior, result);
 			return result;
 		}
-	} opLTE;
+	} opLTE; // singleton
 	
 	// GTE number number
 	// GTE string string
@@ -401,7 +401,7 @@ namespace MUZ {
 			to_booltoken(superior, result);
 			return result;
 		}
-	} opGTE;
+	} opGTE; // singleton
 	
 	// DIFF number number
 	// DIFF string string
@@ -453,7 +453,7 @@ namespace MUZ {
 			to_booltoken(diff, result);
 			return result;
 		}
-	} opDIFF;
+	} opDIFF; // singleton
 	
 	// EQUAL number number
 	// EQUAL string string
@@ -502,12 +502,13 @@ namespace MUZ {
 			to_booltoken(equal, result);
 			return result;
 		}
-	} opEQUAL;
+	} opEQUAL; // singleton
 
 	
-	/** external accessible array for the operator coresponding to each token type. This array must have exactly one member for each
-	 possible token type, and it must be in the same order as them in the TokenType enum.
-	 Some token type are not linked to operators: they're directed to the "nop" operator which does nothing. */
+	/** Externally accessible array for the operators coresponding to each token type. This array must have exactly one member for each
+	 possible token type, and it must be in the same order as them in the TokenType enum. In debug compile, a check is done by
+	 the Expression Evaluator constructor to make sure this array is correctly set.
+	 Some token type are used by the parser but not linked to actual operators: they're assigned  the "nop" operator which does nothing. */
 	OperatorDef allOps[tokenTypeLAST] = {
 		{9999, &nop, tokenTypeUNKNOWN },		// No token of this type can be stored
 		{9999, &nop, tokenTypeLETTERS},		// during parsing of a characters string but not knowing what king of token it will be

@@ -75,7 +75,7 @@ namespace MUZ {
 
 		
 		/** Assemble a prepared code line. */
-		bool Assemble(CodeLine& codeline, ErrorList& msg);
+		bool AssembleCodeLine(CodeLine& codeline, ErrorList& msg);
 		
 
 		/** Prepare listing file, close previous if any. */
@@ -137,9 +137,9 @@ namespace MUZ {
 		ADDRESSTYPE GetAddress();
 
 		/** Assembles a main or included source file. */
-		bool Assemble(std::string file, ErrorList& msg, bool included, CodeLine& codeline);
+		bool AssembleFile(std::string file, bool included, CodeLine& codeline, ErrorList& msg);
 		/** Assemble a single line and return a codeline */
-		CodeLine Assemble(std::string sourceline, ErrorList& msg);
+		CodeLine AssembleLine(std::string sourceline, ErrorList& msg);
 		
 		
 		/** Try to find a directive in the # and . directives array. */

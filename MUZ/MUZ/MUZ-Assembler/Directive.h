@@ -1,5 +1,5 @@
 //
-//  Directive.hpp
+//  Directive.h
 //  MUZ-Workshop
 //
 //  Created by Francis Pierot on 03/12/2018.
@@ -9,8 +9,11 @@
 #ifndef Directive_h
 #define Directive_h
 
-#include "CodeLine.h"
-#include "Instruction.h"
+#include <vector>
+#include <string>
+#include <unordered_map>
+
+#include "Errors.h"
 
 namespace MUZ {
 
@@ -22,16 +25,18 @@ namespace MUZ {
  	Directives are derived from Instruction because they share the same argument parsing.
  */
 
-	class Directive : public Instruction
+	class Directive
 	{
 	public:
 		
-		virtual bool Parse(class Assembler& as,				// assembler woth current address
+		virtual bool Parse(class Assembler& as,			// assembler woth current address
 						   class Parser& parser,			// parser status
-						   CodeLine& codeline,
+						   class CodeLine& codeline,
 						   class Label* label,				// nullptr or label found in line
 						   ErrorList& msg) {
-			return Instruction::Parse(as, parser, codeline, label, msg);
+			ErrorMessage m = { errorTypeERROR, "Non derived Directive class used", "", 0};
+			msg.push_back(m);
+			return true;
 		}
 	};
 	

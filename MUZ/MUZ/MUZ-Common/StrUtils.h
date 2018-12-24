@@ -36,6 +36,9 @@ unsigned int dec_to_unsigned(std::string s);
 /** Convert an address to an hexa string. */
 std::string address_to_hex(MUZ::ADDRESSTYPE address);
 
+/** Converts a byte to an hexa string. */
+std::string data_to_hex(MUZ::DATATYPE data);
+
 /** Tells if a character is a binary digit. */
 inline bool isBinDigit(char c) { return c == '0' || c == '1'; }
 /** Tells if a character is an octal digit. */

@@ -15,6 +15,7 @@
 
 #include "All-Directives.h"
 #include "Z80-Instructions.h"
+#include "Z80-Operands.h"
 
 using MUZ::BYTE;
 using MUZ::ADDRESSTYPE;
@@ -164,6 +165,10 @@ namespace MUZ {
 		m_directives[".EQU"] = new DirectiveEQU();
 		m_directives[".BYTE"] = new DirectiveBYTE();
 		m_directives[".WORD"] = new DirectiveWORD();
+		
+		// Initialize the operand type maps
+		initRegisterMap();
+
 	}
 	
 	Assembler::~Assembler()
@@ -254,7 +259,7 @@ namespace MUZ {
 	 	@param included true if this is called from within assembly of another parent file
 	 	@param codeline references to the calling context
 	 */
-	bool Assembler::Assemble(string file, ErrorList& msg, bool included, CodeLine& codeline)
+	bool Assembler::AssembleFile(string file, bool included, CodeLine& codeline, ErrorList& msg)
 	{
 		// basic security
 		if (file.size() < 2) return false;
@@ -309,7 +314,7 @@ namespace MUZ {
 			cl.size = linesize;
 			cl.source = string((char*)buffer);
 			// Assemble this line, will include another file if #INCLUDE is met
-			cl.assembled = Assemble(cl, msg);
+			cl.assembled = AssembleCodeLine(cl, msg);
 			if (cl.assembled) {
 				cl.address = m_status.curaddress;
 			}
@@ -330,6 +335,8 @@ namespace MUZ {
 			// Store assembly result and go next line
 			sf->lines.push_back(cl); // each line index in m_files[filenum].lines is its line number in file
 			offset = ftell(f);
+			// update current address
+			m_status.curaddress += cl.code.size();
 		}
 
 		// Close the listing file if finished main source
@@ -345,7 +352,7 @@ namespace MUZ {
 	}
 
 	/** Assemble a single line into a codeline, */
-	CodeLine Assembler::Assemble(std::string sourceline, ErrorList& msg)
+	CodeLine Assembler::AssembleLine(std::string sourceline, ErrorList& msg)
 	{
 		//TODO: get the source line from its file
 		CodeLine codeline;
@@ -355,7 +362,7 @@ namespace MUZ {
 		codeline.offset = 0;
 		codeline.size = 0;
 		codeline.source = sourceline;
-		codeline.assembled = Assemble(codeline, msg);
+		codeline.assembled = AssembleCodeLine(codeline, msg);
 		return codeline;
 	}
 
@@ -384,7 +391,7 @@ namespace MUZ {
  	fill the rest. Notice that running conditionnal directive conditions can make the line to be unassembled
  	and ignored. In this case, the "assembled" flag is not set.
  */
-	bool Assembler::Assemble(CodeLine& codeline, ErrorList& msg)
+	bool Assembler::AssembleCodeLine(CodeLine& codeline, ErrorList& msg)
 	{
 		// cut the source line into a vector of tokens
 		int curtoken = 0;
@@ -478,10 +485,16 @@ namespace MUZ {
 				// Should be an instruction
 				Instruction* instruction = GetInstruction(token.source);
 				if (instruction) {
+					// resolve any symbols, and prepare the token index for assembling
 					parser.ResolveSymbols(curtoken);
-					instruction->Parse(*this, parser, codeline, lastLabel, msg);
+					codeline.Reset( curtoken );
+					// let the instruction set the assembled code in the coode line
+					if (instruction->Assemble(*this, codeline, lastLabel, msg)) {
+					} else {
+						// TODO: signal an assembling error
+					}
 				} else {
-					// TODO: is this possible?
+					// TODO: should be an instruction, probably syntax error?
 				}
 			}
 			// assume it is something to convert, like HEXNUMBER
@@ -685,6 +698,7 @@ namespace MUZ {
 	// Build listing line helper
 	// places the various components aligned on template
 	//
+	// 0044: 00 00 00 00   0234              .DW  0,0            ;0x0044  Not used
 	// ADDR: XX XX XX XX   NNNN  <source>
 	// 012345678901234567890123456
 	//
@@ -707,9 +721,9 @@ namespace MUZ {
 			// (4,2) -> codes 4 to 5 then ".. "
 		for (size_t index = firstcode ; index <= firstcode + 3 ; index++) {
 			if (index <= lastindex) {
-				result += address_to_hex(code[index]) + " "; 	// normal code display
-			} else if (index <= code.size()) {
-				result += "..";									// show code presence but not value
+				result += data_to_hex(code[index]) + " "; 	// normal code display
+			} else if (index < code.size()) {
+				result += ".. ";									// show code presence but not value
 			} else {
 				result += spaces(3);							// no more code available, all space
 			}
@@ -722,9 +736,9 @@ namespace MUZ {
 	{
 		string thisline;
 		if (code.empty() && label != nullptr) {
-			thisline = address_to_hex(label->address) + ":";
+			thisline = address_to_hex(label->address) + ": ";
 		} else {
-			thisline = (code.empty()) ? spaces(5) : address_to_hex(address) + ":";
+			thisline = (code.empty()) ? spaces(6) : address_to_hex(address) + ": ";
 		}
 		
 		//prepare line number
@@ -740,7 +754,9 @@ namespace MUZ {
 
 		// 0 byte : one line, all space instead of code, then line number and source
 		// 02EE:               0033  ConInitialise:
-		if (code.empty()) return thisline + buildCodes(code, 0, 0) + linenum + spaces(2) + source;
+		if (code.empty()) {
+			return thisline + buildCodes(code, 0, 0) + spaces(2) + linenum + spaces(2) + source;
+		}
 
 		// 1 to 4 bytes: one line with all elements and codes 0..3/2/1/0
 		// 1 to 8 bytes: one line with all elements and codes 0..3, one line with codes 4..7 and no line number nor source

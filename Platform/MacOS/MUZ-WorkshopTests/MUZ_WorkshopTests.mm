@@ -8,10 +8,15 @@
 
 #import <XCTest/XCTest.h>
 
+// emulation
 #include "MUZ-Computer/ROMPagingPort.h"
 #include "muz_simz80.h"
+
+// assembling and parsing
+#include "Parser.h"
 #include "Assembler.h"
 #include "Expression.h"
+#include "Z80-Operands.h"
 
 #include <iostream>
 using std::cout;
@@ -27,6 +32,7 @@ std::string RomHexFilePath ;
 std::string SourceFilePath;
 std::string ConditionnalsSourcePath;
 std::string ExpressionsSourcePath;
+std::string InstructionsSourcePath;
 
 - (void)setUp {
 	
@@ -34,6 +40,8 @@ std::string ExpressionsSourcePath;
 	SourceFilePath = "/Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm";
 	ConditionnalsSourcePath = SourcesRootDir + "Conditionnals.asm";
 	ExpressionsSourcePath = SourcesRootDir + "Expressions.asm";
+	InstructionsSourcePath = SourcesRootDir + "Instructions.asm";
+	MUZ::initRegisterMap();
 }
 
 - (void)tearDown {
@@ -96,6 +104,9 @@ std::string ExpressionsSourcePath;
 }
 
 - (void) testAddressZone {
+	
+	MUZ::AddressZone azone;
+	azone.Reset(0x2000, 0x800);
 	
 	MUZ::AddressZone az(0x2000,0x800);
 	// Check the out of range exceptions
@@ -255,7 +266,7 @@ std::string ExpressionsSourcePath;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testAssembler.LST");
 	try {
-		as.Assemble(SourceFilePath,msg, false, codeline); // false = not included
+		as.AssembleFile(SourceFilePath, false, codeline, msg); // false = not included
 	} catch (std::exception &e) {
 		perror(e.what());
 	}
@@ -267,7 +278,7 @@ std::string ExpressionsSourcePath;
 	MUZ::CodeLine codeline;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testConditionnalsAssembler.LST");
-	as.Assemble(ConditionnalsSourcePath, msg, false,codeline); // false = not included
+	as.AssembleFile(ConditionnalsSourcePath, false, codeline, msg); // false = not included
 }
 
 - (void)testExpressionsAssembler {
@@ -276,7 +287,7 @@ std::string ExpressionsSourcePath;
 	MUZ::CodeLine codeline;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testExpressionsAssembler.LST");
-	as.Assemble(ExpressionsSourcePath, msg, false,codeline); // false = not included
+	as.AssembleFile(ExpressionsSourcePath, false, codeline, msg); // false = not included
 }
 
 -(void) testInclude {
@@ -285,7 +296,7 @@ std::string ExpressionsSourcePath;
 	MUZ::ErrorList msg;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testInclude.LST");
-	codeline = as.Assemble("#INCLUDE    /Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/Hardware\\Custom\\Config_R0.asm", msg);
+	codeline = as.AssembleLine("#INCLUDE    /Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/Hardware\\Custom\\Config_R0.asm", msg);
 }
 
 -(void) testEquate {
@@ -293,7 +304,7 @@ std::string ExpressionsSourcePath;
 	MUZ::CodeLine codeline;
 	MUZ::ErrorList msg;
 	MUZ::Label* label;
-	codeline = as.Assemble("NotLabel: .EQU $1234", msg);
+	codeline = as.AssembleLine("NotLabel: .EQU $1234", msg);
 	label = as.GetLabel("NotLabel");
 	XCTAssertNotEqual(label, nullptr);
 	if (label) {
@@ -309,46 +320,46 @@ std::string ExpressionsSourcePath;
 	MUZ::ParseToken result;
 	MUZ::ExpressionEvaluator eval;
 
-	codeline = as.Assemble("0xFFFF & 01010b", msg);
+	codeline = as.AssembleLine("0xFFFF & 01010b", msg);
 	result = eval.Evaluate(codeline.tokens, 0);
 	XCTAssertEqual(result.source, "10"); // 1010b
 	XCTAssertEqual(result.type, MUZ::tokenTypeDECNUMBER);
 
-	codeline = as.Assemble("0xAAAA | 5555h", msg);
+	codeline = as.AssembleLine("0xAAAA | 5555h", msg);
 	result = eval.Evaluate(codeline.tokens, 0);
 	XCTAssertEqual(result.source, "65535");
 	XCTAssertEqual(result.type, MUZ::tokenTypeDECNUMBER);
 
-	codeline = as.Assemble("0xAAAA ^ FFFFh", msg);
+	codeline = as.AssembleLine("0xAAAA ^ FFFFh", msg);
 	result = eval.Evaluate(codeline.tokens, 0);
 	XCTAssertEqual(result.source, "21845"); // 5555h
 	XCTAssertEqual(result.type, MUZ::tokenTypeDECNUMBER);
 
-	codeline = as.Assemble("(1=0) && (1=1)", msg);
+	codeline = as.AssembleLine("(1=0) && (1=1)", msg);
 	result = eval.Evaluate(codeline.tokens, 0);
 	XCTAssertEqual(result.source, ""); // false  
 	XCTAssertEqual(result.type, MUZ::tokenTypeBOOL);
 
-	codeline = as.Assemble("(1=0) || (1=1)", msg);
+	codeline = as.AssembleLine("(1=0) || (1=1)", msg);
 	result = eval.Evaluate(codeline.tokens, 0);
 	XCTAssertEqual(result.source, "t"); // true
 	XCTAssertEqual(result.type, MUZ::tokenTypeBOOL);
 	
 	
-	codeline = as.Assemble("0xFFFF", msg);
+	codeline = as.AssembleLine("0xFFFF", msg);
 	XCTAssertEqual(codeline.tokens.size(), 1);
 	XCTAssertEqual(codeline.tokens[0].source, "65535");
-	codeline = as.Assemble("0b10101010",  msg);
+	codeline = as.AssembleLine("0b10101010",  msg);
 	XCTAssertEqual(codeline.tokens.size(), 1);
 	XCTAssertEqual(codeline.tokens[0].source, "170"); // 0xAA
-	codeline = as.Assemble("65536",  msg);
+	codeline = as.AssembleLine("65536",  msg);
 	XCTAssertEqual(codeline.tokens.size(), 1);
 	XCTAssertEqual(codeline.tokens[0].source, "65536");
-	codeline = as.Assemble("-1",  msg);
+	codeline = as.AssembleLine("-1",  msg);
 	XCTAssertEqual(codeline.tokens.size(), 2);
 	XCTAssertEqual(codeline.tokens[0].type, MUZ::tokenTypeOP_MINUS);
 	XCTAssertEqual(codeline.tokens[1].type, MUZ::tokenTypeDECNUMBER);
-	codeline = as.Assemble("1 + 2 * 4",  msg);
+	codeline = as.AssembleLine("1 + 2 * 4",  msg);
 	XCTAssertEqual(codeline.tokens.size(), 5);
 	XCTAssertEqual(codeline.tokens[0].type, MUZ::tokenTypeDECNUMBER);
 	XCTAssertEqual(codeline.tokens[1].type, MUZ::tokenTypeOP_PLUS);
@@ -358,9 +369,9 @@ std::string ExpressionsSourcePath;
 
 	
 	
-	codeline = as.Assemble(".UNKNOWN 'nothing', 0x7FFF",  msg);
-	codeline = as.Assemble("Start: .EQU 0x8000",  msg);
-	codeline = as.Assemble("Origin: .ORG 0x8000",  msg);
+	codeline = as.AssembleLine(".UNKNOWN 'nothing', 0x7FFF",  msg);
+	codeline = as.AssembleLine("Start: .EQU 0x8000",  msg);
+	codeline = as.AssembleLine("Origin: .ORG 0x8000",  msg);
 
 }
 
@@ -369,7 +380,7 @@ std::string ExpressionsSourcePath;
 	MUZ::ExpressionEvaluator eval;
 	MUZ::Assembler as;
 	MUZ::ErrorList msg;
-	MUZ::Parser parser(as); // give reference of the assembbler to the parser
+	MUZ::Parser parser(as); // give reference of the assembler to the parser
 	MUZ::CodeLine codeline;
 	MUZ::ParseToken result;
 	MUZ::ExpVector& tokens = codeline.tokens;
@@ -396,6 +407,191 @@ std::string ExpressionsSourcePath;
 
 		
 
+}
+
+/** Tests various minor stuff for a good code coverage. */
+-(void) testCoverage {
+	MUZ::Operator op;
+	MUZ::ParseToken tok1, tok2;
+	MUZ::ParseToken result;
+	const std::string somestring("*** some random string ***");
+	
+	result.source = somestring;
+	result = op.Exec(tok1, tok2); // does a nop!
+	XCTAssertEqual(result.source, "");
+	
+}
+
+/** Tests the operand types detection functions. */
+-(void) testOperandTypes {
+
+	MUZ::ParseToken tok1, tok2;
+	tok1.type = MUZ::tokenTypeLETTERS;
+	MUZ::OperandType optype;
+	int value;
+	
+	// 8 bit registers tests
+	{
+		std::vector<std::string> reg8ok = {"A", "B", "C", "D", "E", "H", "L", "I", "R" };
+		std::vector<std::string> reg8bad = {"J", "SP", "", "0", "(C)" };
+		for (auto & reg: reg8ok) {
+			tok1.source = reg;
+			MUZ::ExpVector tokens;
+			tokens.push_back(tok1);
+			bool result = reg8(&tokens, 0, optype, value);
+			XCTAssertEqual(result, true);
+		}
+		for (auto & reg: reg8bad) {
+			tok1.source = reg;
+			MUZ::ExpVector tokens;
+			tokens.push_back(tok1);
+			bool result = reg8(&tokens, 0, optype, value);
+			XCTAssertEqual(result, false);
+		}
+	}
+	// 16 bit registers tests
+	{
+		std::vector<std::string> reg16ok = {"AF", "AF'", "BC", "DE", "HL", "SP", "IX", "IY" };
+		std::vector<std::string> reg16bad = {"J", "(SP)", "", "0", "(C)" };
+		for (auto & reg: reg16ok) {
+			tok1.source = reg;
+			MUZ::ExpVector tokens;
+			tokens.push_back(tok1);
+			bool result = reg16(&tokens, 0, optype, value);
+			XCTAssertEqual(result, true);
+		}
+		for (auto & reg: reg16bad) {
+			tok1.source = reg;
+			MUZ::ExpVector tokens;
+			tokens.push_back(tok1);
+			bool result = reg16(&tokens, 0, optype, value);
+			XCTAssertEqual(result, false);
+		}
+	}
+	// various indirect via register
+	{
+		{
+			tok1.source = "(C)";
+			MUZ::ExpVector tokens;
+			tokens.push_back(tok1);
+			bool result = indirectC(&tokens, 0, optype, value);
+			XCTAssertEqual(result, true);
+		}
+		{
+			tok1.source = "(HL)";
+			MUZ::ExpVector tokens;
+			tokens.push_back(tok1);
+			bool result = indirectHL(&tokens, 0, optype, value);
+			XCTAssertEqual(result, true);
+		}
+		{
+			tok1.source = "(SP)";
+			MUZ::ExpVector tokens;
+			tokens.push_back(tok1);
+			bool result = indirectSP(&tokens, 0, optype, value);
+			XCTAssertEqual(result, true);
+		}
+		{
+			// (IX+8)
+			MUZ::ExpVector tokens;
+			tok1.source.clear();
+			tok1.type = MUZ::tokenTypePAROPEN;
+			tokens.push_back(tok1);
+			tok1.source = "IX";
+			tok1.type = MUZ::tokenTypeLETTERS;
+			tokens.push_back(tok1);
+			tok1.source = "+";
+			tok1.type = MUZ::tokenTypeOP_PLUS;
+			tokens.push_back(tok1);
+			tok1.source = "8";
+			tok1.type = MUZ::tokenTypeDECNUMBER;
+			tokens.push_back(tok1);
+			tok1.source.clear();
+			tok1.type = MUZ::tokenTypePARCLOSE;
+			tokens.push_back(tok1);
+			bool result = indirectX(&tokens, 0, optype, value);
+			XCTAssertEqual(result, true);
+			XCTAssertEqual(optype, MUZ::indIXd);
+			XCTAssertEqual(value, 8);
+		}
+	}
+	// bit number
+	{
+		MUZ::ExpVector tokens;
+		tok1.source = "7";
+		tok1.type = MUZ::tokenTypeDECNUMBER;
+		tokens.push_back(tok1);
+		bool result = bitnumber( &tokens, 0, optype, value);
+		XCTAssertTrue(result);
+		XCTAssertEqual(optype, MUZ::bit7);
+	}
+	// conditions
+	{
+		std::vector<std::string> condok = {"NC", "C'", "NZ", "Z", "PE", "PO", "M", "P" };
+		std::vector<std::string> condbad = {"CY", "PA", "", "0" };
+		for (auto & reg: condok) {
+			tok1.source = reg;
+			MUZ::ExpVector tokens;
+			tokens.push_back(tok1);
+			bool result = condition(&tokens, 0, optype, value);
+			XCTAssertEqual(result, true);
+		}
+		for (auto & reg: condbad) {
+			tok1.source = reg;
+			MUZ::ExpVector tokens;
+			tokens.push_back(tok1);
+			bool result = condition(&tokens, 0, optype, value);
+			XCTAssertEqual(result, false);
+		}
+	}
+	// 8-bit direct data
+	{
+		MUZ::ExpVector tokens;
+		tok1.source = "127";
+		tok1.type = MUZ::tokenTypeDECNUMBER;
+		tokens.push_back(tok1);
+		bool result = number8( &tokens, 0, optype, value);
+		XCTAssertTrue(result);
+		XCTAssertEqual(optype, MUZ::num8);
+		XCTAssertEqual(value, 127);
+	}
+	// 16-bit direct data
+	{
+		MUZ::ExpVector tokens;
+		tok1.source = "65535";
+		tok1.type = MUZ::tokenTypeDECNUMBER;
+		tokens.push_back(tok1);
+		bool result = number16( &tokens, 0, optype, value);
+		XCTAssertTrue(result);
+		XCTAssertEqual(optype, MUZ::num16);
+		XCTAssertEqual(value, 65535);
+	}
+	// indirect 16-bit address
+	{
+		MUZ::ExpVector tokens;
+		tok1.source.clear();
+		tok1.type = MUZ::tokenTypePAROPEN;
+		tokens.push_back(tok1);
+		tok1.source = "65535";
+		tok1.type = MUZ::tokenTypeDECNUMBER;
+		tokens.push_back(tok1);
+		tok1.source.clear();
+		tok1.type = MUZ::tokenTypePARCLOSE;
+		tokens.push_back(tok1);
+		bool result = indirect16( &tokens, 0, optype, value);
+		XCTAssertTrue(result);
+		XCTAssertEqual(optype, MUZ::ind16);
+		XCTAssertEqual(value, 65535);
+	}
+}
+
+-(void) testInstructionCodes {
+	MUZ::Assembler as;
+	MUZ::ErrorList msg;
+	MUZ::CodeLine codeline;
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetListingFilename("testInstructionsCodes.LST");
+	as.AssembleFile(InstructionsSourcePath, false, codeline, msg); // false = not included
 }
 /*
 - (void)testPerformanceExample {

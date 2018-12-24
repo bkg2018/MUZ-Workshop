@@ -124,8 +124,8 @@ namespace MUZ {
 		}
 		// trim spaces at the end of filename
 		strtrimright(filetoken.source);
-		if (as.Assemble(filetoken.source, msg, true, codeline)) {
-			// what?
+		if (as.AssembleFile(filetoken.source, true, codeline, msg)) {
+			//TODO: anything special to do if assembly replied ok?
 		}
 		
 		// tells the parser that the file must be included

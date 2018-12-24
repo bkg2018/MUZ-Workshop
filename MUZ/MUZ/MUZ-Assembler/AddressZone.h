@@ -31,6 +31,7 @@ namespace MUZ {
 		
 		// low level increment a zone relative to current start and size - beware, no check
 		void _inc(ADDRESSTYPE a, ADDRESSTYPE s) {
+			if (zone == nullptr) return;
 			for (ADDRESSTYPE addr = a-start ; s > 0 ; addr++, s--) {
 				zone[addr]++;
 			}
@@ -48,6 +49,7 @@ namespace MUZ {
 		}
 		
 		void Reset(ADDRESSTYPE a, ADDRESSTYPE s) {
+			if (zone == nullptr) return;
 			free(zone);zone = nullptr;
 			Mark(a,s);
 		}
