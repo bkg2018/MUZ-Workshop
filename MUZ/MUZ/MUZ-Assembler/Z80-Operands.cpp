@@ -12,6 +12,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <map>
 
 namespace MUZ {
 	
@@ -19,12 +20,41 @@ namespace MUZ {
 
 	
 	// Maps of names
-	std::unordered_map<std::string, OperandType> registers8;
-	std::unordered_map<std::string, OperandType> registers16;
-	std::unordered_map<std::string, OperandType> conditions;
+	std::unordered_map<std::string, OperandType> registers8;    // list of acceptable 8-bit registers
+	std::unordered_map<std::string, OperandType> registers16;	// list of acceptable 16-bit registers
+	std::unordered_map<std::string, OperandType> conditions;	// list of acceptable conditions
+	
+	// Maps off sub-encoding for addressing
+	std::map<OperandType, int> regsubcode;
 
 	// Initialize registers map
 	void initRegisterMap() {
+		
+		// offsets for some registers in some encodings
+		regsubcode[regB] = 0;
+		regsubcode[regC] = 1;
+		regsubcode[regD] = 2;
+		regsubcode[regE] = 3;
+		regsubcode[regH] = 4;
+		regsubcode[regL] = 5;
+		regsubcode[indHL] = 6;
+		regsubcode[regA] = 7;
+		regsubcode[regBC] = 0x00;
+		regsubcode[regDE] = 0x10;
+		regsubcode[regHL] = 0x20;
+		regsubcode[regSP] = 0x30;
+		regsubcode[regIX] = 0xDD;
+		regsubcode[regIY] = 0xFD;
+		regsubcode[bit0] = 0x00;
+		regsubcode[bit1] = 0x08;
+		regsubcode[bit2] = 0x10;
+		regsubcode[bit3] = 0x18;
+		regsubcode[bit4] = 0x20;
+		regsubcode[bit5] = 0x28;
+		regsubcode[bit6] = 0x30;
+		regsubcode[bit7] = 0x38;
+
+		// authorized registers
 		registers8["A"] = regA;
 		registers8["B"] = regB;
 		registers8["C"] = regC;
@@ -53,6 +83,16 @@ namespace MUZ {
 		conditions["P"] = condP;
 		conditions["M"] = condM;
 
+	}
+	
+	/** Returns the subcode for a register code. Used for instructions accepting a reg8 spec or a reg16 spec.
+	 	Returns a 0 for any invalid register or addressing code.
+	 */
+	int getsubcode( OperandType reg )
+	{
+		if (regsubcode.count(reg))
+			return regsubcode[reg];
+		return 0;
 	}
 	
 	// regA to regR

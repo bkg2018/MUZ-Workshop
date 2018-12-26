@@ -10,20 +10,27 @@
 #define Z80_Operands_h
 
 #include "ExpVector.h"
+#include <map>
 
 namespace MUZ {
 	
-	/** Enumeration for the possible Z-80 operand types. */
+	/** Enumeration for the possible Z-80 operand types.
+
+	The same goes for 16-bits registers BC DE HL SP which have values to help their encoding:
+
+	*/
+	
 	enum OperandType {
 		
 		// 8 bits registers, returned by reg8() function
-		regA, regB, regC, regD, regE, regH, regL, regI, regR,
+		regA, regB, regC, regD, regE, regH, regL,
+		regI, regR,
 		
 		// 16 bits registers, returned by reg16() function
 		regAF, regAFp, regBC, regDE, regHL, regSP, regIX, regIY,
 		
 		// indirect via 16 bits registers
-		indHL,		// (HL)
+		indHL,		// (HL), generally can be used at same places as A B C D E H L
 		indSP,		// (SP)
 		indC,		// (C)
 		indIXd,		// (IX+d)
@@ -41,7 +48,7 @@ namespace MUZ {
 		// indirect via 16 bits number
 		ind16,
 	};
-
+	
 	/** This must be called before any register can be recognized. */
 	void initRegisterMap();
 	
@@ -57,5 +64,8 @@ namespace MUZ {
 	bool number8( ExpVector* tokens, int curtoken, OperandType& number8, int& value );		// num8
 	bool number16( ExpVector* tokens, int curtoken, OperandType& number16, int& value );	// num16
 	bool indirect16( ExpVector* tokens, int curtoken, OperandType& number16, int& value );	// ind16
+	
+	// get the subcode for a register code
+	int getsubcode(OperandType reg);
 }
 #endif /* Z80_Operands_h */

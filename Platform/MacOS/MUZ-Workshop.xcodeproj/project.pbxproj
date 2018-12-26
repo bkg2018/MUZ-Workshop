@@ -166,6 +166,7 @@
 		866786CA21CFDAE10027E67F /* Z80-Operands.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "Z80-Operands.cpp"; sourceTree = "<group>"; };
 		866786CC21D112060027E67F /* Instructions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Instructions.asm; sourceTree = "<group>"; };
 		866786CE21D1144C0027E67F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		866786CF21D133990027E67F /* Z80-table.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Z80-table.md"; sourceTree = "<group>"; };
 		86892BBE21B590C600EC24EF /* Name.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Name.h; sourceTree = "<group>"; };
 		86892BC321B6BC1600EC24EF /* StrUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StrUtils.h; sourceTree = "<group>"; };
 		86892BC421B6BF4700EC24EF /* StrUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StrUtils.cpp; sourceTree = "<group>"; };
@@ -507,6 +508,7 @@
 				86892BC821B95B6700EC24EF /* conditionnal assembling.md */,
 				8694B71D21B19468006EF947 /* design.md */,
 				86554A7121C13FA80071447E /* Operators.md */,
+				866786CF21D133990027E67F /* Z80-table.md */,
 			);
 			path = Documentation;
 			sourceTree = "<group>";

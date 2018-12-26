@@ -6,7 +6,7 @@
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
 
-// Should be assembled ok
+// ADC ok
 ADC A, A
 ADC A, B
 ADC A, C
@@ -22,12 +22,57 @@ ADC HL, BC
 ADC HL, DE
 ADC HL, HL
 ADC HL, SP
-
-// should fail
+// ADC fail
 ADC B, C
 ADC A
 ADC HL, (HL)
 ADC A, HL
 ADC HL, IX
 ADC A, 0x100
-
+ADC IX,IY
+ADC HL,IX
+// ADD ok
+ADD A, A
+ADD A, B
+ADD A, C
+ADD A, D
+ADD A, E
+ADD A, H
+ADD A, L
+ADD A, 0x55
+ADD A, (HL)
+ADD A, (IX+0xAA)
+ADD A, (IY+0xAA)
+ADD HL, BC
+ADD HL, DE
+ADD HL, HL
+ADD HL, SP
+ADD IX, BC
+ADD IX, DE
+ADD IX, IX
+ADD IX, SP
+ADD IY, BC
+ADD IY, DE
+ADD IY, IY
+ADD IY, SP
+// ADD fail
+ADD B, C
+ADD A
+ADD HL, (HL)
+ADD A, HL
+ADD HL, IX
+ADD A, 0x100
+ADD IX,IY
+ADD HL,IX
+// AND ok
+AND A
+AND B
+AND C
+AND D
+AND E
+AND H
+AND L
+AND 0x55
+AND (HL)
+AND (IX+0xAA)
+AND (IY+0xAA)

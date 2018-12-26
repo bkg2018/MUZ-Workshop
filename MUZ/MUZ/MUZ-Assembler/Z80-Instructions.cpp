@@ -156,14 +156,71 @@ namespace MUZ {
 		}
 
 		/** Assemble instruction at current token, returns false if error
-		 @param as the assembler which stores symbols and assembly
+		 tok index 0   1   2   3
+		 ADD A   ,   A/B/C/D/E/H/L
+		 ADD A   ,   n
+		 ADD A   ,   (HL)/(IX+d)/(IY+d)
+		 ADD HL  ,   BC/DE/HL/SP
+		 ADD IX  ,   BC/DE/IX/SP
+		 ADD IY  ,   BC/DE/IY/SP
+	 @param as the assembler which stores symbols and assembly
 		 @param codeline the code line in which assembled codes will be stored
 		 @param label the last or current label if any, or nullptr
 		 @param msg the message list which will receive any warning or error information
 		 */
 		bool InstructionADD::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
 		{
-			return true;
+			OperandType dest, src;
+			int value;
+			if (codeline.GetNextReg8(dest)) {
+				if (dest != regA) {
+					//TODO: wrong register ADC only works on A
+					return false;
+				}
+				if (!codeline.GetNextComma()) {
+					//TODO: syntax error after ADC A
+					return false;
+				}
+				// ADD A,?
+				if (codeline.GetNextReg8(src)) {
+					if (src == regI || src == regR) return false;
+					codeline.AddCode(0x80 + getsubcode(src));
+					return true;
+				}
+				if (codeline.GetNextIndHL(src)) {
+					codeline.AddCode(0x86);
+					return true;
+				}
+				if (codeline.GetNextIndX(src, value)) {
+					codeline.AddCode(getsubcode(src), 0x86, (value & 0xFF));
+					return true;
+				}
+				if (codeline.GetNextNum8(src, value)) {
+					codeline.AddCode(0xC6, (value & 0xFF));
+					return true;
+				}
+				// TODO: error after ADD A,
+				return false;
+			}
+			if (codeline.GetNextReg16(dest)) {
+				if (!codeline.GetNextComma()) {
+					return false;//TODO: syntax after ADD rp
+				}
+				if (codeline.GetNextReg16(src)) {
+					if (src == regIX || src == regIY || src == regHL) {
+						if (src != dest) return false; // only accept HL,HL - IX,IX - IY,IY
+						src = regHL;
+					}
+					if (dest == regIX || dest == regIY) {
+						codeline.AddCode(getsubcode(dest)); // prefix for IX and IY
+					}
+					if (src == regBC || src == regDE || src == regHL || src == regSP) {
+						codeline.AddCode(0x09 + getsubcode(src));
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		/** Assemble instruction at current token, returns false if error.
@@ -179,10 +236,6 @@ namespace MUZ {
 		 */
 		bool InstructionADC::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
 		{
-			if (!codeline.enoughTokensLeft(3)) {
-				//TODO: not enough tokens
-				return false;
-			}
 			OperandType dest, src;
 			int value;
 			if (codeline.GetNextReg8(dest)) {
@@ -196,39 +249,20 @@ namespace MUZ {
 				}
 				// ADC A,?
 				if (codeline.GetNextReg8(src)) {
-					if (src == regA) {
-						codeline.SetCode(0x8F);
-					} else if (src == regB) {
-						codeline.SetCode(0x88);
-					} else if (src == regC) {
-						codeline.SetCode(0x89);
-					} else if (src == regD) {
-						codeline.SetCode(0x8A);
-					} else if (src == regE) {
-						codeline.SetCode(0x8B);
-					} else if (src == regH) {
-						codeline.SetCode(0x8C);
-					} else if (src == regL) {
-						codeline.SetCode(0x8D);
-					} else {
-						//TODO: wrong register
-						return false;
-					}
+					if (src == regI || src == regR) return false;
+					codeline.AddCode(0x88 + getsubcode(src));
 					return true;
 				}
 				if (codeline.GetNextIndHL(src)) {
-					codeline.SetCode(0x8E);
+					codeline.AddCode(0x8E);
 					return true;
 				}
 				if (codeline.GetNextIndX(src, value)) {
-					if (src == regIX)
-						codeline.SetCode(0xDD, 0x8E, (value & 0xFF));
-					else
-						codeline.SetCode(0xFD, 0x8E, (value & 0xFF));
+					codeline.AddCode(getsubcode(src), 0x8E, (value & 0xFF));
 					return true;
 				}
 				if (codeline.GetNextNum8(src, value)) {
-					codeline.SetCode(0xCE, (value & 0xFF));
+					codeline.AddCode(0xCE, (value & 0xFF));
 					return true;
 				}
 				// TODO: error after ADD A,
@@ -243,19 +277,10 @@ namespace MUZ {
 					return false;//TODO: syntax after ADC HL
 				}
 				if (codeline.GetNextReg16(src)) {
-					if (src == regBC) {
-						codeline.SetCode(0xED, 0x4A);
-					} else if (src == regDE) {
-						codeline.SetCode(0xED, 0x5A);
-					} else if (src == regHL) {
-						codeline.SetCode(0xED, 0x6A);
-					} else if (src == regSP) {
-						codeline.SetCode(0xED, 0x7A);
-					} else {
-						//TODO: wrong register
-						return false;
+					if (src == regBC || src == regDE || src == regHL || src == regSP) {
+						codeline.AddCode(0xED, 0x4A + getsubcode(src));
+						return true;
 					}
-					return true;
 				}
 			}
 			return false;
@@ -284,6 +309,9 @@ namespace MUZ {
 		}
 
 		/** Assemble instruction at current token, returns false if error
+		 AND A/B/C/D/E/H/L
+		 AND n
+		 AND (HL)/(IX+d)/(IY+d)
 		 @param as the assembler which stores symbols and assembly
 		 @param codeline the code line in which assembled codes will be stored
 		 @param label the last or current label if any, or nullptr
@@ -291,7 +319,29 @@ namespace MUZ {
 		 */
 		bool InstructionAND::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
 		{
-			return true;
+			OperandType src;
+			int value;
+			if (codeline.GetNextReg8(src)) {
+				// AND r
+				if (src == regI || src == regR) {
+					return false;
+				}
+				codeline.AddCode(0xA0 + getsubcode(src));
+				return true;
+			}
+			if (codeline.GetNextIndHL(src)) {
+				codeline.AddCode(0xA6);
+				return true;
+			}
+			if (codeline.GetNextIndX(src, value)) {
+				codeline.AddCode(getsubcode(src), 0xA6, (value & 0xFF));
+				return true;
+			}
+			if (codeline.GetNextNum8(src, value)) {
+				codeline.AddCode(0xE6, (value & 0xFF));
+				return true;
+			}
+			return false;
 		}
 
 		/** Assemble instruction at current token, returns false if error
@@ -604,6 +654,9 @@ namespace MUZ {
 		}
 
 		/** Assemble instruction at current token, returns false if error
+		 	bit b,r
+		 	b = 0 to 7
+		 	r = A B C D E H L (HL) (IX+d) (IY+d)
 		 @param as the assembler which stores symbols and assembly
 		 @param codeline the code line in which assembled codes will be stored
 		 @param label the last or current label if any, or nullptr
@@ -611,6 +664,21 @@ namespace MUZ {
 		 */
 		bool InstructionBIT::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
 		{
+			int d=0;
+			OperandType src, bit;
+			if (!codeline.GetNextBitNumber(bit)) return false;
+			if (!codeline.GetNextComma()) return false;
+			if (codeline.GetNextReg8(src)) {
+				if (src == regI || src == regR) return false;
+			} else if (codeline.GetNextIndHL(src)) {
+			} else if (codeline.GetNextIndX(src, d)) {
+			} else return false;
+			// IX and IY are prefixxed then using (HL) encoding
+			if (src == regIX || src == regIY) {
+				codeline.AddCode(getsubcode(src), 0xCB, 0x40 + getsubcode(bit) + getsubcode(regHL), (d & 0xFF));
+			} else {
+				codeline.AddCode(0xCB, 0x40 + getsubcode(bit) + getsubcode(src));
+			}
 			return true;
 		}
 

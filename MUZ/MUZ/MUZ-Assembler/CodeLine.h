@@ -67,6 +67,7 @@ namespace MUZ {
 		
 		/** Returns true if current token is a comma, and go next token. */
 		bool GetNextComma() {
+			if (!enoughTokensLeft(1)) return false;
 			if (tokens.at(curtoken).type == tokenTypeCOMMA) {
 				curtoken += 1;
 				return true;
@@ -181,19 +182,22 @@ namespace MUZ {
 		}
 
 		/** Pushes codes. */
-		void SetCode(DATATYPE b0) {
+		void ResetCode() {
+			code.clear();
+		}
+		void AddCode(DATATYPE b0) {
 			code.push_back(b0);
 		}
-		void SetCode(DATATYPE b0, DATATYPE b1) {
+		void AddCode(DATATYPE b0, DATATYPE b1) {
 			code.push_back(b0);
 			code.push_back(b1);
 		}
-		void SetCode(DATATYPE b0, DATATYPE b1, DATATYPE b2) {
+		void AddCode(DATATYPE b0, DATATYPE b1, DATATYPE b2) {
 			code.push_back(b0);
 			code.push_back(b1);
 			code.push_back(b2);
 		}
-		void SetCode(DATATYPE b0, DATATYPE b1, DATATYPE b2, DATATYPE b3) {
+		void AddCode(DATATYPE b0, DATATYPE b1, DATATYPE b2, DATATYPE b3) {
 			code.push_back(b0);
 			code.push_back(b1);
 			code.push_back(b2);
