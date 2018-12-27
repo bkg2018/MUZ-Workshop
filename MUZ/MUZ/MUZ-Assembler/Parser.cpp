@@ -461,7 +461,7 @@ namespace MUZ {
 				word = s.substr(pos); // add the rest of line as a comment
 				type = tokenTypeCOMMENT;
 				StoreToken();
-				continue;
+				break; // finished!
 			}
 
 			// check if it is starting a new binary, octal, decimal or hexa number

@@ -27,6 +27,41 @@ namespace MUZ {
 		codeTypeSTRING
 	};
 
+	// register flags must be in the same order as OperandType registers:
+//	regA, regB, regC, regD, regE, regH, regL,
+//	regI, regR, regF,
+//	regAF, regAFp, regBC, regDE, regHL, regSP, regIX, regIY,
+
+	enum REGFLAGS {
+		// 8 bits registers, returned by reg8() function
+		A		= 1 << 0,
+		B		= 1 << 1,
+		C		= 1 << 2,
+		D		= 1 << 3,
+		E		= 1 << 4,
+		H		= 1 << 5,
+		L		= 1 << 6,
+		I		= 1 << 7,
+		R		= 1 << 8,
+		F		= 1 << 9,
+		// 16 bits registers, returned by reg16() function
+		AF		= 1 << 10,
+		AFp		= 1 << 11,
+		BC		= 1 << 12,
+		DE		= 1 << 13,
+		HL		= 1 << 14,
+		SP		= 1 << 15,
+		IX		= 1 << 16,
+		IY		= 1 << 17,
+
+		ABCDEHL = A | B | C | D | E | H | L,
+		BCDESP = BC | DE | SP,
+		BCDEHLSP = BC | DE | HL | SP,
+		XY = IX | IY,
+		HLXY = HL | IX | IY,
+	};
+	
+
 	/** Source and assembled content for one line of source code. */
 	struct CodeLine
 	{
@@ -45,13 +80,18 @@ namespace MUZ {
 		// assembled code
 		bool				assembled = false; 			// true when assembled
 		std::vector<BYTE>	code;						// assembled code
-		int					cycles;						// machine cycles for this code
+		int					cyclesmin;					// machine cycles for this code
+		int					cyclesmax;					// machine cycles for this code
 		ADDRESSTYPE			address = 0;				// starting address for this code
 		CodeType			codetype = codeTypeUNKNOWN;	// type of data for this code
 		int					includefile = 0;			// > 0 when this line includes another sourcefile
 		class Label*		label = nullptr;			// label if there is one on this line
 		
 		// helpers for instructions assembling
+		bool regaccept(int flags, OperandType reg) {
+			int f = 1 << (int)reg;
+			return ((f & flags) == f);
+		}
 		
 		/** Returns true if the tokens array has at least the resquested number of tokens available starting at curtoken. */
 		bool enoughTokensLeft(int number) {
@@ -76,22 +116,26 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as an 8-bit register, and go next token. */
-		bool GetNextReg8( OperandType& reg ) {
+		bool GetNextReg8( OperandType& reg, unsigned int regs = 0xFFFFFFFF ) {
 			int value;
 			if (!enoughTokensLeft(1)) return false;
 			if (reg8(&tokens, curtoken, reg, value)) {
-				curtoken += 1;
-				return true;
+				if (regaccept(regs, reg)) {
+					curtoken += 1;
+					return true;
+				}
 			}
 			return false;
 		}
 		/** Returns true if current token is recognized as an 16-bit register, and go next token. */
-		bool GetNextReg16( OperandType& reg ) {
+		bool GetNextReg16( OperandType& reg, unsigned int regs = 0xFFFFFFFF ) {
 			int value;
 			if (!enoughTokensLeft(1)) return false;
 			if (reg16(&tokens, curtoken, reg, value)) {
-				curtoken += 1;
-				return true;
+				if (regaccept(regs, reg)) {
+					curtoken += 1;
+					return true;
+				}
 			}
 			return false;
 		}
@@ -183,8 +227,9 @@ namespace MUZ {
 		}
 
 		/** Set machine cycles. */
-		void SetCycles(int c) {
-			cycles = c;
+		void SetCycles(int mintime, int maxtime = -1) {
+			cyclesmin = mintime;
+			cyclesmax = maxtime > 0 ? maxtime : mintime;
 		}
 		
 		/** Pushes codes. */
@@ -192,22 +237,22 @@ namespace MUZ {
 			code.clear();
 		}
 		void AddCode(DATATYPE b0) {
-			code.push_back(b0);
+			code.push_back(b0 & DATAMASK);
 		}
 		void AddCode(DATATYPE b0, DATATYPE b1) {
-			code.push_back(b0);
-			code.push_back(b1);
+			AddCode(b0);
+			AddCode(b1);
 		}
 		void AddCode(DATATYPE b0, DATATYPE b1, DATATYPE b2) {
-			code.push_back(b0);
-			code.push_back(b1);
-			code.push_back(b2);
+			AddCode(b0);
+			AddCode(b1);
+			AddCode(b2);
 		}
 		void AddCode(DATATYPE b0, DATATYPE b1, DATATYPE b2, DATATYPE b3) {
-			code.push_back(b0);
-			code.push_back(b1);
-			code.push_back(b2);
-			code.push_back(b3);
+			AddCode(b0);
+			AddCode(b1);
+			AddCode(b2);
+			AddCode(b3);
 		}
 	};
 
