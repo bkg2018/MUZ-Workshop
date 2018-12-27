@@ -24,7 +24,7 @@ namespace MUZ {
 		
 		// 8 bits registers, returned by reg8() function
 		regA, regB, regC, regD, regE, regH, regL,
-		regI, regR,
+		regI, regR, regF,
 		
 		// 16 bits registers, returned by reg16() function
 		regAF, regAFp, regBC, regDE, regHL, regSP, regIX, regIY,
@@ -40,7 +40,7 @@ namespace MUZ {
 		bit0, bit1, bit2, bit3, bit4, bit5, bit6, bit7,
 		
 		// conditions
-		condNZ, condZ, condNC, condC, condPO, condPE, condM, condP,
+		condNZ, condZ, condNC, condC, condPO, condPE, condP, condM,
 		
 		// numeric operands
 		num8, num16,

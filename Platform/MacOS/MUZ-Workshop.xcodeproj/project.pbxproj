@@ -184,7 +184,7 @@
 		8694B72721B43873006EF947 /* Parser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
 		8694B72821B43873006EF947 /* Parser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
 		8694B72B21B47E88006EF947 /* Instruction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Instruction.h; sourceTree = "<group>"; };
-		8694B72D21B47FAE006EF947 /* Z80-Instructions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "Z80-Instructions.cpp"; sourceTree = "<group>"; };
+		8694B72D21B47FAE006EF947 /* Z80-Instructions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "Z80-Instructions.cpp"; sourceTree = "<group>"; usesTabs = 1; };
 		8694B72E21B47FAE006EF947 /* Z80-Instructions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Z80-Instructions.h"; sourceTree = "<group>"; };
 		8694B73121B4A293006EF947 /* Directive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Directive.h; sourceTree = "<group>"; };
 		8694B73321B4A390006EF947 /* All-Directives.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "All-Directives.cpp"; sourceTree = "<group>"; };

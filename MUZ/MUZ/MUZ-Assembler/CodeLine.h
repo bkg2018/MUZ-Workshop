@@ -45,6 +45,7 @@ namespace MUZ {
 		// assembled code
 		bool				assembled = false; 			// true when assembled
 		std::vector<BYTE>	code;						// assembled code
+		int					cycles;						// machine cycles for this code
 		ADDRESSTYPE			address = 0;				// starting address for this code
 		CodeType			codetype = codeTypeUNKNOWN;	// type of data for this code
 		int					includefile = 0;			// > 0 when this line includes another sourcefile
@@ -181,6 +182,11 @@ namespace MUZ {
 			return false;
 		}
 
+		/** Set machine cycles. */
+		void SetCycles(int c) {
+			cycles = c;
+		}
+		
 		/** Pushes codes. */
 		void ResetCode() {
 			code.clear();

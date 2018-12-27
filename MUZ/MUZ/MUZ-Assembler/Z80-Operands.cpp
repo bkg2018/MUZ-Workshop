@@ -37,14 +37,17 @@ namespace MUZ {
 		regsubcode[regE] = 3;
 		regsubcode[regH] = 4;
 		regsubcode[regL] = 5;
+		regsubcode[regF] = 6;
 		regsubcode[indHL] = 6;
 		regsubcode[regA] = 7;
+		
 		regsubcode[regBC] = 0x00;
 		regsubcode[regDE] = 0x10;
 		regsubcode[regHL] = 0x20;
 		regsubcode[regSP] = 0x30;
 		regsubcode[regIX] = 0xDD;
 		regsubcode[regIY] = 0xFD;
+		
 		regsubcode[bit0] = 0x00;
 		regsubcode[bit1] = 0x08;
 		regsubcode[bit2] = 0x10;
@@ -53,7 +56,16 @@ namespace MUZ {
 		regsubcode[bit5] = 0x28;
 		regsubcode[bit6] = 0x30;
 		regsubcode[bit7] = 0x38;
-
+		
+		regsubcode[condNZ] = 0x00;
+		regsubcode[condZ]  = 0x08;
+		regsubcode[condNC] = 0x10;
+		regsubcode[condC]  = 0x18;
+		regsubcode[condPO] = 0x20;
+		regsubcode[condPE] = 0x28;
+		regsubcode[condP]  = 0x30;
+		regsubcode[condM]  = 0x38;
+	
 		// authorized registers
 		registers8["A"] = regA;
 		registers8["B"] = regB;
@@ -64,6 +76,7 @@ namespace MUZ {
 		registers8["L"] = regL;
 		registers8["I"] = regI;
 		registers8["R"] = regR;
+		registers8["F"] = regF;
 		
 		registers16["AF"] = regAF;
 		registers16["AF'"] = regAFp;

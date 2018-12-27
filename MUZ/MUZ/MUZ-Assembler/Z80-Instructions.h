@@ -663,7 +663,7 @@ namespace MUZ {
 		virtual bool Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	
-	class InstructionINR : public Instruction {
+	class InstructionINIR : public Instruction {
 	public:
 		/** Assemble instruction at current token, returns false if error
 		 @param as the assembler which stores symbols and assembly

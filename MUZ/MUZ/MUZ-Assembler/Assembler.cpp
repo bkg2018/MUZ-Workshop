@@ -139,7 +139,7 @@ namespace MUZ {
 		m_instructions["RST"] = new InstructionRST();
 		m_instructions["IN"] = new InstructionIN();
 		m_instructions["INI"] = new InstructionINI();
-		m_instructions["INR"] = new InstructionINR();
+		m_instructions["INIR"] = new InstructionINIR();
 		m_instructions["IND"] = new InstructionIND();
 		m_instructions["INDR"] = new InstructionINDR();
 		m_instructions["OUT"] = new InstructionOUT();
