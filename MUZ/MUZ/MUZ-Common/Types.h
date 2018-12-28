@@ -12,11 +12,10 @@
 #include <string>
 #include <vector>
 
+#include "Config.h"
+
 namespace MUZ {
 
-	#define MODE_A16_D8	// 8-bit data wth 16-bit addressing (Z-80, 6502, 6809...)
-	// #define MODE_A32_D16	// 16-bit data with 32-bit addressing (8086, 68000,..)
-	
 	// Types for memory and content
 	typedef unsigned char BYTE;
 	typedef unsigned short WORD;	// should be 16-bits
@@ -42,7 +41,7 @@ namespace MUZ {
 	typedef WORD DATATYPE;
 	const int DATAMASK = 0xFFFF;
 #else
-#error An addressing/data mode must be choosen
+#error An addressing/data mode must be choosen in Config.h
 #endif
 	
 	const ADDRESSSIZETYPE MEMMAXSIZE = (ADDRESSSIZETYPE)ADDRESSMASK + 1;

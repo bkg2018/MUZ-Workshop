@@ -40,11 +40,15 @@ namespace MUZ {
 		regsubcode[regF] = 6;
 		regsubcode[indHL] = 6;
 		regsubcode[regA] = 7;
+
+		regsubcode[regI] = 0x07;
+		regsubcode[regR] = 0x0F;
 		
 		regsubcode[regBC] = 0x00;
 		regsubcode[regDE] = 0x10;
 		regsubcode[regHL] = 0x20;
 		regsubcode[regSP] = 0x30;
+		regsubcode[regAF] = 0x30; // push,pop
 		regsubcode[regIX] = 0xDD;
 		regsubcode[regIY] = 0xFD;
 		
@@ -159,6 +163,34 @@ namespace MUZ {
 		token = &tokens->at(curtoken + 2);
 		if (token->type != tokenTypePARCLOSE) return false;
 		reg = indHL;
+		return true;
+	}
+	// indBC
+	bool indirectBC( ExpVector* tokens, int curtoken, OperandType& reg, int& value )
+	{
+		if (curtoken + 2 >= tokens->size() ) return false;
+		ParseToken* token = &tokens->at(curtoken);
+		if (token->type != tokenTypePAROPEN) return false;
+		token = &tokens->at(curtoken + 1);
+		if (token->type != tokenTypeLETTERS) return false;
+		if (token->source != "BC") return false;
+		token = &tokens->at(curtoken + 2);
+		if (token->type != tokenTypePARCLOSE) return false;
+		reg = indBC;
+		return true;
+	}
+	// indDE
+	bool indirectDE( ExpVector* tokens, int curtoken, OperandType& reg, int& value )
+	{
+		if (curtoken + 2 >= tokens->size() ) return false;
+		ParseToken* token = &tokens->at(curtoken);
+		if (token->type != tokenTypePAROPEN) return false;
+		token = &tokens->at(curtoken + 1);
+		if (token->type != tokenTypeLETTERS) return false;
+		if (token->source != "DE") return false;
+		token = &tokens->at(curtoken + 2);
+		if (token->type != tokenTypePARCLOSE) return false;
+		reg = indDE;
 		return true;
 	}
 

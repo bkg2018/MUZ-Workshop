@@ -167,6 +167,8 @@
 		866786CC21D112060027E67F /* Instructions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Instructions.asm; sourceTree = "<group>"; };
 		866786CE21D1144C0027E67F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		866786CF21D133990027E67F /* Z80-table.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Z80-table.md"; sourceTree = "<group>"; };
+		866786D021D530290027E67F /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		866786D121D530C40027E67F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		86892BBE21B590C600EC24EF /* Name.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Name.h; sourceTree = "<group>"; };
 		86892BC321B6BC1600EC24EF /* StrUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StrUtils.h; sourceTree = "<group>"; };
 		86892BC421B6BF4700EC24EF /* StrUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StrUtils.cpp; sourceTree = "<group>"; };
@@ -593,6 +595,7 @@
 				8694B71A21B13ECF006EF947 /* Documentation */,
 				869B4C3621AC4FB300E65FE7 /* YAZE */,
 				869B4C1A21AC4FB200E65FE7 /* MUZ */,
+				866786D121D530C40027E67F /* README.md */,
 			);
 			name = MUZ;
 			path = ../../MUZ;
@@ -605,6 +608,7 @@
 				86892BC221B6BC0300EC24EF /* MUZ-Common */,
 				8694B71C21B193C4006EF947 /* MUZ-Assembler */,
 				869B4C2221AC4FB200E65FE7 /* Tests */,
+				866786D021D530290027E67F /* Config.h */,
 			);
 			path = MUZ;
 			sourceTree = "<group>";

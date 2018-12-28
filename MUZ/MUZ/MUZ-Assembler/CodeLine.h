@@ -88,13 +88,13 @@ namespace MUZ {
 		class Label*		label = nullptr;			// label if there is one on this line
 		
 		// helpers for instructions assembling
-		bool regaccept(int flags, OperandType reg) {
+		bool RegAccept(int flags, OperandType reg) {
 			int f = 1 << (int)reg;
 			return ((f & flags) == f);
 		}
 		
 		/** Returns true if the tokens array has at least the resquested number of tokens available starting at curtoken. */
-		bool enoughTokensLeft(int number) {
+		bool EnoughTokensLeft(int number) {
 			// if curtoken is 'i' and we request 3 tokens,
 			// then the tokens size must be 'i' + 3 or more
 			return (tokens.size() >= curtoken + number) ;
@@ -107,8 +107,8 @@ namespace MUZ {
 		}
 		
 		/** Returns true if current token is a comma, and go next token. */
-		bool GetNextComma() {
-			if (!enoughTokensLeft(1)) return false;
+		bool GetComma() {
+			if (!EnoughTokensLeft(1)) return false;
 			if (tokens.at(curtoken).type == tokenTypeCOMMA) {
 				curtoken += 1;
 				return true;
@@ -116,11 +116,11 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as an 8-bit register, and go next token. */
-		bool GetNextReg8( OperandType& reg, unsigned int regs = 0xFFFFFFFF ) {
+		bool GetReg8( OperandType& reg, unsigned int regs = 0xFFFFFFFF ) {
 			int value;
-			if (!enoughTokensLeft(1)) return false;
+			if (!EnoughTokensLeft(1)) return false;
 			if (reg8(&tokens, curtoken, reg, value)) {
-				if (regaccept(regs, reg)) {
+				if (RegAccept(regs, reg)) {
 					curtoken += 1;
 					return true;
 				}
@@ -128,11 +128,11 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as an 16-bit register, and go next token. */
-		bool GetNextReg16( OperandType& reg, unsigned int regs = 0xFFFFFFFF ) {
+		bool GetReg16( OperandType& reg, unsigned int regs = 0xFFFFFFFF ) {
 			int value;
-			if (!enoughTokensLeft(1)) return false;
+			if (!EnoughTokensLeft(1)) return false;
 			if (reg16(&tokens, curtoken, reg, value)) {
-				if (regaccept(regs, reg)) {
+				if (RegAccept(regs, reg)) {
 					curtoken += 1;
 					return true;
 				}
@@ -140,9 +140,10 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as (C), and go next token. */
-		bool GetNextIndC( OperandType& regC ) {
+		bool GetIndC(  ) {
 			int value;
-			if (!enoughTokensLeft(3)) return false;
+			if (!EnoughTokensLeft(3)) return false;
+			OperandType regC;
 			if (indirectC(&tokens, curtoken, regC, value)) {
 				curtoken += 3;
 				return true;
@@ -150,19 +151,43 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as (HL), and go next token. */
-		bool GetNextIndHL( OperandType& regHL ) {
+		bool GetIndHL(  ) {
 			int value;
-			if (!enoughTokensLeft(3)) return false;
+			if (!EnoughTokensLeft(3)) return false;
+			OperandType regHL;
 			if (indirectHL(&tokens, curtoken, regHL, value)) {
 				curtoken += 3;
 				return true;
 			}
 			return false;
 		}
-		/** Returns true if current token is recognized as (SP), and go next token. */
-		bool GetNextIndSP( OperandType& regSP ) {
+		/** Returns true if current token is recognized as (HL), and go next token. */
+		bool GetIndBC(  ) {
 			int value;
-			if (!enoughTokensLeft(3)) return false;
+			if (!EnoughTokensLeft(3)) return false;
+			OperandType regBC;
+			if (indirectBC(&tokens, curtoken, regBC, value)) {
+				curtoken += 3;
+				return true;
+			}
+			return false;
+		}
+		/** Returns true if current token is recognized as (HL), and go next token. */
+		bool GetIndDE(  ) {
+			int value;
+			if (!EnoughTokensLeft(3)) return false;
+			OperandType regDE;
+			if (indirectDE(&tokens, curtoken, regDE, value)) {
+				curtoken += 3;
+				return true;
+			}
+			return false;
+		}
+		/** Returns true if current token is recognized as (SP), and go next token. */
+		bool GetIndSP(  ) {
+			int value;
+			if (!EnoughTokensLeft(3)) return false;
+			OperandType regSP;
 			if (indirectSP(&tokens, curtoken, regSP, value)) {
 				curtoken += 3;
 				return true;
@@ -170,8 +195,8 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as (IX+d) or (IY+d), and go next token. */
-		bool GetNextIndX( OperandType& regX, int& value ) {
-			if (!enoughTokensLeft(5)) return false;
+		bool GetIndX( OperandType& regX, int& value ) {
+			if (!EnoughTokensLeft(5)) return false;
 			if (indirectX(&tokens, curtoken, regX, value)) {
 				curtoken += 5;
 				return true;
@@ -179,9 +204,9 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as a bit nuùber (0-7), and go next token. */
-		bool GetNextBitNumber( OperandType& bit ) {
+		bool GetBitNumber( OperandType& bit ) {
 			int value;
-			if (!enoughTokensLeft(1)) return false;
+			if (!EnoughTokensLeft(1)) return false;
 			if (bitnumber(&tokens, curtoken, bit, value)) {
 				curtoken += 1;
 				return true;
@@ -189,9 +214,9 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as a condition, and go next token. */
-		bool GetNextCond( OperandType& cond ) {
+		bool GetCond( OperandType& cond ) {
 			int value;
-			if (!enoughTokensLeft(1)) return false;
+			if (!EnoughTokensLeft(1)) return false;
 			if (condition(&tokens, curtoken, cond, value)) {
 				curtoken += 1;
 				return true;
@@ -199,8 +224,9 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as an 8-bit number, and go next token. */
-		bool GetNextNum8( OperandType& num8, int& value ) {
-			if (!enoughTokensLeft(1)) return false;
+		bool GetNum8( int& value ) {
+			if (!EnoughTokensLeft(1)) return false;
+			OperandType num8;
 			if (number8(&tokens, curtoken, num8, value)) {
 				curtoken += 1;
 				return true;
@@ -208,8 +234,9 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as an 8-bit number, and go next token. */
-		bool GetNextNum16( OperandType& num16, int& value ) {
-			if (!enoughTokensLeft(1)) return false;
+		bool GetNum16( int& value ) {
+			if (!EnoughTokensLeft(1)) return false;
+			OperandType num16;
 			if (number16(&tokens, curtoken, num16, value)) {
 				curtoken += 1;
 				return true;
@@ -217,8 +244,9 @@ namespace MUZ {
 			return false;
 		}
 		/** Returns true if current token is recognized as an (16-bit) indirect addressing, and go next token. */
-		bool GetNextInd16( OperandType& num16, int& value ) {
-			if (!enoughTokensLeft(3)) return false;
+		bool GetInd16( int& value ) {
+			if (!EnoughTokensLeft(3)) return false;
+			OperandType num16;
 			if (indirect16(&tokens, curtoken, num16, value)) {
 				curtoken += 3;
 				return true;
