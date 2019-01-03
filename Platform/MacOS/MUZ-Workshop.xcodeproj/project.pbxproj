@@ -12,6 +12,8 @@
 		86554A7021C13DBA0071447E /* Operator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86554A6E21C13DBA0071447E /* Operator.cpp */; };
 		86554A7421C23B220071447E /* All-Operators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86554A7221C23B220071447E /* All-Operators.cpp */; };
 		866786CB21CFDAE10027E67F /* Z80-Operands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866786CA21CFDAE10027E67F /* Z80-Operands.cpp */; };
+		866786D321D64D060027E67F /* CodeLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866786D221D64D060027E67F /* CodeLine.cpp */; };
+		866786D621D670A40027E67F /* FileUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866786D421D670A40027E67F /* FileUtils.cpp */; };
 		86892BC521B6BF4700EC24EF /* StrUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86892BC421B6BF4700EC24EF /* StrUtils.cpp */; };
 		8694B72421B2E653006EF947 /* Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B72221B2E652006EF947 /* Assembler.cpp */; };
 		8694B72921B43873006EF947 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B72721B43873006EF947 /* Parser.cpp */; };
@@ -169,6 +171,9 @@
 		866786CF21D133990027E67F /* Z80-table.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Z80-table.md"; sourceTree = "<group>"; };
 		866786D021D530290027E67F /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		866786D121D530C40027E67F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		866786D221D64D060027E67F /* CodeLine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CodeLine.cpp; sourceTree = "<group>"; };
+		866786D421D670A40027E67F /* FileUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FileUtils.cpp; sourceTree = "<group>"; };
+		866786D521D670A40027E67F /* FileUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileUtils.h; sourceTree = "<group>"; };
 		86892BBE21B590C600EC24EF /* Name.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Name.h; sourceTree = "<group>"; };
 		86892BC321B6BC1600EC24EF /* StrUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StrUtils.h; sourceTree = "<group>"; };
 		86892BC421B6BF4700EC24EF /* StrUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StrUtils.cpp; sourceTree = "<group>"; };
@@ -485,6 +490,8 @@
 				869B4C1F21AC4FB200E65FE7 /* Types.h */,
 				86892BC321B6BC1600EC24EF /* StrUtils.h */,
 				86892BC421B6BF4700EC24EF /* StrUtils.cpp */,
+				866786D421D670A40027E67F /* FileUtils.cpp */,
+				866786D521D670A40027E67F /* FileUtils.h */,
 			);
 			path = "MUZ-Common";
 			sourceTree = "<group>";
@@ -518,6 +525,7 @@
 		8694B71C21B193C4006EF947 /* MUZ-Assembler */ = {
 			isa = PBXGroup;
 			children = (
+				866786D221D64D060027E67F /* CodeLine.cpp */,
 				8642232E21C862490053E02F /* CodeLine.h */,
 				8694B72021B2E484006EF947 /* AddressZone.h */,
 				8694B73321B4A390006EF947 /* All-Directives.cpp */,
@@ -760,6 +768,7 @@
 				869B4C4221AC4FB300E65FE7 /* Module.cpp in Sources */,
 				869B4C4121AC4FB300E65FE7 /* PortModule.cpp in Sources */,
 				8694B72421B2E653006EF947 /* Assembler.cpp in Sources */,
+				866786D321D64D060027E67F /* CodeLine.cpp in Sources */,
 				86554A6D21C108C20071447E /* ExpVector.cpp in Sources */,
 				86554A6621C01D110071447E /* Expression.cpp in Sources */,
 				86C121B321AEC742005A5C36 /* PortMgr.cpp in Sources */,
@@ -768,6 +777,7 @@
 				869B4C5021AC4FB300E65FE7 /* dummy_yaze.cpp in Sources */,
 				8694B72921B43873006EF947 /* Parser.cpp in Sources */,
 				869B4C4D21AC4FB300E65FE7 /* CPU.cpp in Sources */,
+				866786D621D670A40027E67F /* FileUtils.cpp in Sources */,
 				86554A7021C13DBA0071447E /* Operator.cpp in Sources */,
 				869B4C5121AC4FB300E65FE7 /* simz80.cpp in Sources */,
 				869B4C3F21AC4FB300E65FE7 /* Computer.cpp in Sources */,

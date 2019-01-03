@@ -21,7 +21,7 @@ namespace std {
 			result = to_string(value % 10) + result;
 			value = value / 10;
 		};
-		return result;
+		return result.empty() ? "0" : result;
 	}
 
 	/** returns uppercased string .*/
@@ -258,6 +258,7 @@ bool fgetline(MUZ::BYTE** buffer, int *length, FILE* f)
 		*(*buffer + size - 1) = c;
 	};
 	// add ending null
+	*buffer = (MUZ::BYTE*)realloc(*buffer, size + 1);
 	*(*buffer + size) = 0; // ok: size+1 allocated
 	*length = size;
 	return true;
@@ -320,4 +321,84 @@ std::string spaces(int number)
 		result += " ";
 	}
 	return result;
+}
+
+/***** hex files support. */
+
+// numeric value of a char. only '0'-9'  'A'-'F' and 'a'-'f' have a value
+static MUZ::BYTE asciinum[256] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00 - 0f
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10 - 1f
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20 - 2f
+	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, // 30 - 3f
+	0,10,11,12,13,14,15, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 40 - 4f
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50 - 5f
+	0,10,11,12,13,14,15, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60 - 6f
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 - 7f
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+
+// helper function to convert a 2 chars hex at an address to a byte value
+MUZ::BYTE hex2byte(const MUZ::BYTE* p) {
+	int value = asciinum[(int)*(p+1)] + (asciinum[(int)*p] << 4);
+	return (MUZ::BYTE)(value & 0xFF);
+}
+
+// practical consts for HEX intel format, these are byte offset of fields starting with ':' at offset 0
+const int HEXOFS_SIZE = 1;		// offset to the 2-digits byte size
+const int HEXOFS_ADDRESS = 3;	// offset of the 4-digits address
+const int HEXOFS_TYPE = 7;		// offset of the 1-digit record type
+const int HEXOFS_CONTENT = 9;	// offset of the content
+
+// returns the type of HEX record - returns -1 if not a valid HEX
+int hexType(const MUZ::BYTE* hexline) {
+	if (*hexline != ':') return -1;
+	return (int)hex2byte(hexline + HEXOFS_TYPE);
+}
+
+// returns number of bytes in an Intel HEX record - returns 0 if not a type 0 record
+int hexNbBytes(const MUZ::BYTE* hexline) {
+	if (*hexline != ':') return 0;
+	int type = hex2byte(hexline + HEXOFS_TYPE);
+	if (type == 0) return hex2byte(hexline + HEXOFS_SIZE);
+	return 0;
+}
+
+// tells if the record is an end of file
+bool hexEOF(const MUZ::BYTE* hexline) {
+	if (*hexline != ':') return false;
+	int type = hex2byte(hexline + HEXOFS_TYPE);
+	return (type == 1);
+}
+
+// returns the address in an hex record - returns 0 if not a type 0 record
+MUZ::ADDRESSTYPE hexAddress(const MUZ::BYTE* hexline) {
+	if (*hexline != ':') return 0;
+	int type = hex2byte(hexline + HEXOFS_TYPE);
+	if (type == 0) {
+		MUZ::BYTE h = hex2byte(hexline + HEXOFS_ADDRESS);
+		MUZ::BYTE l = hex2byte(hexline + HEXOFS_ADDRESS + 2);
+		return ((int)h << 8) + (int)l;
+	}
+	return 0;
+}
+
+// stores the hex content in a given buffer
+void hexStore(const MUZ::BYTE* hexline, MUZ::DATATYPE* buffer) {
+	
+	MUZ::BYTE* psrc = (MUZ::BYTE*)hexline + HEXOFS_CONTENT ;
+	MUZ::DATATYPE* pdest = buffer;
+	int nbbytes = hexNbBytes(hexline);
+	for (psrc = (MUZ::BYTE*)(hexline + HEXOFS_CONTENT) ; nbbytes > 0 ; nbbytes --) {
+		*pdest = (MUZ::DATATYPE)hex2byte(psrc);
+		psrc += 2;
+		pdest += 1;
+	}
 }

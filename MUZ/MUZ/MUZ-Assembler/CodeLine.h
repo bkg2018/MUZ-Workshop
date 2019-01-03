@@ -84,8 +84,9 @@ namespace MUZ {
 		int					cyclesmax;					// machine cycles for this code
 		ADDRESSTYPE			address = 0;				// starting address for this code
 		CodeType			codetype = codeTypeUNKNOWN;	// type of data for this code
-		int					includefile = 0;			// > 0 when this line includes another sourcefile
+		int					includefile = 0;			// file reference when this line includes another sourcefile
 		class Label*		label = nullptr;			// label if there is one on this line
+		class Assembler*	as = nullptr;				// referenc for pass check
 		
 		// helpers for instructions assembling
 		bool RegAccept(int flags, OperandType reg) {
@@ -119,9 +120,10 @@ namespace MUZ {
 		bool GetReg8( OperandType& reg, unsigned int regs = 0xFFFFFFFF ) {
 			int value;
 			if (!EnoughTokensLeft(1)) return false;
-			if (reg8(&tokens, curtoken, reg, value)) {
+			int worktoken = curtoken;
+			if (reg8(&tokens, worktoken, reg, value)) {
 				if (RegAccept(regs, reg)) {
-					curtoken += 1;
+					curtoken = worktoken;
 					return true;
 				}
 			}
@@ -131,11 +133,13 @@ namespace MUZ {
 		bool GetReg16( OperandType& reg, unsigned int regs = 0xFFFFFFFF ) {
 			int value;
 			if (!EnoughTokensLeft(1)) return false;
-			if (reg16(&tokens, curtoken, reg, value)) {
+			int worktoken = curtoken;
+			if (reg16(&tokens, worktoken, reg, value)) {
 				if (RegAccept(regs, reg)) {
-					curtoken += 1;
+					curtoken = worktoken;
 					return true;
 				}
+				
 			}
 			return false;
 		}
@@ -145,7 +149,6 @@ namespace MUZ {
 			if (!EnoughTokensLeft(3)) return false;
 			OperandType regC;
 			if (indirectC(&tokens, curtoken, regC, value)) {
-				curtoken += 3;
 				return true;
 			}
 			return false;
@@ -156,7 +159,6 @@ namespace MUZ {
 			if (!EnoughTokensLeft(3)) return false;
 			OperandType regHL;
 			if (indirectHL(&tokens, curtoken, regHL, value)) {
-				curtoken += 3;
 				return true;
 			}
 			return false;
@@ -167,7 +169,6 @@ namespace MUZ {
 			if (!EnoughTokensLeft(3)) return false;
 			OperandType regBC;
 			if (indirectBC(&tokens, curtoken, regBC, value)) {
-				curtoken += 3;
 				return true;
 			}
 			return false;
@@ -178,7 +179,6 @@ namespace MUZ {
 			if (!EnoughTokensLeft(3)) return false;
 			OperandType regDE;
 			if (indirectDE(&tokens, curtoken, regDE, value)) {
-				curtoken += 3;
 				return true;
 			}
 			return false;
@@ -189,71 +189,34 @@ namespace MUZ {
 			if (!EnoughTokensLeft(3)) return false;
 			OperandType regSP;
 			if (indirectSP(&tokens, curtoken, regSP, value)) {
-				curtoken += 3;
 				return true;
 			}
 			return false;
 		}
 		/** Returns true if current token is recognized as (IX+d) or (IY+d), and go next token. */
-		bool GetIndX( OperandType& regX, int& value ) {
-			if (!EnoughTokensLeft(5)) return false;
-			if (indirectX(&tokens, curtoken, regX, value)) {
-				curtoken += 5;
-				return true;
-			}
-			return false;
-		}
-		/** Returns true if current token is recognized as a bit nuùber (0-7), and go next token. */
-		bool GetBitNumber( OperandType& bit ) {
-			int value;
-			if (!EnoughTokensLeft(1)) return false;
-			if (bitnumber(&tokens, curtoken, bit, value)) {
-				curtoken += 1;
-				return true;
-			}
-			return false;
-		}
+		bool GetIndX( OperandType& regX, int& value );
+		
+		/** Returns true if current token is recognized as a bit number (0-7), and go next token. */
+		bool GetBitNumber( OperandType& bit );
+		
 		/** Returns true if current token is recognized as a condition, and go next token. */
 		bool GetCond( OperandType& cond ) {
 			int value;
 			if (!EnoughTokensLeft(1)) return false;
 			if (condition(&tokens, curtoken, cond, value)) {
-				curtoken += 1;
 				return true;
 			}
 			return false;
 		}
 		/** Returns true if current token is recognized as an 8-bit number, and go next token. */
-		bool GetNum8( int& value ) {
-			if (!EnoughTokensLeft(1)) return false;
-			OperandType num8;
-			if (number8(&tokens, curtoken, num8, value)) {
-				curtoken += 1;
-				return true;
-			}
-			return false;
-		}
+		bool GetNum8( int& value );
+		
 		/** Returns true if current token is recognized as an 8-bit number, and go next token. */
-		bool GetNum16( int& value ) {
-			if (!EnoughTokensLeft(1)) return false;
-			OperandType num16;
-			if (number16(&tokens, curtoken, num16, value)) {
-				curtoken += 1;
-				return true;
-			}
-			return false;
-		}
+		bool GetNum16( int& value );
+		
 		/** Returns true if current token is recognized as an (16-bit) indirect addressing, and go next token. */
-		bool GetInd16( int& value ) {
-			if (!EnoughTokensLeft(3)) return false;
-			OperandType num16;
-			if (indirect16(&tokens, curtoken, num16, value)) {
-				curtoken += 3;
-				return true;
-			}
-			return false;
-		}
-
+		bool GetInd16( int& value );
+		
 		/** Set machine cycles. */
 		void SetCycles(int mintime, int maxtime = -1) {
 			cyclesmin = mintime;

@@ -27,16 +27,11 @@ namespace MUZ {
 	{
 	public:
 		/** Assemble the instruction at current token, returns false if error
-		 @param as the assembler which stores symbols and assembly
 		 @param codeline the code line in which assembled codes will be stored
-		 @param label the last or current label if any, or nullptr
 		 @param msg the message list which will receive any warning or error information
 		 */
-		virtual bool Assemble(class Assembler& as,
-						   class CodeLine& codeline,
-						   class Label* label,
-						   ErrorList& msg) {
-			ErrorMessage m = { errorTypeERROR, "Non derived instruction class used", "", 0};
+		virtual bool Assemble(class CodeLine& codeline, ErrorList& msg) {
+			ErrorMessage m = { errorTypeERROR, "Non derived instruction class used", &codeline};
 			msg.push_back(m);
 			return true;
 		};

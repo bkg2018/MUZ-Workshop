@@ -34,7 +34,7 @@ namespace MUZ {
 						   class CodeLine& codeline,
 						   class Label* label,				// nullptr or label found in line
 						   ErrorList& msg) {
-			ErrorMessage m = { errorTypeERROR, "Non derived Directive class used", "", 0};
+			ErrorMessage m = { errorTypeERROR, "Non derived Directive class used", &codeline};
 			msg.push_back(m);
 			return true;
 		}

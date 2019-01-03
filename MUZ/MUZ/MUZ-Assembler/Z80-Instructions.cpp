@@ -18,20 +18,22 @@ namespace MUZ {
 	 ADC A   ,   n
 	 ADC A   ,   (HL)/(IX+d)/(IY+d)
 	 ADC HL  ,   BC/DE/HL/SP
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionADC::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionADC::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest, src;
 		int d;
+		// save current position
+		int curtoken = codeline.curtoken;
 		// ADC A, 8 bit
 		if (codeline.GetReg8(dest,REGFLAGS::A)) {
 			if (!codeline.GetComma()) {
-				//TODO: syntax error after ADC A
-				return false;
+				// ADC A
+				codeline.AddCode(0x88 + getsubcode(regA));
+				codeline.SetCycles(4);
+				return true;
 			}
 			// ADC A,r
 			if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
@@ -71,6 +73,37 @@ namespace MUZ {
 				codeline.SetCycles(15);
 				return true;
 			}
+			return false;
+		}
+		// restore initial position
+		codeline.curtoken = curtoken; //TODO:: not needed?
+		// ADC r
+		if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0x88 + getsubcode(src));
+			codeline.SetCycles(4);
+			return true;
+		}
+		// ADC  (HL)
+		if (codeline.GetIndHL()) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0x8E);
+			codeline.SetCycles(7);
+			return true;
+		}
+		// ADC (X+d)
+		if (codeline.GetIndX(src, d)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(getsubcode(src), 0x8E, d);
+			codeline.SetCycles(19);
+			return true;
+		}
+		// ADC n
+		if (codeline.GetNum8(d)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0xCE, d);
+			codeline.SetCycles(7);
+			return true;
 		}
 		return false;
 	}
@@ -83,21 +116,24 @@ namespace MUZ {
 	 ADD HL  ,   BC/DE/HL/SP
 	 ADD IX  ,   BC/DE/IX/SP
 	 ADD IY  ,   BC/DE/IY/SP
-	 @param as the assembler which stores symbols and assembly
+	 allowed:
+	 ADD A/B/C/D/E/H/L
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionADD::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionADD::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest, src;
 		int d;
-		
+		// save current position
+		int curtoken = codeline.curtoken;
 		// ADD A,8bit
 		if (codeline.GetReg8(dest,REGFLAGS::A)) {
 			if (!codeline.GetComma()) {
-				//TODO: syntax error after ADC A
-				return false;
+				// ADD A
+				codeline.AddCode(0x87);
+				codeline.SetCycles(4);
+				return true;
 			}
 			// ADD A,r
 			if (codeline.GetReg8(src,REGFLAGS::ABCDEHL)) {
@@ -151,6 +187,40 @@ namespace MUZ {
 				codeline.SetCycles(cycles);
 				return true;
 			}
+			return false;
+		}
+		// all checked, maybe shortcut form ADD A / ADD B etc
+		// error if there is a comma after next operand
+		// restore initial position
+		codeline.curtoken = curtoken;//TODO: normaly not needed?
+
+		// ADD r
+		if (codeline.GetReg8(src,REGFLAGS::ABCDEHL)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0x80 + getsubcode(src));
+			codeline.SetCycles(4);
+			return true;
+		}
+		// ADD (HL)
+		if (codeline.GetIndHL()) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0x86);
+			codeline.SetCycles(7);
+			return true;
+		}
+		// ADD (X+d)
+		if (codeline.GetIndX(src, d)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(getsubcode(src), 0x86, d);
+			codeline.SetCycles(19);
+			return true;
+		}
+		// ADD n
+		if (codeline.GetNum8(d)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0xC6, d);
+			codeline.SetCycles(7);
+			return true;
 		}
 		return false;
 	}
@@ -159,30 +229,65 @@ namespace MUZ {
 	 AND A/B/C/D/E/H/L
 	 AND n
 	 AND (HL)/(IX+d)/(IY+d)
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionAND::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionAND::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType src;
 		int d;
+		// save current position
+		int curtoken = codeline.curtoken;
+		if (codeline.GetReg8(src, REGFLAGS::A)) {
+			if (codeline.GetComma()) {
+				// AND A,r
+				if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+					codeline.AddCode(0xA0 + getsubcode(src));
+					codeline.SetCycles(4);
+					return true;
+				}
+				// AND A,(HL)
+				if (codeline.GetIndHL()) {
+					codeline.AddCode(0xA6);
+					codeline.SetCycles(7);
+					return true;
+				}
+				// AND A,(X+d)
+				if (codeline.GetIndX(src, d)) {
+					codeline.AddCode(getsubcode(src), 0xA6, d);
+					codeline.SetCycles(19);
+					return true;
+				}
+				// AND A,n
+				if (codeline.GetNum8(d)) {
+					codeline.AddCode(0xE6, d);
+					codeline.SetCycles(7);
+					return true;
+				}
+				return false;
+			}
+			// restore initial position
+			codeline.curtoken = curtoken;
+		}
+		// AND A
 		if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
 			codeline.AddCode(0xA0 + getsubcode(src));
 			codeline.SetCycles(4);
 			return true;
 		}
+		// AND (HL)
 		if (codeline.GetIndHL()) {
 			codeline.AddCode(0xA6);
 			codeline.SetCycles(7);
 			return true;
 		}
+		// AND (X+d)
 		if (codeline.GetIndX(src, d)) {
 			codeline.AddCode(getsubcode(src), 0xA6, d);
 			codeline.SetCycles(19);
 			return true;
 		}
+		// AND n
 		if (codeline.GetNum8(d)) {
 			codeline.AddCode(0xE6, d);
 			codeline.SetCycles(7);
@@ -195,12 +300,10 @@ namespace MUZ {
 	 BIT b,r
 	 b = 0 to 7
 	 r = A B C D E H L (HL) (IX+d) (IY+d)
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionBIT::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionBIT::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		int d=0;
 		OperandType src, bit;
@@ -210,6 +313,7 @@ namespace MUZ {
 			codeline.SetCycles(8);
 		} else if (codeline.GetIndHL()) {
 			codeline.SetCycles(12);
+			src = indHL;
 		} else if (codeline.GetIndX(src, d)) {
 			codeline.SetCycles(20);
 		} else return false;
@@ -232,12 +336,10 @@ namespace MUZ {
 	 condNZ, condZ, condNC, condC, condPO, condPE, condP, condM,
 	 c4      cc     d4      dc     e4      ec      f4     fc
 	 
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionCALL::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionCALL::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType cond;
 		int addr;
@@ -261,12 +363,10 @@ namespace MUZ {
 	
 	/** Assemble instruction at current token, returns false if error
 	 CCF
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionCCF::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionCCF::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0x3F);
 		codeline.SetCycles(4);
@@ -277,30 +377,66 @@ namespace MUZ {
 	 CP A/B/C/D/E/H/L
 	 CP n
 	 CP (HL)/(IX+d)/(IY+d)
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionCP::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionCP::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType src;
 		int d ;
+		if (codeline.GetReg8(src,REGFLAGS::A)) {
+			if (!codeline.GetComma()) {
+				// CP A
+				codeline.AddCode(0xB8 + getsubcode(src));
+				codeline.SetCycles(4);
+				return true;
+			}
+
+			// CP A,r
+			if (codeline.GetReg8(src,REGFLAGS::ABCDEHL)) {
+				codeline.AddCode(0xB8 + getsubcode(src));
+				codeline.SetCycles(4);
+				return true;
+			}
+			// CP A,(HL)
+			if (codeline.GetIndHL()) {
+				codeline.AddCode(0xBE);
+				codeline.SetCycles(7);
+				return true;
+			}
+			// CP A,(X+d)
+			if (codeline.GetIndX(src, d)) {
+				codeline.AddCode(getsubcode(src), 0xBE, d);
+				codeline.SetCycles(19);
+				return true;
+			}
+			// CP A,n
+			if (codeline.GetNum8(d)) {
+				codeline.AddCode(0xFE, d);
+				codeline.SetCycles(7);
+				return true;
+			}
+			return false;
+		}
+		// CP r
 		if (codeline.GetReg8(src,REGFLAGS::ABCDEHL)) {
 			codeline.AddCode(0xB8 + getsubcode(src));
 			codeline.SetCycles(4);
 			return true;
 		}
+		// CP (HL)
 		if (codeline.GetIndHL()) {
 			codeline.AddCode(0xBE);
 			codeline.SetCycles(7);
 			return true;
 		}
+		// CP (X+d)
 		if (codeline.GetIndX(src, d)) {
 			codeline.AddCode(getsubcode(src), 0xBE, d);
 			codeline.SetCycles(19);
 			return true;
 		}
+		// CP n
 		if (codeline.GetNum8(d)) {
 			codeline.AddCode(0xFE, d);
 			codeline.SetCycles(7);
@@ -310,12 +446,10 @@ namespace MUZ {
 	}
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionCPD::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionCPD::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xA9);
 		codeline.SetCycles(16);
@@ -323,12 +457,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionCPDR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionCPDR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xB9);
 		codeline.SetCycles(16,21);
@@ -336,12 +468,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionCPI::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionCPI::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xA1);
 		codeline.SetCycles(16);
@@ -349,12 +479,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionCPIR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionCPIR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xB1);
 		codeline.SetCycles(16,21); // 5 if repeat, 4 when finished
@@ -362,12 +490,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionCPL::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionCPL::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0x2F);
 		codeline.SetCycles(4); // 5 if repeat, 4 when finished
@@ -375,12 +501,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionDAA::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionDAA::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0x27);
 		codeline.SetCycles(4); // 5 if repeat, 4 when finished
@@ -404,12 +528,10 @@ namespace MUZ {
 	 DEC SP        3B
 	 DEC IX        dd 2B
 	 DEC IY        fd 2B
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionDEC::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionDEC::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest;
 		int d;
@@ -444,12 +566,10 @@ namespace MUZ {
 	}
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionDI::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionDI::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xF3);
 		codeline.SetCycles(4);
@@ -457,16 +577,20 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionDJNZ::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionDJNZ::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		int d;
-		if (codeline.GetNum8(d)) {
-			codeline.AddCode(0x10, d);
+		if (codeline.GetNum16(d)) {
+			int depl = codeline.as->GetAddress() + 2 - d;
+			if (!codeline.as->IsFirstPass() && ( depl < -126 || depl > +129)) {
+				// TODO: error, target too farr
+				return false;
+			}
+			depl = 0x100 - depl;
+			codeline.AddCode(0x10, depl);
 			codeline.SetCycles(8,13); // 3 when looping, 2 when finished
 			return true;
 		}
@@ -474,12 +598,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionEI::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionEI::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xFB);
 		codeline.SetCycles(4);
@@ -493,12 +615,10 @@ namespace MUZ {
 	 EX (SP),IX dd E3
 	 EX (SP),IY fd E3
 	 
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionEX::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionEX::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest, src;
 		if (codeline.GetReg16(dest,REGFLAGS::AF | REGFLAGS::DE)) {
@@ -537,12 +657,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionEXX::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionEXX::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xD9);
 		codeline.SetCycles(4);
@@ -550,12 +668,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionHALT::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionHALT::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0x76);
 		codeline.SetCycles(4);
@@ -563,12 +679,10 @@ namespace MUZ {
 	}
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionIM::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionIM::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		int m;
 		if (codeline.GetNum8(m)) {
@@ -585,12 +699,10 @@ namespace MUZ {
 	 IN A,(num8)
 	 IN r,(C)  ->  A B C D E F H L
 	 
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionIN::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionIN::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest;
 		int n;
@@ -628,12 +740,10 @@ namespace MUZ {
 	 INC SP        33
 	 INC IX        dd 23
 	 INC IY        fd 23
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionINC::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionINC::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest;
 		int d;
@@ -666,12 +776,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionIND::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionIND::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xAA);
 		codeline.SetCycles(16);
@@ -679,12 +787,10 @@ namespace MUZ {
 	}
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionINDR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionINDR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xBA);
 		codeline.SetCycles(16,21); // 5 when repeat, 4 when finished
@@ -692,12 +798,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionINI::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionINI::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xA2);
 		codeline.SetCycles(16); // 5 when repeat, 4 when finished
@@ -705,12 +809,10 @@ namespace MUZ {
 	}
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionINIR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionINIR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xB2);
 		codeline.SetCycles(21); // 5 when repeat, 4 when finished
@@ -726,12 +828,10 @@ namespace MUZ {
 	 
 	 condNZ, condZ, condNC, condC, condPO, condPE, condP, condM,
 	 c2      ca     d2      da     e2      ea      f2     fa
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionJP::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionJP::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType cond, reg;
 		int addr;
@@ -768,33 +868,45 @@ namespace MUZ {
 	 JR cond,d
 	 JR d
 	 
+	 d: 2 complement of $ + 2 - dest address
+	 
 	 condNZ, condZ, condNC, condC,
 	 20      28     30      38
 	 
 	 invalid: condPO, condPE, condP, condM
 
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionJR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionJR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType cond;
 		int d;
 		if (codeline.GetCond(cond)) {
 			if (cond == condZ || cond == condNZ || cond == condC || cond == condNC) {
 				if (codeline.GetComma()) {
-					if (codeline.GetNum8(d)) {
-						codeline.AddCode(0x20 + getsubcode(cond), d & 0xFF);
+					if (codeline.GetNum16(d)) {
+						int depl = codeline.as->GetAddress() + 2 - d;
+						if (!codeline.as->IsFirstPass() && ( depl < -129 || depl > +126)) {
+							// TODO: error, target too farr
+							return false;
+						}
+						depl = 0x100 - depl;
+						codeline.AddCode(0x20 + getsubcode(cond), depl);
 						codeline.SetCycles(7,12);
 						return true;
 					}
 				}
 			}
 		}
-		if (codeline.GetNum8(d)) {
-			codeline.AddCode(0x18, d);
+		if (codeline.GetNum16(d)) {
+			int depl = codeline.as->GetAddress() + 2 - d;
+			if (!codeline.as->IsFirstPass() && ( depl < -129 || depl > +126)) {
+				// TODO: error, target too farr
+				return false;
+			}
+			depl = 0x100 - depl; // 2-complement
+			codeline.AddCode(0x18, depl);
 			codeline.SetCycles(12);
 			return true;
 		}
@@ -844,12 +956,10 @@ namespace MUZ {
 	 LD SP,IX
 	 LD SP,IY
 	 
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionLD::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionLD::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType src, dest;
 		int d;
@@ -857,7 +967,7 @@ namespace MUZ {
 		if (codeline.GetReg8(dest, REGFLAGS::I | REGFLAGS::R)) {
 			if (codeline.GetComma()) {
 				if (codeline.GetReg8(src, REGFLAGS::A)) {
-					codeline.AddCode(0xED, 0x40 + getsubcode(dest));
+					codeline.AddCode(0xED, 0x40 + getsubcode(src));
 					codeline.SetCycles(9);
 					return true;
 				}
@@ -944,32 +1054,32 @@ namespace MUZ {
 			}
 			return false;
 		}
-		// LD (HL) (IX+d) (IY+d), n r
+		// LD (HL) , n r
 		if (codeline.GetIndHL()) {
 			if (codeline.GetComma()) {
-				if (codeline.GetReg16(src, REGFLAGS::ABCDEHL)) {
+				if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
 					codeline.AddCode(0x70 + getsubcode(src));
 					codeline.SetCycles(7);
 					return true;
 				}
-				if (codeline.GetNum16(d)) {
-					codeline.AddCode(0x36, d & 0xFF, d >> 8);
+				if (codeline.GetNum8(d)) {
+					codeline.AddCode(0x36, d);
 					codeline.SetCycles(10);
 					return true;
 				}
 			}
 			return false;
 		}
-		// LD (HL), n r
-		if (codeline.GetIndHL()) {
+		// LD (IX+d) (IY+d), n r
+		if (codeline.GetIndX(dest, d)) {
 			if (codeline.GetComma()) {
-				if (codeline.GetReg16(src, REGFLAGS::ABCDEHL)) {
-					codeline.AddCode(0x70 + getsubcode(src));
+				if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+					codeline.AddCode(getsubcode(dest), 0x70 + getsubcode(src));
 					codeline.SetCycles(7);
 					return true;
 				}
-				if (codeline.GetNum16(d)) {
-					codeline.AddCode(0x36, d & 0xFF, d >> 8);
+				if (codeline.GetNum8(d)) {
+					codeline.AddCode(getsubcode(dest), 0x36, d);
 					codeline.SetCycles(10);
 					return true;
 				}
@@ -979,7 +1089,7 @@ namespace MUZ {
 		// LD (BC),A
 		if (codeline.GetIndBC()) {
 			if (codeline.GetComma()) {
-				if (codeline.GetReg16(src, REGFLAGS::A)) {
+				if (codeline.GetReg8(src, REGFLAGS::A)) {
 					codeline.AddCode(0x02);
 					codeline.SetCycles(7);
 					return true;
@@ -990,26 +1100,9 @@ namespace MUZ {
 		// LD (DE),A
 		if (codeline.GetIndDE()) {
 			if (codeline.GetComma()) {
-				if (codeline.GetReg16(src, REGFLAGS::A)) {
+				if (codeline.GetReg8(src, REGFLAGS::A)) {
 					codeline.AddCode(0x12);
 					codeline.SetCycles(7);
-					return true;
-				}
-			}
-			return false;
-		}
-		// LD (IX+d) (IY+d), n r
-		if (codeline.GetIndX(dest, d)) {
-			if (codeline.GetComma()) {
-				if (codeline.GetReg16(src, REGFLAGS::ABCDEHL)) {
-					codeline.AddCode(getsubcode(dest), 0x70 + getsubcode(src), d);
-					codeline.SetCycles(19);
-					return true;
-				}
-				int n;
-				if (codeline.GetNum16(n)) {
-					codeline.AddCode(getsubcode(dest), 0x36, d, n);
-					codeline.SetCycles(19);
 					return true;
 				}
 			}
@@ -1057,13 +1150,13 @@ namespace MUZ {
 			if (codeline.GetComma()) {
 				// LD A,I R
 				if (codeline.GetReg8(src, REGFLAGS::I | REGFLAGS::R)) {
-					codeline.AddCode(0xED, 0x50 + getsubcode(dest));
+					codeline.AddCode(0xED, 0x50 + getsubcode(src));
 					codeline.SetCycles(9);
 					return true;
 				}
 				// LD A, r
 				if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
-					codeline.AddCode(0xED, 0x78 + getsubcode(src));
+					codeline.AddCode(0x78 + getsubcode(src));
 					codeline.SetCycles(4);
 					return true;
 				}
@@ -1141,12 +1234,10 @@ namespace MUZ {
 	}
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionLDD::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionLDD::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xA8);
 		codeline.SetCycles(16);
@@ -1154,12 +1245,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionLDDR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionLDDR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xB8);
 		codeline.SetCycles(16,21);
@@ -1167,12 +1256,10 @@ namespace MUZ {
 	}
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionLDI::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionLDI::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xA0);
 		codeline.SetCycles(16);
@@ -1180,12 +1267,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionLDIR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionLDIR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xB0);
 		codeline.SetCycles(16,21);
@@ -1193,12 +1278,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionNEG::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionNEG::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0x44);
 		codeline.SetCycles(8);
@@ -1206,12 +1289,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionNOP::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionNOP::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0x00);
 		codeline.SetCycles(4);
@@ -1222,30 +1303,65 @@ namespace MUZ {
 	 AND A/B/C/D/E/H/L
 	 AND n
 	 AND (HL)/(IX+d)/(IY+d)
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionOR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionOR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType src;
 		int d;
+		// save current position
+		int curtoken = codeline.curtoken;
+		if (codeline.GetReg8(src, REGFLAGS::A)) {
+			if (codeline.GetComma()) {
+				// OR A,r
+				if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+					codeline.AddCode(0xB0 + getsubcode(src));
+					codeline.SetCycles(4);
+					return true;
+				}
+				// OR A,(HL)
+				if (codeline.GetIndHL()) {
+					codeline.AddCode(0xB6);
+					codeline.SetCycles(7);
+					return true;
+				}
+				// OR A,(X+d)
+				if (codeline.GetIndX(src, d)) {
+					codeline.AddCode(getsubcode(src), 0xB6, d);
+					codeline.SetCycles(19);
+					return true;
+				}
+				// OR A,n
+				if (codeline.GetNum8(d)) {
+					codeline.AddCode(0xF6, d);
+					codeline.SetCycles(7);
+					return true;
+				}
+				return false;
+			}
+			// restore initial position
+			codeline.curtoken = curtoken;
+		}
+		// OR r
 		if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
 			codeline.AddCode(0xB0 + getsubcode(src));
 			codeline.SetCycles(4);
 			return true;
 		}
+		// OR (HL)
 		if (codeline.GetIndHL()) {
 			codeline.AddCode(0xB6);
 			codeline.SetCycles(7);
 			return true;
 		}
+		// OR (X+d)
 		if (codeline.GetIndX(src, d)) {
 			codeline.AddCode(getsubcode(src), 0xB6, d);
 			codeline.SetCycles(19);
 			return true;
 		}
+		// OR n
 		if (codeline.GetNum8(d)) {
 			codeline.AddCode(0xF6, d);
 			codeline.SetCycles(7);
@@ -1255,12 +1371,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionOTDR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionOTDR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xBB);
 		codeline.SetCycles(16,21);
@@ -1269,12 +1383,10 @@ namespace MUZ {
 	
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionOTIR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionOTIR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xB3);
 		codeline.SetCycles(16,21);
@@ -1284,12 +1396,10 @@ namespace MUZ {
 	/** Assemble instruction at current token, returns false if error
 	 OUT (num8),A
 	 IN (C),r  ->  A B C D E   H L
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionOUT::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionOUT::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType src;
 		int n;
@@ -1316,12 +1426,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionOUTD::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionOUTD::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xAB);
 		codeline.SetCycles(16);
@@ -1329,12 +1437,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionOUTI::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionOUTI::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0xA3);
 		codeline.SetCycles(16);
@@ -1342,12 +1448,10 @@ namespace MUZ {
 	}
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionPOP::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionPOP::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest;
 		if (codeline.GetReg16(dest,REGFLAGS::AF|REGFLAGS::BC|REGFLAGS::DE|REGFLAGS::HLXY)) {
@@ -1364,12 +1468,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionPUSH::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionPUSH::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest;
 		if (codeline.GetReg16(dest,REGFLAGS::AF|REGFLAGS::BC|REGFLAGS::DE|REGFLAGS::HLXY)) {
@@ -1386,12 +1488,10 @@ namespace MUZ {
 	}
 
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRES::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRES::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		int d=0;
 		OperandType src, bit;
@@ -1401,6 +1501,7 @@ namespace MUZ {
 			codeline.SetCycles(8);
 		} else if (codeline.GetIndHL()) {
 			codeline.SetCycles(15);
+			src = indHL;
 		} else if (codeline.GetIndX(src, d)) {
 			codeline.SetCycles(23);
 		} else return false;
@@ -1414,12 +1515,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRET::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRET::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType cond;
 		if (codeline.GetCond(cond)) {
@@ -1433,12 +1532,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRETI::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRETI::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0x4D);
 		codeline.SetCycles(14);
@@ -1446,12 +1543,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRETN::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRETN::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0x45);
 		codeline.SetCycles(14);
@@ -1461,12 +1556,10 @@ namespace MUZ {
 	/** Assemble instruction at current token, returns false if error
 	 RL r
 	 RL (HL) (X+d)
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRL::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRL::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest;
 		int d;
@@ -1489,12 +1582,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRLA::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRLA::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0x17);
 		codeline.SetCycles(4);
@@ -1503,12 +1594,10 @@ namespace MUZ {
 	/** Assemble instruction at current token, returns false if error
 	 RLC r
 	 RLC (HL) (X+d)
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRLC::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRLC::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest;
 		int d;
@@ -1531,12 +1620,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRLCA::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRLCA::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0x07);
 		codeline.SetCycles(4);
@@ -1544,12 +1631,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRLD::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRLD::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0x6F);
 		codeline.SetCycles(18);
@@ -1557,12 +1642,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRR::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest;
 		int d;
@@ -1585,12 +1668,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRRA::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRRA::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0x1F);
 		codeline.SetCycles(4);
@@ -1598,12 +1679,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRRC::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRRC::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		OperandType dest;
 		int d;
@@ -1626,12 +1705,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRRCA::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRRCA::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0x0F);
 		codeline.SetCycles(4);
@@ -1639,12 +1716,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRRD::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRRD::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		codeline.AddCode(0xED, 0x67);
 		codeline.SetCycles(18);
@@ -1652,12 +1727,10 @@ namespace MUZ {
 	}
 	
 	/** Assemble instruction at current token, returns false if error
-	 @param as the assembler which stores symbols and assembly
 	 @param codeline the code line in which assembled codes will be stored
-	 @param label the last or current label if any, or nullptr
 	 @param msg the message list which will receive any warning or error information
 	 */
-	bool InstructionRST::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
+	bool InstructionRST::Assemble(CodeLine& codeline, ErrorList& msg)
 	{
 		int addr;
 		if (codeline.GetNum8(addr)) {
@@ -1670,113 +1743,367 @@ namespace MUZ {
 		return false;
 	}
 	
-	//---------------------------------------------------------------------------------------------------------------
+	/** Assemble instruction at current token, returns false if error
+	 SBC A   ,   A/B/C/D/E/H/L
+	 SBC A   ,   n
+	 SBC A   ,   (HL)/(IX+d)/(IY+d)
+	 SBC HL  ,   BC/DE/HL/SP
+	 @param codeline the code line in which assembled codes will be stored
+	 @param msg the message list which will receive any warning or error information
+	 */
+	bool InstructionSBC::Assemble(CodeLine& codeline, ErrorList& msg)
+	{
+		OperandType dest, src;
+		int d;
+		// save current position
+		int curtoken = codeline.curtoken;
+		// SBC A, 8 bit
+		if (codeline.GetReg8(dest,REGFLAGS::A)) {
+			if (!codeline.GetComma()) {
+				// SBC A
+				codeline.AddCode(0x98 + getsubcode(regA));
+				codeline.SetCycles(4);
+				return true;
+			}
+			// SBC A,r
+			if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+				codeline.AddCode(0x98 + getsubcode(src));
+				codeline.SetCycles(4);
+				return true;
+			}
+			// SBC A,(HL)
+			if (codeline.GetIndHL()) {
+				codeline.AddCode(0x9E);
+				codeline.SetCycles(7);
+				return true;
+			}
+			// SBC A,(X+d)
+			if (codeline.GetIndX(src, d)) {
+				codeline.AddCode(getsubcode(src), 0x9E, d);
+				codeline.SetCycles(19);
+				return true;
+			}
+			// SBC A,n
+			if (codeline.GetNum8(d)) {
+				codeline.AddCode(0xDE, d);
+				codeline.SetCycles(7);
+				return true;
+			}
+			// TODO: ADD A,IXL IXH IYL IYH
+			return false;
+		}
+		// SBC 16 bits
+		if (codeline.GetReg16(dest,REGFLAGS::HL)) {
+			if (!codeline.GetComma()) {
+				return false;//TODO: syntax after SBC HL
+			}
+			// SBC HL, BC DE HL SP
+			if (codeline.GetReg16(src,REGFLAGS::BCDESP | REGFLAGS::HL)) {
+				codeline.AddCode(0xED, 0x42 + getsubcode(src));
+				codeline.SetCycles(15);
+				return true;
+			}
+			return false;
+		}
+		// restore initial position
+		codeline.curtoken = curtoken;//TODO: not needed?
+		// SBC r
+		if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0x98 + getsubcode(src));
+			codeline.SetCycles(4);
+			return true;
+		}
+		// SBC (HL)
+		if (codeline.GetIndHL()) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0x9E);
+			codeline.SetCycles(7);
+			return true;
+		}
+		// SBC (X+d)
+		if (codeline.GetIndX(src, d)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(getsubcode(src), 0x9E, d);
+			codeline.SetCycles(19);
+			return true;
+		}
+		// SBC n
+		if (codeline.GetNum8(d)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0xDE, d);
+			codeline.SetCycles(7);
+			return true;
+		}
+		return false;
+	}
 	
+	/** Assemble instruction at current token, returns false if error
+	 @param codeline the code line in which assembled codes will be stored
+	 @param msg the message list which will receive any warning or error information
+	 */
+	bool InstructionSCF::Assemble(CodeLine& codeline, ErrorList& msg)
+	{
+		codeline.AddCode(0x37);
+		codeline.SetCycles(4);
+		return true;
+	}
+	
+	/** Assemble instruction at current token, returns false if error
+	 SET b,r
+	 b = 0 to 7
+	 r = A B C D E H L (HL) (IX+d) (IY+d)
+	 @param codeline the code line in which assembled codes will be stored
+	 @param msg the message list which will receive any warning or error information
+	 */
+	bool InstructionSET::Assemble(CodeLine& codeline, ErrorList& msg)
+	{
+		int d=0;
+		OperandType src, bit;
+		if (!codeline.GetBitNumber(bit)) return false;
+		if (!codeline.GetComma()) return false;
+		if (codeline.GetReg8(src,REGFLAGS::ABCDEHL)) {
+			codeline.SetCycles(8);
+		} else if (codeline.GetIndHL()) {
+			codeline.SetCycles(15);
+			src = indHL;
+		} else if (codeline.GetIndX(src, d)) {
+			codeline.SetCycles(23);
+		} else return false;
+		// (IX+d) and (IY+d) are prefixed then use (HL) encoding
+		if (codeline.RegAccept(REGFLAGS::XY, src)) {
+			codeline.AddCode(getsubcode(src), 0xCB, d, 0xC0 + getsubcode(bit) + getsubcode(indHL));
+		} else {
+			codeline.AddCode(0xCB, 0xC0 + getsubcode(bit) + getsubcode(src));
+		}
+		return true;
+	}
+	
+	/** Assemble instruction at current token, returns false if error
+	 SLA r
+	 SLA (HL) (X+d)
+	 @param codeline the code line in which assembled codes will be stored
+	 @param msg the message list which will receive any warning or error information
+	 */
+	bool InstructionSLA::Assemble(CodeLine& codeline, ErrorList& msg)
+	{
+		OperandType dest;
+		int d;
+		if (codeline.GetIndHL()) {
+			codeline.AddCode(0xCB, 0x26);
+			codeline.SetCycles(15);
+			return true;
+		}
+		if (codeline.GetIndX(dest, d)) {
+			codeline.AddCode(getsubcode(dest), 0xCB, d, 0x26);
+			codeline.SetCycles(23);
+			return true;
+		}
+		if (codeline.GetReg8(dest,REGFLAGS::ABCDEHL)) {
+			codeline.AddCode(0xCB, 0x20 + getsubcode(dest));
+			codeline.SetCycles(8);
+			return true;
+		}
+		return false;
+	}
+
+	/** Assemble instruction at current token, returns false if error
+	 SRA r
+	 SRA (HL) (X+d)
+	 @param codeline the code line in which assembled codes will be stored
+	 @param msg the message list which will receive any warning or error information
+	 */
+	bool InstructionSRA::Assemble(CodeLine& codeline, ErrorList& msg)
+	{
+		OperandType dest;
+		int d;
+		if (codeline.GetIndHL()) {
+			codeline.AddCode(0xCB, 0x2E);
+			codeline.SetCycles(15);
+			return true;
+		}
+		if (codeline.GetIndX(dest, d)) {
+			codeline.AddCode(getsubcode(dest), 0xCB, d, 0x2E);
+			codeline.SetCycles(23);
+			return true;
+		}
+		if (codeline.GetReg8(dest,REGFLAGS::ABCDEHL)) {
+			codeline.AddCode(0xCB, 0x28 + getsubcode(dest));
+			codeline.SetCycles(8);
+			return true;
+		}
+		return false;
+	}
+	
+	/** Assemble instruction at current token, returns false if error
+	 SRL r
+	 SRL (HL) (X+d)
+	 @param codeline the code line in which assembled codes will be stored
+	 @param msg the message list which will receive any warning or error information
+	 */
+	bool InstructionSRL::Assemble(CodeLine& codeline, ErrorList& msg)
+	{
+		OperandType dest;
+		int d;
+		if (codeline.GetIndHL()) {
+			codeline.AddCode(0xCB, 0x3E);
+			codeline.SetCycles(15);
+			return true;
+		}
+		if (codeline.GetIndX(dest, d)) {
+			codeline.AddCode(getsubcode(dest), 0xCB, d, 0x3E);
+			codeline.SetCycles(23);
+			return true;
+		}
+		if (codeline.GetReg8(dest,REGFLAGS::ABCDEHL)) {
+			codeline.AddCode(0xCB, 0x38 + getsubcode(dest));
+			codeline.SetCycles(8);
+			return true;
+		}
+		return false;
+	}
+	
+	/** Assemble instruction at current token, returns false if error
+	 @param codeline the code line in which assembled codes will be stored
+	 @param msg the message list which will receive any warning or error information
+	 */
+	bool InstructionSUB::Assemble(CodeLine& codeline, ErrorList& msg)
+	{
+		OperandType src;
+		int d;
+		// SUB (HL)
+		if (codeline.GetIndHL()) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0x96);
+			codeline.SetCycles(7);
+			return true;
+		}
+		// SUB (X+d)
+		if (codeline.GetIndX(src, d)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(getsubcode(src), 0x96, d);
+			codeline.SetCycles(19);
+			return true;
+		}
+		// save current position
+		int curtoken = codeline.curtoken;
+		// SUB A, ...
+		if (codeline.GetReg8(src,REGFLAGS::A)) {
+			if (codeline.GetComma()) {
+				// SUB A,r
+				if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+					codeline.AddCode(0x90 + getsubcode(src));
+					codeline.SetCycles(4);
+					return true;
+				}
+				// SUB A,(HL)
+				if (codeline.GetIndHL()) {
+					codeline.AddCode(0x96);
+					codeline.SetCycles(7);
+					return true;
+				}
+				// SUB A, (X+d)
+				if (codeline.GetIndX(src, d)) {
+					codeline.AddCode(getsubcode(src), 0x96, d);
+					codeline.SetCycles(19);
+					return true;
+				}
+				// SUB A, n
+				if (codeline.GetNum8(d)) {
+					if (codeline.GetComma()) return false;//TODO: return an error
+					codeline.AddCode(0xD6, d);
+					codeline.SetCycles(7);
+					return true;
+				}
+				return false;
+			}
+			// restore initial position
+			codeline.curtoken = curtoken;
+		}
+		// SUB r
+		if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+			codeline.AddCode(0x90 + getsubcode(src));
+			codeline.SetCycles(4);
+			return true;
+		}
+		// SUB n
+		if (codeline.GetNum8(d)) {
+			if (codeline.GetComma()) return false;//TODO: return an error
+			codeline.AddCode(0xD6, d);
+			codeline.SetCycles(7);
+			return true;
+		}
+		return false;
+	}
 	
 
-
-
-		/** Assemble instruction at current token, returns false if error
-		 @param as the assembler which stores symbols and assembly
-		 @param codeline the code line in which assembled codes will be stored
-		 @param label the last or current label if any, or nullptr
-		 @param msg the message list which will receive any warning or error information
-		 */
-		bool InstructionSUB::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
-		{
+	/** Assemble instruction at current token, returns false if error
+	 @param codeline the code line in which assembled codes will be stored
+	 @param msg the message list which will receive any warning or error information
+	 */
+	bool InstructionXOR::Assemble(CodeLine& codeline, ErrorList& msg)
+	{
+		OperandType src;
+		int d;
+		// save current position
+		int curtoken = codeline.curtoken;
+		if (codeline.GetReg8(src,REGFLAGS::A)) {
+			if (codeline.GetComma()) {
+				// XOR A,r
+				if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+					codeline.AddCode(0xA8 + getsubcode(src));
+					codeline.SetCycles(4);
+					return true;
+				}
+				// XOR A,(HL)
+				if (codeline.GetIndHL()) {
+					codeline.AddCode(0xAE);
+					codeline.SetCycles(7);
+					return true;
+				}
+				// XOR A,(X+d)
+				if (codeline.GetIndX(src, d)) {
+					codeline.AddCode(getsubcode(src), 0xAE, d);
+					codeline.SetCycles(19);
+					return true;
+				}
+				// XOR A,n
+				if (codeline.GetNum8(d)) {
+					codeline.AddCode(0xEE, d);
+					codeline.SetCycles(7);
+					return true;
+				}
+				return false;
+			}
+			// restore initial position
+			codeline.curtoken = curtoken;
+		}
+		// XOR r
+		if (codeline.GetReg8(src, REGFLAGS::ABCDEHL)) {
+			codeline.AddCode(0xA8 + getsubcode(src));
+			codeline.SetCycles(4);
 			return true;
 		}
-
-		/** Assemble instruction at current token, returns false if error
-		 @param as the assembler which stores symbols and assembly
-		 @param codeline the code line in which assembled codes will be stored
-		 @param label the last or current label if any, or nullptr
-		 @param msg the message list which will receive any warning or error information
-		 */
-		bool InstructionSBC::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
-		{
+		// XOR A,(HL)
+		if (codeline.GetIndHL()) {
+			codeline.AddCode(0xAE);
+			codeline.SetCycles(7);
 			return true;
 		}
-
-		/** Assemble instruction at current token, returns false if error
-		 @param as the assembler which stores symbols and assembly
-		 @param codeline the code line in which assembled codes will be stored
-		 @param label the last or current label if any, or nullptr
-		 @param msg the message list which will receive any warning or error information
-		 */
-		bool InstructionXOR::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
-		{
+		// XOR A,(X+d)
+		if (codeline.GetIndX(src, d)) {
+			codeline.AddCode(getsubcode(src), 0xAE, d);
+			codeline.SetCycles(19);
 			return true;
 		}
-
-
-		/** Assemble instruction at current token, returns false if error
-		 @param as the assembler which stores symbols and assembly
-		 @param codeline the code line in which assembled codes will be stored
-		 @param label the last or current label if any, or nullptr
-		 @param msg the message list which will receive any warning or error information
-		 */
-		bool InstructionSCF::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
-		{
+		// XOR A,n
+		if (codeline.GetNum8(d)) {
+			codeline.AddCode(0xEE, d);
+			codeline.SetCycles(7);
 			return true;
 		}
-
-
-
-
-		/** Assemble instruction at current token, returns false if error
-		 @param as the assembler which stores symbols and assembly
-		 @param codeline the code line in which assembled codes will be stored
-		 @param label the last or current label if any, or nullptr
-		 @param msg the message list which will receive any warning or error information
-		 */
-		bool InstructionSLA::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
-		{
-			return true;
-		}
-
-
-		/** Assemble instruction at current token, returns false if error
-		 @param as the assembler which stores symbols and assembly
-		 @param codeline the code line in which assembled codes will be stored
-		 @param label the last or current label if any, or nullptr
-		 @param msg the message list which will receive any warning or error information
-		 */
-		bool InstructionSRA::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
-		{
-			return true;
-		}
-
-		/** Assemble instruction at current token, returns false if error
-		 @param as the assembler which stores symbols and assembly
-		 @param codeline the code line in which assembled codes will be stored
-		 @param label the last or current label if any, or nullptr
-		 @param msg the message list which will receive any warning or error information
-		 */
-		bool InstructionSRL::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
-		{
-			return true;
-		}
-
-
-		/** Assemble instruction at current token, returns false if error
-		 RES b,r
-		 b = 0 to 7
-		 r = A B C D E H L (HL) (IX+d) (IY+d)
-		 @param as the assembler which stores symbols and assembly
-		 @param codeline the code line in which assembled codes will be stored
-		 @param label the last or current label if any, or nullptr
-		 @param msg the message list which will receive any warning or error information
-		 */
-		bool InstructionSET::Assemble(class Assembler& as, CodeLine& codeline, class Label* label, ErrorList& msg)
-		{
-			return true;
-		}
-
-
-
-
-
-
+		return false;
+	}
+	
 } // namespace MUZ
 

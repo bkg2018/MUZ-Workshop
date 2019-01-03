@@ -80,4 +80,12 @@ extern const char NORMAL_DIR_SEPARATOR; // Windows backslash and UNIXes slash
 extern const char OTHER_DIR_SEPARATOR;	// slash allowed on Windows, and backslash will be changed to slash on UNIXes
 extern const char ALTERNATE_ROOTDIR; 	// '~' on UNIXes, '\0' elsewhere
 
+
+/** HEX files support. */
+int hexNbBytes(const MUZ::BYTE* hexline);
+bool hexEOF(const MUZ::BYTE* hexline);
+MUZ::ADDRESSTYPE hexAddress(const MUZ::BYTE* hexline);
+int hexType(const MUZ::BYTE* hexline);
+void hexStore(const MUZ::BYTE* hexline, MUZ::DATATYPE* buffer);
+
 #endif /* StrUtils_h */

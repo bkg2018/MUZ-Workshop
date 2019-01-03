@@ -140,45 +140,6 @@ namespace MUZ {
 		return onlybin; // all hexx digits and no sufffix
 	}
 	
-	/** Defines each possible state subparsing function. */
-	bool Parser::stateParseNothing(void) {
-		return true;
-	};
-	bool Parser::stateParseLetters(void) {
-		return true;
-	};
-	bool Parser::stateParseHexDigits(void) {
-		return true;
-	};
-	bool Parser::stateParseDecDigits(void) {
-		return true;
-	};
-	bool Parser::stateParseOctDigits(void) {
-		return true;
-	};
-	bool Parser::stateParseBinDigits(void) {
-		return true;
-	};
-	bool Parser::stateParseDoubleQuote(void) {
-		return true;
-	};
-	bool Parser::stateParseSingleQuote(void) {
-		return true;
-	};
-	bool Parser::stateParseSpace(void) {
-		return true;
-	};
-	bool Parser::stateParseDirective(void) {
-		return true;
-	};
-	bool Parser::stateParseFilename(void) {
-		return true;
-	};
-	
-	
-	
-	
-	
 	/** Stores a new token given a string and a type.
 	 In some cases no token will be added, e.g. a number with empty content.
 	 In any cases, the parsing status is prepared for next token by reseting
@@ -211,6 +172,9 @@ namespace MUZ {
 			
 			// Store the token, use upper case for directives
 			if (type == tokenTypeDIRECTIVE) {
+				if (word == ".") {
+					type = tokenTypeSTRING;
+				}
 				word = to_upper(word);
 			}
 			ParseToken token;
@@ -245,61 +209,87 @@ namespace MUZ {
 					status = inFilename;
 					return;
 				}
-				else if (token.source == "#INSERTHEX") resultFlag = hasINSERTHEX;
+				else if (token.source == "#INSERTHEX") {
+					resultFlag = hasINSERTHEX;
+					// same as #INCLUDE
+					size_t len = source->length();
+					while (pos < len && (source->at(pos) == ' ' || source->at(pos) == '\t')) {
+						pos++;
+					}
+					char ch =source->at(pos);
+					doubleQuoted = (ch == '"');
+					if (doubleQuoted) {
+						pos += 1;
+					} else {
+						word = ch;
+					}
+					type = tokenTypeFILENAME;
+					status = inFilename;
+					return;
+
+				}
 			}
 		}
 		word.clear();
 		type = tokenTypeUNKNOWN;
 		status = inNothing;
-		currentState = &Parser::stateParseNothing;
 	}
 	
 	
 	
 	// publics
-	/** Resolve symbol, equates and labels starting in a given token. */
-	void Parser::ResolveSymbolAt(int index)
+	
+	/** Resolve symbol, equates and labels starting in a given token.
+	 	If a symbol cannot be replaced by a value, the function returns false.
+	 */
+	bool Parser::ResolveSymbolAt(int index)
 	{
 #ifdef DEBUG
 		if (!curtoken || !result) throw PARSERNotInitialized();
 		if (index < 0 || index > result->size()) throw PARSERInvalidTokenIndex();
 #endif
 		auto &token = result->at(index);
+		if (token.type == tokenTypeCOMMENT)
+			return true;
+		if (token.type == tokenTypeDECNUMBER)
+			return true;
 		// This only occurs on the LETTER type tokens
 		if (token.type == tokenTypeLETTERS) {
 			if (as->ReplaceDefSymbol(token))
-				return;
+				return true;
 			if (as->ReplaceLabel(token.source)) {
 				token.type = tokenTypeDECNUMBER;
-				return;
+				return true;
 			}
+			token.unsolved = true;
+			return false;// unknown symbol, not resolved
 		}
 		// replace "$" current address if found
 		if (token.type == tokenTypeDOLLAR) {
 			token.source = std::to_string(as->GetAddress());
 			token.type = tokenTypeDECNUMBER;
-			return;
+			return true;
 		}
 		// translate hex numbers
 		if (token.type == tokenTypeHEXNUMBER) {
 			unsigned int uint = hex_to_unsigned(token.source);
 			token.source = std::to_string(uint);
 			token.type = tokenTypeDECNUMBER;
-			return;
+			return true;
 		}
 		// translate binary numbers
 		if (token.type == tokenTypeBINNUMBER) {
 			unsigned int uint = bin_to_unsigned(token.source);
 			token.source = std::to_string(uint);
 			token.type = tokenTypeDECNUMBER;
-			return;
+			return true;
 		}
 		// translate octal numbers
 		if (token.type == tokenTypeOCTNUMBER) {
 			unsigned int uint = oct_to_unsigned(token.source);
 			token.source = std::to_string(uint);
 			token.type = tokenTypeDECNUMBER;
-			return;
+			return true;
 		}
 		// translate characters in bytes
 		if (token.type == tokenTypeCHAR) {
@@ -307,22 +297,34 @@ namespace MUZ {
 			unsigned int uint = token.source.size() > 0 ? token.source.at(0) : 0; // '' will be 00
 			token.source = std::to_string(uint);
 			token.type = tokenTypeDECNUMBER;
+			return true;
 		}
 		// translate escape sequences in strings
 		if (token.type == tokenTypeSTRING) {
 			token.source = unescape(token.source);
+			return true;
 		}
+		
+		// ok by default, meaning any other operator like tokenTypeOP_PLUS
+		return true;
 	}
 	
-	/** Resolve symbols, equates and labels starting at given token index. if no start index is given, will start at current token */
-	void Parser::ResolveSymbols(int start /* = -1 */)
+	/** Resolve symbols, equates and labels starting at given token index. If no start index is given, will start at current token.
+	 Returns a list of indexes of unsolved label tokens. Unsolved labels are replaced by a decimal "0" value.
+	 */
+	std::vector<int> Parser::ResolveSymbols(int start /* = -1 */)
 	{
 		// next token if no start
 		if (start == -1) start = *curtoken;
 		// replace existing symbols, EQU values, labels by their value
+		
+		std::vector<int> unsolved;
 		for (int i = start ; i < result->size() ; i++) {
-			ResolveSymbolAt(i);
+			if (!ResolveSymbolAt(i)) {
+				unsolved.push_back(i);
+			}
 		}
+		return unsolved;
 	}
 	
 	/** Cuts a string into a vector of typed tokens. Each token has a type but is not interpreted, so
@@ -385,37 +387,6 @@ namespace MUZ {
 				continue;
 			}
 
-			// comment?
-			if (c == ';') {
-				StoreToken();
-				word = s.substr(pos); // add the rest of line as a comment
-				type = tokenTypeCOMMENT;
-				StoreToken();
-				break; // finished!
-			}
-			// end of label?
-			if (c == ':') {
-				StoreToken();
-				type = tokenTypeCOLON;
-				StoreToken();
-				continue;
-			}
-			
-			// Directive prefix?
-			if (c == '.' || c == '#') {
-				if (word.empty()) {
-					// nothing stored yet, start a directive
-					status = inDirective;
-					word = c;
-					type = tokenTypeDIRECTIVE;
-					continue;
-				}
-				// we're not  supposed to reach here: would mean a '.' or '#' contained in a word
-				// so just keep going and emit a warning
-				word += c;
-				//TODO: warnings.push_back(std::string("A dubious '") + c + "' was found in a sequence of characters");
-				continue;
-			}
 			// double quote running?
 			if (status == inDoubleQuotes) {
 				if (c == '"') {
@@ -450,6 +421,42 @@ namespace MUZ {
 				StoreToken();
 				status = inSingleQuotes;
 				type = tokenTypeCHAR;
+				continue;
+			}
+			// comment?
+			if (c == ';') {
+				StoreToken();
+				word = s.substr(pos); // add the rest of line as a comment
+				type = tokenTypeCOMMENT;
+				StoreToken();
+				break; // finished!
+			}
+			// end of label?
+			if (c == ':') {
+				StoreToken();
+				if (*curtoken > 1) {
+					type = tokenTypeCHAR;
+					word = c;
+				} else {
+					type = tokenTypeCOLON;
+				}
+				StoreToken();
+				continue;
+			}
+			
+			// Directive prefix?
+			if (c == '.' || c == '#') {
+				if (word.empty()) {
+					// nothing stored yet, start a directive
+					status = inDirective;
+					word = c;
+					type = tokenTypeDIRECTIVE;
+					continue;
+				}
+				// we're not  supposed to reach here: would mean a '.' or '#' contained in a word
+				// so just keep going and emit a warning
+				word += c;
+				//TODO: warnings.push_back(std::string("A dubious '") + c + "' was found in a sequence of characters");
 				continue;
 			}
 			hasNext = (pos + 1 < s.length());
@@ -531,19 +538,6 @@ namespace MUZ {
 			// End a running number?
 			if (status == inDigits) {
 
-				// H suffix after hex digits?
-				if (upperc == 'H') {
-					type = tokenTypeHEXNUMBER;
-					StoreToken();
-					continue;
-				}
-				// B suffix after digits?
-				if (upperc == 'B') {
-					type = tokenTypeBINNUMBER;
-					StoreToken();
-					continue;
-				}
-
 				// continuing digit sequence?
 				if (isHexDigit(upperc) && (type == tokenTypeHEXNUMBER)) {
 					word += c;
@@ -558,6 +552,19 @@ namespace MUZ {
 					continue;
 				}
 			
+				// H suffix after hex digits?
+				if (upperc == 'H') {
+					type = tokenTypeHEXNUMBER;
+					StoreToken();
+					continue;
+				}
+				// B suffix after digits?
+				if (upperc == 'B' && (type != tokenTypeHEXNUMBER)) {
+					type = tokenTypeBINNUMBER;
+					StoreToken();
+					continue;
+				}
+				
 				// end of number
 				StoreToken();
 				// parse again from this position
@@ -653,6 +660,8 @@ namespace MUZ {
 				continue;
 			if (findOperator('/', tokenTypeOP_DIV))
 				continue;
+			if (findOperator('\\', tokenTypeOP_DIV))
+				continue;
 			if (findOperator('%', tokenTypeOP_MOD))
 				continue;
 			if (findOperator('!', tokenTypeOP_NOT))
@@ -701,11 +710,14 @@ namespace MUZ {
 	bool Parser::EvaluateBoolean()
 	{
 		ExpressionEvaluator eval;
-		ParseToken evaluated = eval.Evaluate(*result, *curtoken);
+		int lasttoken = -1;
+		ParseToken evaluated = eval.Evaluate(*result, *curtoken, lasttoken);
 		if (evaluated.type == tokenTypeDECNUMBER) {
+			*curtoken = lasttoken;
 			return dec_to_unsigned(evaluated.source) != 0;
 		}
 		if ((evaluated.type == tokenTypeBOOL) || (evaluated.type == tokenTypeSTRING)) {
+			*curtoken = lasttoken;
 			return !evaluated.source.empty();
 		}
 		return false;
@@ -717,11 +729,14 @@ namespace MUZ {
 	std::string Parser::EvaluateString()
 	{
 		ExpressionEvaluator eval;
-		ParseToken evaluated = eval.Evaluate(*result, *curtoken);
+		int lasttoken = -1;
+		ParseToken evaluated = eval.Evaluate(*result, *curtoken, lasttoken);
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER) || (evaluated.type == tokenTypeLETTERS)) {
+			*curtoken = lasttoken;
 			return evaluated.source;
 		}
 		if (evaluated.type == tokenTypeBOOL) {
+			*curtoken = lasttoken;
 			return evaluated.source.empty() ? "" : "t";
 		}
 		return "";
@@ -732,8 +747,10 @@ namespace MUZ {
 	ADDRESSTYPE Parser::EvaluateAddress()
 	{
 		ExpressionEvaluator eval;
-		ParseToken evaluated = eval.Evaluate(*result, *curtoken);
+		int lasttoken = -1;
+		ParseToken evaluated = eval.Evaluate(*result, *curtoken, lasttoken);
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
+			*curtoken = lasttoken;
 			return dec_to_unsigned(evaluated.source);
 		}
 		//TODO: generate an error when EvaluateAddress() doesn't get a string or number

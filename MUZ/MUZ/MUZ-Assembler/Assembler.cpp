@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "StrUtils.h"
+#include "FileUtils.h"
 #include "Exceptions.h"
 #include "Assembler.h"
 #include "Parser.h"
@@ -29,10 +30,20 @@ using std::string;
 /** The assembler class definitions. */
 namespace MUZ {
 	
+	/** Gets the root up the whole parent SourceFile tree. */
+	Assembler::SourceFile* Assembler::SourceFile::Root()
+	{
+		SourceFile* root = this->parent;
+		while (root && root->parent)
+			root = root->parent;
+		return root;
+	}
+
+	
 	/** Lets a SourceFile sets itself from a given file path and a parent specification. */
-	bool Assembler::SourceFile::Set(std::string file, SourceFile *parent) {
+	bool Assembler::SourceFile::Set(std::string file, SourceFile *parentfile) {
 		// included files may be relative to the path of their parent, check this
-		included = (parent != nullptr);
+		included = (parentfile != nullptr);
 		if (included) {
 			bool absolute = false;
 #ifdef WIN32
@@ -54,15 +65,38 @@ namespace MUZ {
 #endif
 			// split into non-prefixed absolute or relative path and name
 			splitpath(file, filepath, filename);
+			parent = parentfile;
+			SourceFile* root = parent->Root();
 			if (filepath.size() == 0) {
-				filepath = parent->filepath;
+				// no path 1: try to find in parent directory
+				if (ExistFile(parent->filepath + NORMAL_DIR_SEPARATOR + filename)) {
+					filepath = parent->filepath;
+				} else {
+					// no path 2: try to find file in root
+					if (ExistFile(root->filepath + NORMAL_DIR_SEPARATOR + filename)) {
+						filepath = root->filepath;
+					} else {
+						// not found, will generate an error
+						filepath = parent->filepath;
+					}
+				}
 			} else {
-				// is it an absolute path?
+				// path not empty: is it an absolute path?
 				absolute = (filepath[0] == NORMAL_DIR_SEPARATOR) || (filepath[0] == ALTERNATE_ROOTDIR);
-				// if not absolute, prefix with parent path
+				// if absolute, keep it this way
 				if (!absolute) {
-					//TODO: handle parent prefix?
-					filepath = parent->filepath + NORMAL_DIR_SEPARATOR + filepath;
+					
+					// not absolute: try relative to parent
+					if (ExistFile(parent->filepath + NORMAL_DIR_SEPARATOR + filepath + NORMAL_DIR_SEPARATOR + filename)) {
+						filepath = parent->filepath + NORMAL_DIR_SEPARATOR + filepath;
+					} else {
+						if (ExistFile(root->filepath + NORMAL_DIR_SEPARATOR + filepath + NORMAL_DIR_SEPARATOR + filename)) {
+							filepath = root->filepath + NORMAL_DIR_SEPARATOR + filepath;
+						} else {
+							// not found, will generate an error
+							filepath = parent->filepath;
+						}
+					}
 				}
 			}
 		} else {
@@ -111,8 +145,6 @@ namespace MUZ {
 		m_instructions["DI"] = new InstructionDI();
 		m_instructions["EI"] = new InstructionEI();
 		m_instructions["IM"] = new InstructionIM();
-		m_instructions["ADD"] = new InstructionADD();
-		m_instructions["ADC"] = new InstructionADC();
 		m_instructions["RLCA"] = new InstructionRLCA();
 		m_instructions["RLA"] = new InstructionRLA();
 		m_instructions["RRCA"] = new InstructionRRCA();
@@ -154,6 +186,7 @@ namespace MUZ {
 		m_directives["#IF"] = new DirectiveIF();
 		m_directives["#IFDEF"] = new DirectiveIFDEF();
 		m_directives["#ELSE"] = new DirectiveELSE();
+		m_directives["#IFNDEF"] = new DirectiveIFNDEF();
 		m_directives["#ENDIF"] = new DirectiveENDIF();
 		m_directives["#INCLUDE"] = new DirectiveINCLUDE();
 		m_directives["#INSERTHEX"] = new DirectiveINSERTHEX();
@@ -161,11 +194,16 @@ namespace MUZ {
 		// Assembler directives
 		m_directives[".PROC"] = new DirectivePROC();
 		m_directives[".ORG"] = new DirectiveORG();
+		m_directives[".DATA"] = new DirectiveDATA();
+		m_directives[".CODE"] = new DirectiveCODE();
 		m_directives[".HEXBYTES"] = new DirectiveHEXBYTES();
 		m_directives[".EQU"] = new DirectiveEQU();
 		m_directives[".BYTE"] = new DirectiveBYTE();
+		m_directives[".DB"] = new DirectiveBYTE();
 		m_directives[".WORD"] = new DirectiveWORD();
-		
+		m_directives[".DW"] = new DirectiveWORD();
+		m_directives[".DS"] = new DirectiveSPACE();
+
 		// Initialize the operand type maps
 		initRegisterMap();
 
@@ -191,11 +229,12 @@ namespace MUZ {
 	/** Resets the assembler. */
 	void Assembler::Reset() {
 		m_defsymbols.clear();
-		m_labels.clear();
+		labels.clear();
 		m_files.clear();
 		m_zones.clear();
-		m_status.curaddress = 0;
-		m_status.curname = nullptr;
+		m_status.curaddress[sectionCODE] =0;
+		m_status.curaddress[sectionDATA] =0;
+		m_status.cursection = sectionCODE;
 		m_modes = ParsingModeStack();// resets
 	}
 
@@ -240,14 +279,22 @@ namespace MUZ {
 			}
 			m_listingfile = fopen(filename.c_str(), "w");
 			if (m_listingfile == nullptr) {
-				msg.push_back({errorTypeABOUTFILE, "cannot write listing file",filename,0});
+				msg.push_back({errorTypeABOUTFILE, "cannot write listing file" + filename,nullptr});
 			}
 		}
 	}
 	
 	/** Assembles a source file as a main or included file.
 	 
-	 	A source file name is split into three parts:
+	 The first pass is for labels generation:
+	 	- doesn't store the assembled codelines
+	 	- doesn't generate listing
+	 	- follows directives like .ORG or #DEFINE
+	 	- updates current address so labels can be created correctly
+	 
+	 The second pass is for code generation.
+	 
+	 A source file name is split into three parts:
 	 	- a prefix, which may include UNC "\\?\" and/or "<unit>:" on Windows, can be empty for relative pathes
 	 	- an absolute path starting with a / or \, can be empty for relative pathes
 	 	- a filename.ext part, cannot be empty
@@ -255,9 +302,11 @@ namespace MUZ {
 	 	Absolute pathes for included files are prepended with their parent file path.
 	 
 	 	@param file the file path to the source to assemble, can be relative to parent file path if included
-	 	@param msg the stack of error and warnings returned by the assembler
 	 	@param included true if this is called from within assembly of another parent file
 	 	@param codeline references to the calling context
+	 	@param msg the stack of error and warnings returned by the assembler
+	 
+	 	@return true if assembly was correctly done
 	 */
 	bool Assembler::AssembleFile(string file, bool included, CodeLine& codeline, ErrorList& msg)
 	{
@@ -265,92 +314,259 @@ namespace MUZ {
 		if (file.size() < 2) return false;
 		if (included && (codeline.file >= (int)m_files.size())) return false;
 		
-		// Prepare the path and name for file
-		SourceFile* sourcefile = new SourceFile;
-		if (!sourcefile->Set(file, included && (codeline.file >= 0) ? m_files[codeline.file] : nullptr)) return false;
-		
-		// If it's a master file, initialize the listing file
-		if (!included) {
-			PrepareListing(msg);
-		}
-		
-		// try to open the source file
-		file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
-		FILE* f = fopen(file.c_str(), "r");
-		if (!f) {
-			msg.push_back({errorTypeFATAL, "cannot open source file",file,0});
-			throw MUZ::NoFileException();
-		}
+		// first pass?
+		if (m_status.firstpass) {
+			
+			// Prepare the path and name for file
+			SourceFile* sourcefile = new SourceFile;
+			if (sourcefile == nullptr) throw MUZ::OutOfMemoryException();
+			if (!sourcefile->Set(file, included && (codeline.file >= 0) ? m_files[codeline.file] : nullptr)) return false;
 
-		// Store this file definition
-		size_t filenum = m_files.size();
-		m_files.push_back(sourcefile);
-		SourceFile* sf = m_files.at(filenum);
-		if (included) {
-			sf->parentfile = codeline.file;
-			sf->parentline = codeline.line;
-			sf->included = (sf->parentfile >= 0);
-			// For included files, put the #include in listing here before the included source is listed
-			GenerateListing(codeline, msg);
-		}
-		
-		// print the full file path in listing
-		if (m_listingfile) {
-			fprintf(m_listingfile, "                 %s\n", file.c_str()); // 17 spaces before file path
-		}
-		
-	// now explore line by line
-		BYTE* buffer = nullptr;
-		int linesize = 0;
-		long offset = ftell(f);
-		while (fgetline(&buffer, &linesize, f)) {
-			// store
-			CodeLine cl;
-			cl.address = 0;
-			cl.assembled = false;
-			cl.file = (int)filenum;
-			cl.offset = offset;
-			cl.line = (int)sf->lines.size()  + 1;
-			cl.size = linesize;
-			cl.source = string((char*)buffer);
-			// Assemble this line, will include another file if #INCLUDE is met
-			cl.assembled = AssembleCodeLine(cl, msg);
-			if (cl.assembled) {
-				cl.address = m_status.curaddress;
+			// try to open the source file
+			file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
+			FILE* f = fopen(file.c_str(), "r");
+			if (!f) {
+				msg.push_back({errorTypeFATAL, "cannot open source file" + file, &codeline});
+				throw MUZ::NoFileException();
 			}
-			// Add the assembled line to listing, or display parent filename if it was an #INCLUDE directive
-			if (cl.tokens.size() > 0) {
-				ParseToken& token = cl.tokens.at(0);
-				if (cl.assembled && (token.type == tokenTypeDIRECTIVE) && (token.source == "#INCLUDE")) {
-					// list current parent file to show that include if finished
-					fprintf(m_listingfile, "                 %s\n", file.c_str()); // 17 spaces before file path
+
+			// Store this file definition
+			size_t filenum = m_files.size();
+			m_files.push_back(sourcefile);
+			m_status.curfile = (int)filenum;
+
+			if (included) {
+				sourcefile->parentfile = codeline.file;
+				sourcefile->parentline = codeline.line;
+				sourcefile->included = (sourcefile->parentfile >= 0);
+				}
+
+			// now explore the file line by line
+			BYTE* buffer = nullptr;
+			int linesize = 0;
+			long offset = ftell(f);
+			Label* lastLabel = nullptr;
+			while (fgetline(&buffer, &linesize, f)) {
+
+				// debug
+#if DEBUG
+				printf("%04X: [%4d] %s\n", GetAddress(),(int)sourcefile->lines.size()  + 1, buffer);
+#endif
+				
+				// prepare the codeline to assemble
+				CodeLine cl;
+				cl.address = GetAddress();
+				cl.assembled = false;
+				cl.file = (int)filenum;
+				cl.offset = offset;
+				cl.line = (int)sourcefile->lines.size()  + 1;
+				cl.size = linesize;
+				cl.source = string((char*)buffer);
+				cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
+				// Assemble this line, will include another file if #INCLUDE is met
+				cl.assembled = AssembleCodeLine(cl, msg);
+				if (cl.assembled) {
+					cl.address = GetAddress();// useless?
+					lastLabel = cl.label;
+				}
+				// Store assembly result
+				sourcefile->lines.push_back(cl);
+				// update current address and file position
+				offset = ftell(f);
+				AdvanceAddress(cl.code.size());
+			}
+			
+			// close main source and release IO buffer
+			fclose(f);
+			free(buffer);
+			
+		} else {
+			
+			// second pass
+			
+			// If it's a master file, initialize the listing file
+			SourceFile* sourcefile = nullptr;
+			if (included) {
+				// For included files, put the #include in listing here before the included source is listed
+				GenerateListing(codeline, msg);
+				sourcefile = m_files.at(codeline.includefile);
+				m_status.curfile = codeline.includefile;
+			} else {
+				// initialize listing
+				PrepareListing(msg);
+				sourcefile = m_files.at(0);
+				m_status.curfile = 0;
+			}
+		
+			// print the full file path in listing
+			if (m_listingfile != nullptr) {
+				fprintf(m_listingfile, "                    %s\n", file.c_str()); // 20 spaces before file path
+			}
+		
+			// now reassemble line by line
+			for (CodeLine& cl : sourcefile->lines) {
+			
+				cl.code.clear();
+				cl.assembled = AssembleCodeLine(cl, msg);
+				if (cl.assembled) {
+					cl.address = GetAddress();
+				}
+				// Add the assembled line to listing, or display parent filename if it was an #INCLUDE directive
+				if (cl.tokens.size() > 0) {
+					ParseToken& token = cl.tokens.at(0);
+					if (cl.assembled && (token.type == tokenTypeDIRECTIVE) && ((token.source == "#INCLUDE") || (token.source == "#INSERTHEX"))) {
+						// list current parent file to show that include if finished
+						fprintf(m_listingfile, "                 %s\n", file.c_str()); // 17 spaces before file path
+					} else {
+						// not assembled, or not an include directive: show normal listing
+						GenerateListing( cl, msg);
+					}
 				} else {
-					// not assembled, or not an include directive: show normal listing
+					// no token: shoud be empty line, list it
 					GenerateListing( cl, msg);
 				}
-			} else {
-				// no token: shoud be empty line, list it
-				GenerateListing( cl, msg);
+				AdvanceAddress(cl.code.size()) ;
 			}
-			// Store assembly result and go next line
-			sf->lines.push_back(cl); // each line index in m_files[filenum].lines is its line number in file
-			offset = ftell(f);
-			// update current address
-			m_status.curaddress += cl.code.size();
+			// Close the listing file if finished main source
+			if (!included && (m_listingfile != nullptr)) {
+				fclose(m_listingfile);
+				m_listingfile = nullptr;
+			}
 		}
-
-		// Close the listing file if finished main source
-		if (!included && (m_listingfile != nullptr)) {
-			fclose(m_listingfile);
-			m_listingfile = nullptr;
-		}
-		
-		// close main source and release IO buffer
-		fclose(f);
-		free(buffer);
 		return true;
 	}
 
+	/** Assembled an HEX included file. */
+	bool Assembler::AssembleHexFile(std::string file, CodeLine& codeline, ErrorList& msg)
+	{
+		// basic security
+		if (file.size() < 2) return false;
+		if (codeline.file >= (int)m_files.size()) return false;
+		
+		// first pass?
+		if (m_status.firstpass) {
+			
+			// Prepare the path and name for file
+			SourceFile* sourcefile = new SourceFile;
+			if (sourcefile == nullptr) throw MUZ::OutOfMemoryException();
+			if (!sourcefile->Set(file, codeline.file >= 0 ? m_files[codeline.file] : nullptr)) return false;
+			
+			// try to open the source file
+			file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
+			FILE* f = fopen(file.c_str(), "r");
+			if (!f) {
+				msg.push_back({errorTypeFATAL, "cannot open source file" + file, &codeline});
+				throw MUZ::NoFileException();
+			}
+			
+			// Store this file definition
+			size_t filenum = m_files.size();
+			m_files.push_back(sourcefile);
+			m_status.curfile = (int)filenum;
+			sourcefile->parentfile = codeline.file;
+			sourcefile->parentline = codeline.line;
+			sourcefile->included = (sourcefile->parentfile >= 0);
+			
+			// now explore the file line by line
+			BYTE* buffer = nullptr;
+			int linesize = 0;
+			long offset = ftell(f);
+			Label* lastLabel = nullptr;
+			BYTE* binbuffer = (BYTE*)calloc(1024,1);// should be suffficient, lines can only store 256 bytes definitions
+			while (fgetline(&buffer, &linesize, f)) {
+				
+				// debug
+#if DEBUG
+				printf("%04X: [%4d] %s\n", GetAddress(),(int)sourcefile->lines.size()  + 1, buffer);
+#endif
+				
+				// translate the hex line into .DB source line
+				int nbbytes = hexNbBytes(buffer);
+				if (nbbytes) {
+					hexStore(buffer, binbuffer);
+					string source="\t.DB ";
+					int b = 0;
+					for ( ; b < nbbytes ; b++) {
+						source += "$" + data_to_hex(binbuffer[b]) + ",";
+					}
+					/*for ( ; b < 16 ; b++) {
+						source += "$FF,";
+					}*/
+
+					
+					// prepare the codeline to assemble
+					CodeLine cl;
+					cl.address = GetAddress();
+					cl.assembled = false;
+					cl.file = (int)filenum;
+					cl.offset = offset;
+					cl.line = (int)sourcefile->lines.size()  + 1;
+					cl.size = linesize;
+					cl.source = source;
+					cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
+					// Assemble this line, will include another file if #INCLUDE is met
+					cl.assembled = AssembleCodeLine(cl, msg);
+					if (cl.assembled) {
+						cl.address = GetAddress();// useless?
+						lastLabel = cl.label;
+					}
+					// Store assembly result
+					sourcefile->lines.push_back(cl);
+					// update current address and file position
+					offset = ftell(f);
+					AdvanceAddress(cl.code.size());
+				}
+			}
+			
+			// close main source and release IO buffer
+			fclose(f);
+			free(buffer);
+			free(binbuffer);
+		} else {
+			
+			// second pass
+			
+			// If it's a master file, initialize the listing file
+			SourceFile* sourcefile = nullptr;
+			// For included files, put the #include in listing here before the included source is listed
+			GenerateListing(codeline, msg);
+			sourcefile = m_files.at(codeline.includefile);
+			m_status.curfile = codeline.includefile;
+			
+			// print the full file path in listing
+			if (m_listingfile != nullptr) {
+				fprintf(m_listingfile, "                    %s\n", file.c_str()); // 20 spaces before file path
+			}
+			
+			// now reassemble line by line
+			for (CodeLine& cl : sourcefile->lines) {
+				
+				cl.code.clear();
+				cl.assembled = AssembleCodeLine(cl, msg);
+				if (cl.assembled) {
+					cl.address = GetAddress();
+				}
+				// Add the assembled line to listing, or display parent filename if it was an #INCLUDE directive
+				if (cl.tokens.size() > 0) {
+					ParseToken& token = cl.tokens.at(0);
+					if (cl.assembled && (token.type == tokenTypeDIRECTIVE) && ((token.source == "#INCLUDE") || (token.source == "#INSERTHEX"))) {
+						// list current parent file to show that include if finished
+						fprintf(m_listingfile, "                 %s\n", file.c_str()); // 17 spaces before file path
+					} else {
+						// not assembled, or not an include directive: show normal listing
+						GenerateListing( cl, msg);
+					}
+				} else {
+					// no token: shoud be empty line, list it
+					GenerateListing( cl, msg);
+				}
+				AdvanceAddress(cl.code.size()) ;
+			}
+		}
+		return true;
+	}
+	
+	
 	/** Assemble a single line into a codeline, */
 	CodeLine Assembler::AssembleLine(std::string sourceline, ErrorList& msg)
 	{
@@ -366,26 +582,72 @@ namespace MUZ {
 		return codeline;
 	}
 
+	/** Creates a label if the code line starts with a label.  A Label can be followed by ':' or by a directive. */
 	Label* Assembler::ScanLabel(CodeLine& codeline, ErrorList& msg)
 	{
-		// First create label or Equate if needed
-		int curtoken = 0;
-		for ( curtoken = 0 ; curtoken < codeline.tokens.size() ; curtoken++) {
-			ParseToken& token = codeline.tokens[curtoken];
-			if (token.type == tokenTypeCOLON) {
-				if (curtoken > 0 && codeline.tokens[curtoken-1].type == tokenTypeLETTERS) {
-					return CreateLabel(codeline.tokens[curtoken-1].source, codeline.file, codeline.line);
+		const int nbtokens = codeline.tokens.size();
+		// empty line
+		if (nbtokens == 0) {
+			return nullptr;
+		}
+		// <letters> ?
+		if (nbtokens == 1) {
+			if (codeline.tokens[0].type == tokenTypeLETTERS) {
+				// <directive> ? (ex: .CODE)
+				if (GetDirective(codeline.tokens[0].source)) return nullptr;
+				// <instruction> ? (ex: RET)
+				if (GetInstruction(codeline.tokens[0].source)) return nullptr;
+				// must be 	 <labelname>
+				if (codeline.tokens[0].source[0] != '@' && codeline.tokens[1].source != ".EQU") {
+					SetLastLabelName(codeline.tokens[0].source) ;
 				}
-				// error in label definition
-				if (curtoken == 0) {
-					//TODO: errors.push_back("colon without a label before");
-					return nullptr;
+				return CreateLabel(codeline.tokens[0].source, &codeline);
+			}
+			///TODO: return error, only one token and unknown case
+			return nullptr;
+		}
+		// <letters> <token> ... ?
+		if (codeline.tokens[0].type == tokenTypeLETTERS) {
+			// <letters> <:> ?
+			if (codeline.tokens[1].type == tokenTypeCOLON) {
+				// neutralize colon for parser
+				codeline.tokens[1].type = tokenTypeIGNORE;
+				// store as last glocal label unless it is an .EQU or local label
+				if (codeline.tokens[0].source[0] != '@' && ((nbtokens <= 2) || (codeline.tokens[2].source != ".EQU"))) {
+					SetLastLabelName(codeline.tokens[0].source) ;
 				}
-				//TODO: errors.push_back("bad syntax in llabel before ':'");
+				return CreateLabel(codeline.tokens[0].source, &codeline);
+			}
+			// <letters> <directive> ?
+			if (GetDirective(codeline.tokens[1].source)) {
+				// store as last glocal label unless it is an .EQU or local label
+				if (codeline.tokens[0].source[0] != '@' && codeline.tokens[1].source != ".EQU") {
+					SetLastLabelName(codeline.tokens[0].source) ;
+				}
+				return CreateLabel(codeline.tokens[0].source, &codeline);
+			}
+			// <letters> <instruction> ?
+			if (GetInstruction(codeline.tokens[1].source)) {
+				// store as last global label
+				SetLastLabelName(codeline.tokens[0].source) ;
+				return CreateLabel(codeline.tokens[0].source, &codeline);
 			}
 		}
 		return nullptr;
 	}
+	
+	/** Sets the last global label name. */
+	void Assembler::SetLastLabelName(std::string name)
+	{
+		m_status.lastlabel = name;
+	}
+	
+	/** Returns the last global label name. */
+	std::string Assembler::GetLastLabelName(void)
+	{
+		return m_status.lastlabel;
+	}
+
 
 /** Assemble a prepared code line. The code line must have its file and source set, and the assembler will
  	fill the rest. Notice that running conditionnal directive conditions can make the line to be unassembled
@@ -454,13 +716,20 @@ namespace MUZ {
 		// If we reach here, #IF/ELSE/ENDIF conditions have all been managed
 		
 		// Scan for a possible label
-		Label* lastLabel = ScanLabel(codeline, msg);
+		Label* label = ScanLabel(codeline, msg);
 		
-		// Handle the last directives: #INCLUDE and #INSERTHEX, as well as '.' directives
-		for ( curtoken = 0 ; curtoken < tokens.size() ; curtoken++) {
+		// If there is a label it can be assigned the current address. Local labels
+		// can store more than one address, while global labels store only one address
+		//TODO: warning if already existing global label ?
+		if (label) {
+			label->SetAddress(GetAddress());
+			codeline.label = label;
+		}
+		
+		// Handle the last directives (#INCLUDE and #INSERTHEX) as well as '.' directives
+		// Skip label if any
+		for (curtoken = (label != nullptr) ? 1 : 0 ; curtoken < tokens.size() ; curtoken++) {
 			ParseToken& token = tokens[curtoken];
-			
-			// Handle directives other than those already treated above (IF*/ELSE/ENDIF)
 			if (token.type == tokenTypeDIRECTIVE) {
 				Directive* directive = GetDirective(token.source);
 				if (!directive) {
@@ -468,12 +737,9 @@ namespace MUZ {
 					return false;
 				}
 				// Let the directive do further parsing and symbols resolving
-				return directive->Parse(*this, parser, codeline, lastLabel, msg);
+				return directive->Parse(*this, parser, codeline, label, msg);
 				
-			// Labels already done, ignore
-			} else if (token.type == tokenTypeCOLON) {
-				continue;
-			// anhything else can be an instruction
+			// anything else can be an instruction
 			} else if (token.type == tokenTypeLETTERS) {
 				
 				// ignore if followed by a colon or a directive, next token will handle it
@@ -486,10 +752,11 @@ namespace MUZ {
 				Instruction* instruction = GetInstruction(token.source);
 				if (instruction) {
 					// resolve any symbols, and prepare the token index for assembling
-					parser.ResolveSymbols(curtoken);
+					vector<int> unsolved = parser.ResolveSymbols(curtoken + 1);
 					codeline.Reset( curtoken );
+					codeline.as = this;
 					// let the instruction set the assembled code in the coode line
-					if (instruction->Assemble(*this, codeline, lastLabel, msg)) {
+					if (instruction->Assemble(codeline, msg)) {
 					} else {
 						// TODO: signal an assembling error
 					}
@@ -505,26 +772,46 @@ namespace MUZ {
 		return true;
 	}
 
+	void Assembler::SetCodeSection()
+	{
+		m_status.cursection = sectionCODE;
+	}
+	void Assembler::SetDataSection()
+	{
+		m_status.cursection = sectionDATA;
+	}
+
 	/** Sets the current assembling address. */
 	void Assembler::SetAddress(ADDRESSTYPE address)
 	{
-		m_status.curaddress = address;
+		m_status.curaddress[m_status.cursection] = address;
 	}
 	
-	/** Create a label at current address. */
-	Label* Assembler::CreateLabel(std::string name, int file, int line)
+	/** Advance the current assembling address. */
+	void Assembler::AdvanceAddress( ADDRESSTYPE advance )
 	{
-		auto label = m_labels[name];
-		if (!label) {
+		m_status.curaddress[m_status.cursection] += advance;
+	}
+	
+	/** Create a label at current address. If the label name starts with a '@', a local label is created for current file and is prefixed with the last
+	 global label name, else the label is global. */
+	Label* Assembler::CreateLabel(std::string name, CodeLine* codeline)
+	{
+		if (name.empty()) return nullptr;
+		Label* label = GetLabel(name);
+		if (label == nullptr) {
 			label = new Label();
 			if (!label) throw OutOfMemoryException();
-			label->line.file = file;
-			label->line.line = line;
-			label->address = 0;
-			label->equate = false;
-			m_labels[name] = label;
+			if (name[0] == '@') {
+				string fullname = GetLastLabelName() + name;
+				m_files[m_status.curfile]->labels[fullname] = label;
+				label->multiple = true;
+			} else {
+				labels[name] = label;
+				label->multiple = false;
+			}
 		}
-		label->address = m_status.curaddress;
+		label->codeline = codeline;
 		return label;
 	}
 	
@@ -575,9 +862,45 @@ namespace MUZ {
 	/** Returns the current address. */
 	ADDRESSTYPE Assembler::GetAddress()
 	{
-		return m_status.curaddress;
+		return m_status.curaddress[m_status.cursection];
 	}
 	
+	/** Set first or second pass. */
+	void Assembler::SetFirstPass(bool yes)
+	{
+		m_status.firstpass = yes;
+	}
+	/** Check if running first pass. */
+	bool Assembler::IsFirstPass()
+	{
+		return m_status.firstpass;
+	}
+	
+	/** Assembles a main file.
+	 
+	 @param file the file path to the source to assemble, can be relative to parent file path if included
+	 @param msg the stack of error and warnings returned by the assembler
+	 
+	 @return true if assembly was correctly done
+	 */
+	bool Assembler::AssembleFile(string file, ErrorList& msg)
+	{
+		SetFirstPass(true);
+		SetAddress(0);
+		CodeLine codeline;
+#if DEBUG
+		printf("Pass 1: %s\n", file.c_str());
+#endif
+		if (AssembleFile(file, false, codeline, msg)) {
+			SetFirstPass(false);
+			SetAddress(0);
+#if DEBUG
+			printf("Pass 2: %s\n", file.c_str());
+#endif
+			return AssembleFile(file, false, codeline, msg);
+		}
+		return false;
+	}
 	/** Try to replace a symbol from the #DEFINE table.
 	 Symbols associated to nothing are considered as a boolean true, while the other symbols are replaced by their string value.
 	 @param token [IN/OUT] the token to check, if its value exists as a symbol it will be replaced by the symbol value if it has a value or by a boolean set to true if the symbol is empty
@@ -602,14 +925,25 @@ namespace MUZ {
 	}
 	
 
-	/** Try to replace a symbol from the Label table */
+	/** Try to replace a symbol from the Label table. Returns closest address if this is a local label with more than one address. Returns false if the label
+	 doesn't exist or has no address yet. */
 	bool Assembler::ReplaceLabel(std::string& source)
 	{
-		if (m_labels.count(source)) {
-			auto label = m_labels[source];
-			if (label) {
-				source = std::to_string(label->address); // std::to_string() extension at the top of this file
+		// local label?
+		if (source.empty()) return false;
+		Label* label = GetLabel(source);
+/*		if (source[0]=='@') {
+			string fullname = GetLastLabelName() + source;
+			if (m_files[m_status.curfile]->labels.count(fullname)) {
+				label = m_files[m_status.curfile]->labels[fullname];
 			}
+		} else {
+			if (labels.count(source)) {
+				label = labels[source];
+			}
+		}
+*/		if (label && !label->empty()) {
+			source = std::to_string(label->AddressFrom(GetAddress())); // std::to_string() extension at the top of this file
 			return true;
 		}
 		return false;
@@ -631,11 +965,20 @@ namespace MUZ {
 		return nullptr;
 	}
 
-	/** Try to find a named label in assembled labels. */
+	/** Try to find a named label in local or global labels. */
 	Label* Assembler::GetLabel(std::string name)
 	{
-		if (m_labels.count(name))
-			return m_labels[name];
+		if (name.empty()) return nullptr;
+		if (name[0] == '@') {
+			string fullname = GetLastLabelName() + name;
+			if (m_files[m_status.curfile]->labels.count(fullname)) {
+				return m_files[m_status.curfile]->labels[fullname];
+			}
+		} else {
+			if (labels.count(name)) {
+				return labels[name];
+			}
+		}
 		return nullptr;
 	}
 
@@ -732,11 +1075,11 @@ namespace MUZ {
 	}
 	
 	// Builds one listing line from a code index (0, 4, 8...)
-	string buildOneListingLine(ADDRESSTYPE address, vector<BYTE> code, int firstcode = 0, int nbcodes = 4, Label* label = nullptr, int line = -1, string source = "")
+	string buildOneListingLine(ADDRESSTYPE address, vector<BYTE> code, int firstcode = 0, int nbcodes = 4, Label* label = nullptr, int file = -1, int line = -1, string source = "")
 	{
 		string thisline;
-		if (code.empty() && label != nullptr) {
-			thisline = address_to_hex(label->address) + ": ";
+		if (code.empty() && label != nullptr && label->codeline && label->codeline->file == file && label->codeline->line == line) {
+			thisline = address_to_hex(label->AddressFrom(address)) + ": ";
 		} else {
 			thisline = (code.empty()) ? spaces(6) : address_to_hex(address) + ": ";
 		}
@@ -789,7 +1132,7 @@ namespace MUZ {
 		int codesize = (int)code.size();
 
 		// first line complete with 0 to 4 bytes of code
-		result.push_back(buildOneListingLine(codeline.address, code, 0, std::min<int>(4, codesize), codeline.label, codeline.line, codeline.source));
+		result.push_back(buildOneListingLine(codeline.address, code, 0, std::min<int>(4, codesize), codeline.label, codeline.file, codeline.line, codeline.source));
 		
 		// second line depend on the number of codes
 		if (codesize >= 5 && codesize <= 8) {
@@ -812,13 +1155,17 @@ namespace MUZ {
 			lines = buildListingLines(codeline);
 		} else {
 			vector<BYTE> emptycode;
-			lines.push_back(buildOneListingLine(codeline.address, emptycode,  0, 0, nullptr, codeline.line, codeline.source));
+			lines.push_back(buildOneListingLine(codeline.address, emptycode,  0, 0, nullptr, codeline.file, codeline.line, codeline.source));
 		}
 
 		// write to listing file
 		for ( auto thisline: lines) {
 			fprintf(m_listingfile, "%s\n", thisline.c_str());
 			fflush(m_listingfile);
+#if DEBUG
+			printf("%s\n", thisline.c_str());
+#endif
+
 		}
 		
 	}

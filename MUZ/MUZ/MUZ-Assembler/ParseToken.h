@@ -20,8 +20,10 @@ namespace MUZ {
 	{
 		std::string source;
 		TokenType 	type;
+		bool 		unsolved=false;// original source for unsolved labels at pass 1
 		
 		ADDRESSTYPE getAsAddress() {
+			if (unsolved) return 0;
 			return (ADDRESSTYPE)(atol(source.c_str()) & ADDRESSMASK);
 		}
 	};

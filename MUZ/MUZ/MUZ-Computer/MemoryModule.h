@@ -38,7 +38,6 @@
 
 namespace MUZ {
 
-
 	
 class MemoryModule: public Module {
 

@@ -39,9 +39,9 @@ namespace MUZ {
 		bool CheckParenthesis(ExpVector& tokens);
 		
 		/** Evaluates a sub expression starting at a given token until end of tokens or invalid token type.
-		 Returns a result and the last token used.
+		 Returns a result, and updates the last token used
 		 */
-		ParseToken Evaluate(ExpVector& tokens, int start);
+		ParseToken Evaluate(ExpVector& tokens, int start, int& end);
 	};
 	
 } // namespace

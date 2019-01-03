@@ -47,25 +47,7 @@ namespace MUZ {
 	/** Structure for the code line parser.  It works on one line at a time. */
 	class Parser {
 		
-		/** Type for subparsing functions. */
-		typedef bool subParserFunction(void);
-		
-		/** Defines each possible state subparsing function. */
-		bool stateParseNothing(void);
-		bool stateParseLetters(void);
-		bool stateParseHexDigits(void);
-		bool stateParseDecDigits(void);
-		bool stateParseOctDigits(void);
-		bool stateParseBinDigits(void);
-		bool stateParseDoubleQuote(void);
-		bool stateParseSingleQuote(void);
-		bool stateParseSpace(void);
-		bool stateParseDirective(void);
-		bool stateParseFilename(void);
-		
-		std::string* source; 							/// points to the original source string
-		
-		// parsing status variable
+		// parsing status variables for current code line
 		int pos = 0;									/// current position in source
 		char c = '\0';									/// current character
 		char upperc = '\0';								/// current character uppercase (identical if not a letter)
@@ -73,22 +55,27 @@ namespace MUZ {
 		char nextc = '\0';								/// next character in string - if hasNext is true
 		char uppernextc = '\0';							/// next character in string in uppercase - if hasNext is true
 		ParsingStatus status = inNothing;				/// main parsing status
-		ResultFlag resultFlag = hasNOTHING;				/// remember if there is a significant directive in this line
-		std::string word;								/// current token string
+		ResultFlag resultFlag = hasNOTHING;				/// shortcut flag for the most significant directives
+		std::string word;								/// cumulated characters for current token string
 		TokenType type = tokenTypeUNKNOWN;				/// current token type
-		bool doubleQuoted = false;						/// true if parsing a string between double quotes, also works for filenames
+		bool doubleQuoted = false;						/// true while parsing a string between double quotes, also works for filenames
 		
-		// current parsing state function
-		bool (Parser::*currentState)() ;				/// the current state function
-	
-		// shortcut to usefull objects
+		// shortcuts to usefull objects
 		class Directive* lastDirective = nullptr;		/// Direct directive access for conditionnal and including directives
 		class Assembler* as = nullptr;					/// Direct assembler access
 		
-		/** Checks if current and next characters can combine into the given operator and if so, store it */
+		/** Points to the parsing result. Each parsed token will be pushed in this result. */
+		ExpVector* result = nullptr;
+		/** Points to the current token variable from caller. */
+		int* curtoken = nullptr;
+		/** Points to the original source string. */
+		std::string* source;
+
+
+		/** Checks if current and next characters can combine into the given operator and if so, store it as token and goes forward. */
 		bool find2CharsOperator(std::string token, TokenType tokentype);
 		
-		/** Checks if current character match the given operator and if so, store it */
+		/** Checks if current character match the given operator and if so, stores it as token and goes forward. */
 		bool findOperator(char token, TokenType tokentype);
 		
 		/** Checks if current and next characters are hex digits only until space.
@@ -97,7 +84,7 @@ namespace MUZ {
 		 */
 		bool findHexNumberNoSuffixSkip(int skip );
 		/** Checks if current and next characters are hex digits only until 'h' suffix.
-		 @param skip number of character to ignore including the ciurrent one
+		 @param skip number of character to ignore including the current one
 		 @return true if a possible hex number has been detected
 		 */
 		bool findHexNumberWithSuffixSkip(int skip );
@@ -108,24 +95,19 @@ namespace MUZ {
 		/** Checks if current and next characters are binary digits ('0'-'1') only until space. Set skip to ignore current character and some more if needed. */
 		bool findBinaryNumberSkip(int skip );
 
-		/** Stores a new token given a string and a type.
+		/** Stores a new token given current string and type.
 		 In some cases no token will be added, e.g. a number with empty content.
-		 In any cases, the parsing status is prepared for next token by reseting
+		 In any case, the parsing status is prepared for next token by reseting
 		 status and clearing the given string.
 		 */
 		void StoreToken();
 	
-		/** Parsing result. */
-		ExpVector* result = nullptr;
-		int* curtoken = nullptr;
-
 	public:
 		
 		Parser(class Assembler& assembler) {
 			result = nullptr;
 			curtoken = nullptr;
 			as = &assembler;
-			currentState = &Parser::stateParseNothing;
 		}
 		
 		/** Init to work on a vector of tokens.*/
@@ -142,57 +124,41 @@ namespace MUZ {
 		
 		/** Tells if there are more tokens after the current one. */
 		bool ExistMoreToken(int howmany) {
-#ifdef DEBUG
-			if (!curtoken || !result) throw PARSERNotInitialized();
-#endif
 			return (*curtoken + howmany < result->size());
 		}
 		
 		/** Returns the next token. */
 		ParseToken& NextToken(int increment = 1) {
-#ifdef DEBUG
-			if (!curtoken || !result) throw PARSERNotInitialized();
-#endif
 			return (*result)[*curtoken + increment];
 		}
 
 		/** Jumps over next tokens, done by the directives or assembler after arguments have been treated. */
 		void JumpTokens(int increment) {
-#ifdef DEBUG
-			if (!curtoken || !result) throw PARSERNotInitialized();
-#endif
 			*curtoken += increment;
 		}
 		
 		/** Jumps to next token and returns it. */
 		ParseToken& JumpNextToken() {
-#ifdef DEBUG
-			if (!curtoken || !result) throw PARSERNotInitialized();
-#endif
 			*curtoken += 1;
 			return (*result)[*curtoken];
 		}
 		
 		/** Returns the current token index. Notice that this token is external to the parser and was set by Init() call. */
 		int GetCurrentTokenIndex() {
-#ifdef DEBUG
-			if (!curtoken || !result) throw PARSERNotInitialized();
-#endif
 			return *curtoken;
 		}
 		
 		/** Resolve symbol, equates and labels starting in a given token. */
-		void ResolveSymbolAt(int index);
+		bool ResolveSymbolAt(int index);
 		
-		/** Resolve symbols, equates and labels starting at given token index. If no index is given, starts at current token. */
-		void ResolveSymbols(int start = -1);
+		/** Resolve symbols, equates and labels starting at given token index. If no start index is given, will start at current token.
+		 Returns a list of unsolved label tokens.
+		 */
+		std::vector<int> ResolveSymbols(int start = -1);
 		
 		/** Resolve symbols, equates and labels starting at next token. */
-		void ResolveNextSymbols() {
-#ifdef DEBUG
-			if (!curtoken || !result) throw PARSERNotInitialized();
-#endif
-			ResolveSymbols( *curtoken + 1 );
+		std::vector<int> ResolveNextSymbols() {
+			return ResolveSymbols( *curtoken + 1 );
 		}
 		
 		/** Evaluate next tokens to produce a boolean result. */

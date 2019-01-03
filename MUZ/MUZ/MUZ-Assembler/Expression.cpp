@@ -42,13 +42,16 @@ namespace MUZ {
 		while (i <= end) {
 			TokenType type = tokens[i].type;
 			// 5a-1) solve unary operators
-			if (type == tokenTypeOP_NOT || type == tokenTypeOP_MINUS) {
-				// 5a-1a) compute op(i) with arg(i+1)
-				result = allOps[type].op->Exec(tokens[i+1], tokens[i+1]);
-				// 5a-1b) delete argument
+			if (type == tokenTypeOP_NOT) {
+				result = allOps[type].op->Exec(tokens[i+1], tokens[i+1]);// 5a-1a) compute op(i) with arg(i+1)
+				tokens.erase(i+1, 1);// 5a-1b) delete argument
+				end -= 1;
+				tokens[i] = result;// 5a-1c) replace operator by result
+			} else if (type == tokenTypeOP_MINUS) {
+				ParseToken zero = {"0", tokenTypeDECNUMBER};
+				result = allOps[type].op->Exec(zero, tokens[i+1]);
 				tokens.erase(i+1, 1);
 				end -= 1;
-				// 5a-1c) replace operator by result
 				tokens[i] = result;
 			} else {
 				// 5a-2) find next prioritary operator
@@ -135,7 +138,7 @@ namespace MUZ {
 	 @param start the first token to use for evaluation
 	 @return a token containing the result
 	 */
-	ParseToken ExpressionEvaluator::Evaluate(ExpVector& tokens, int start)
+	ParseToken ExpressionEvaluator::Evaluate(ExpVector& tokens, int start, int& end)
 	{
 		// reset stack
 		stack.clear();
@@ -143,6 +146,9 @@ namespace MUZ {
 		// 1c) build working copy, stops at first non expression token (comma ...)
 		bool done = false;
 		int curtoken = start;
+		if (end == -1) {
+			end = (int)tokens.size() - 1;
+		}
 		do {
 			ParseToken& token = tokens.at(curtoken);
 			switch( token.type ) {
@@ -185,20 +191,23 @@ namespace MUZ {
 			// next token
 			if (!done) curtoken += 1;
 			
-		} while (!done && (curtoken < tokens.size()));
+		} while (!done && (curtoken <= end));
 		
 		
 		// 1) check parenthesiss levels
 		if (stack.size() > 0 && CheckParenthesis(stack)) {
 		
 			//2a) reduce parenthesis
-			int end = (int)stack.size() - 1;
-			ReduceParenthesis(stack, start, end);
+			int stackend = (int)stack.size() - 1;
+			ReduceParenthesis(stack, 0, stackend);
 
 			// 2b) compute expression
-			start = 0;
-			end = -1;
-			return EvaluateExpression(stack, start, end);
+			stackend = -1;
+			ParseToken result = EvaluateExpression(stack, 0, stackend);
+			
+			// compute the next token index
+			end = curtoken;
+			return result;
 		}
 		
 		//TODO: parenthesis error

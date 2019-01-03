@@ -1,3 +1,70 @@
+BIT 7,(HL)
+BIT 0,B
+BIT 0,C
+BIT 0,D
+BIT 0,E
+BIT 0,H
+BIT 0,L
+BIT 0,(HL)
+BIT 0,A
+BIT 7,B
+BIT 7,C
+BIT 7,D
+BIT 7,E
+BIT 7,H
+BIT 7,L
+;
+BIT 7,A
+
+LD (DE),A
+LD (BC),A
+LD (HL),A
+
+.ORG $2000
+JP NotSoFar
+.DS 0x100
+NotSoFar: .DB 0
+
+
+kWrongHex: .EQU 0x0B
+
+kNull: .EQU 0
+kNewLine: .EQU 13
+szDevices:  .DB  "Devices detected:",kNewLine,kNull
+
+ kVersMajor: .EQU 1
+.ORG 2000h
+.DB  '0'+kVersMajor,'.'
+
+.DB  '0','.'
+store: .DB 1,2,3,4
+LD (store), HL
+
+kData		.EQU 1
+kSPUsr:     .EQU kData+0x00C0
+kInputSize: .EQU 128
+;0000:               0052  kSPUsr:     .EQU kData+0x00C0   ;Top of stack for user program
+;0000:               0053  kSPSys:     .EQU kData+0x0100   ;Top of stack for system
+;0000:               0054  kInputBuff: .EQU kData+0x0100   ;Line input buffer start    (to +0x017F);
+;0000:               0055  kInputSize: .EQU 128            ;Size of input buffer
+;0000:               0056  kStrBuffer: .EQU kData+0x0180   ;String buffer              (to +0x01FF)
+;0000:               0057  kStrSize:   .EQU 128            ;Size of string buffer
+;0000:               0058  kJumpTab:   .EQU kData+0x0200   ;Redirection jump table     (to +0x025F)
+ .ORG $2000
+Start: .DB 1
+End: .DB 2
+LD HL,(End-Start)
+
+.ORG $2000
+Start:		.DS 16
+		JR Start
+
+
+LD (HL),A    ;      77            0045              LD   (HL),A
+LD A,E       ;00C4: 7B            0032              LD   A,E            ;First byte to write to LEDs = 0x01
+LD HL,-8000  ;00C7: 21 C0 E1      0034              LD   HL,-8000       ;Set delay time
+
+
 //
 //  Instructions.asm
 //  MUZ-Workshop

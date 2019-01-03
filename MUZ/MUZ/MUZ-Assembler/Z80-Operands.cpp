@@ -9,6 +9,7 @@
 #include "Z80-Operands.h"
 #include "ParseToken.h"
 #include "StrUtils.h"
+#include "Expression.h"
 
 #include <string>
 #include <unordered_map>
@@ -113,31 +114,33 @@ namespace MUZ {
 	}
 	
 	// regA to regR
-	bool reg8( ExpVector* tokens, int curtoken, OperandType& reg8, int& value )
+	bool reg8( ExpVector* tokens, int& curtoken, OperandType& reg8, int& value )
 	{
 		ParseToken& token =tokens->at(curtoken);
 		if (token.type != tokenTypeLETTERS) return false;
 		if (registers8.count(token.source)) {
 			reg8 = registers8[token.source];
+			curtoken += 1;
 			return true;
 		}
 		return false;
 	}
 
 	// regAF to regIY
-	bool reg16( ExpVector* tokens, int curtoken, OperandType& reg16, int& value )
+	bool reg16( ExpVector* tokens, int& curtoken, OperandType& reg16, int& value )
 	{
 		ParseToken& token =tokens->at(curtoken);
 		if (token.type != tokenTypeLETTERS) return false;
 		if (registers16.count(token.source)) {
 			reg16 = registers16[token.source];
+			curtoken += 1;
 			return true;
 		}
 		return false;
 	}
 
 	// indC
-	bool indirectC( ExpVector* tokens, int curtoken, OperandType& reg, int& value )
+	bool indirectC( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -148,11 +151,12 @@ namespace MUZ {
 		token = &tokens->at(curtoken + 2);
 		if (token->type != tokenTypePARCLOSE) return false;
 		reg = indC;
+		curtoken += 3;
 		return true;
 	}
 
 	// indHL
-	bool indirectHL( ExpVector* tokens, int curtoken, OperandType& reg, int& value )
+	bool indirectHL( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -163,10 +167,11 @@ namespace MUZ {
 		token = &tokens->at(curtoken + 2);
 		if (token->type != tokenTypePARCLOSE) return false;
 		reg = indHL;
+		curtoken += 3;
 		return true;
 	}
 	// indBC
-	bool indirectBC( ExpVector* tokens, int curtoken, OperandType& reg, int& value )
+	bool indirectBC( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -177,10 +182,11 @@ namespace MUZ {
 		token = &tokens->at(curtoken + 2);
 		if (token->type != tokenTypePARCLOSE) return false;
 		reg = indBC;
+		curtoken += 3;
 		return true;
 	}
 	// indDE
-	bool indirectDE( ExpVector* tokens, int curtoken, OperandType& reg, int& value )
+	bool indirectDE( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -191,11 +197,12 @@ namespace MUZ {
 		token = &tokens->at(curtoken + 2);
 		if (token->type != tokenTypePARCLOSE) return false;
 		reg = indDE;
+		curtoken += 3;
 		return true;
 	}
 
 	// indSP
-	bool indirectSP( ExpVector* tokens, int curtoken, OperandType& reg, int& value )
+	bool indirectSP( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -206,92 +213,177 @@ namespace MUZ {
 		token = &tokens->at(curtoken + 2);
 		if (token->type != tokenTypePARCLOSE) return false;
 		reg = indSP;
+		curtoken += 3;
 		return true;
 	}
 
 	// indIXd, indIYd
-	bool indirectX( ExpVector* tokens, int curtoken, OperandType& regX, int& value )
+	OperandError indirectX( ExpVector* tokens, int& curtoken, OperandType& regX, int& value )
 	{
-		if (curtoken + 4 >= tokens->size() ) return false;
+		if (curtoken + 4 >= tokens->size() ) return operrTOKENNUMBER;
 		ParseToken* token = &tokens->at(curtoken);
-		if (token->type != tokenTypePAROPEN) return false;
-		if (! reg16(tokens, curtoken+1, regX, value)) return false;
-		if (regX != regIX && regX != regIY) return false;
+		if (token->type != tokenTypePAROPEN) return operrMISSINGPAROPEN;
+		int indextoken = curtoken + 1;
+		if (! reg16(tokens, indextoken, regX, value)) return operrREGISTERNAME;
+		if (regX != regIX && regX != regIY) return operrWRONGREGISTER;
 		token = &tokens->at(curtoken + 2);
-		if (token->type != tokenTypeOP_PLUS) return false;
-		token = &tokens->at(curtoken + 3);
-		if (token->type != tokenTypeDECNUMBER) return false;
-		value = dec_to_unsigned(token->source);
-		token = &tokens->at(curtoken + 4);
-		if (token->type != tokenTypePARCLOSE) return false;
-		return true;
+		if (token->type != tokenTypeOP_PLUS) return operrWRONGOP;
+		// find closing parenthesis
+		indextoken = curtoken + 3;// skip '(' regX '+'
+		int parlevel = 1;
+		for ( ; indextoken < tokens->size() ; indextoken++) {
+			token = &tokens->at(indextoken);
+			if (token->type == tokenTypePAROPEN) {
+				parlevel += 1;
+			} else if (token->type == tokenTypePARCLOSE) {
+				parlevel -= 1;
+				if (parlevel == 0) break;
+			}
+		}
+		// evaluate the value after "+" and before closing parenthesis
+		indextoken = indextoken - 1;
+		ExpressionEvaluator eval;
+		ParseToken evaluated = eval.Evaluate(*tokens, curtoken + 3, indextoken);
+		if (evaluated.unsolved) {
+			value = 0;
+		}
+		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
+			value = dec_to_unsigned(evaluated.source);
+		}
+		curtoken = indextoken + 2;// skips after closing parenthesis
+		return operrOK;
 	}
 
 	// bit0 to bit7
-	bool bitnumber( ExpVector* tokens, int curtoken, OperandType& bit, int& value )
+	bool bitnumber( ExpVector* tokens, int& curtoken, OperandType& bit, int& value )
 	{
-		ParseToken* token = &tokens->at(curtoken);
-		if (token->type != tokenTypeDECNUMBER) return false;
-		value = dec_to_unsigned(token->source);
-		if (value < 0 || value > 7) return false;
-		if (value == 0) bit = bit0;
-		else if (value == 1) bit = bit1;
-		else if (value == 2) bit = bit2;
-		else if (value == 3) bit = bit3;
-		else if (value == 4) bit = bit4;
-		else if (value == 5) bit = bit5;
-		else if (value == 6) bit = bit6;
-		else bit = bit7;
-		return true;
+		ExpressionEvaluator eval;
+		int lasttoken = -1; 
+		ParseToken evaluated = eval.Evaluate(*tokens, curtoken, lasttoken);
+		//ParseToken* token = &tokens->at(curtoken);
+		//if (token->type != tokenTypeDECNUMBER) return false;
+		//value = dec_to_unsigned(token->source);
+		if (evaluated.unsolved) {
+			value = 0;
+			bit = bit0;
+			curtoken = lasttoken;
+			return true;
+		}
+		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
+			value = dec_to_unsigned(evaluated.source);
+			if (value < 0 || value > 7) return false;
+			if (value == 0) bit = bit0;
+			else if (value == 1) bit = bit1;
+			else if (value == 2) bit = bit2;
+			else if (value == 3) bit = bit3;
+			else if (value == 4) bit = bit4;
+			else if (value == 5) bit = bit5;
+			else if (value == 6) bit = bit6;
+			else bit = bit7;
+			curtoken = lasttoken ;
+			return true;
+		}
+		return false;
 	}
 
 	// condNZ to condP
-	bool condition( ExpVector* tokens, int curtoken, OperandType& cond, int& value )
+	bool condition( ExpVector* tokens, int& curtoken, OperandType& cond, int& value )
 	{
 		ParseToken& token =tokens->at(curtoken);
 		if (token.type != tokenTypeLETTERS) return false;
 		if (conditions.count(token.source)) {
 			cond = conditions[token.source];
+			curtoken += 1;
 			return true;
 		}
 		return false;
 	}
 
 	// num8
-	bool number8( ExpVector* tokens, int curtoken, OperandType& number8, int& value )
+	bool number8( ExpVector* tokens, int& curtoken, OperandType& number8, int& value )
 	{
-		ParseToken& token =tokens->at(curtoken);
-		if (token.type != tokenTypeDECNUMBER) return false;
-		value = dec_to_unsigned(token.source);
-		if (value > 255) return false;
-		number8 = num8;
-		return true;
+		ExpressionEvaluator eval;
+		int lasttoken = -1;
+		ParseToken evaluated = eval.Evaluate(*tokens, curtoken, lasttoken);
+		if (evaluated.unsolved) {
+			value = 0;
+			number8 = num8;
+			curtoken = lasttoken + 1;
+			return true;
+		}
+		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
+			value = dec_to_unsigned(evaluated.source);
+			if (value > 255) return false;
+			number8 = num8;
+			curtoken = lasttoken + 1;
+			return true;
+		}
+		return false;
 	}
 
 	// num16
-	bool number16( ExpVector* tokens, int curtoken, OperandType& number16, int& value )
+	bool number16( ExpVector* tokens, int& curtoken, OperandType& number16, int& value )
 	{
-		ParseToken& token =tokens->at(curtoken);
-		if (token.type != tokenTypeDECNUMBER) return false;
-		value = dec_to_unsigned(token.source);
-		if (value > 65535) return false;
-		number16 = num16;
-		return true;
+		ExpressionEvaluator eval;
+		int lasttoken = -1;
+		ParseToken evaluated = eval.Evaluate(*tokens, curtoken, lasttoken);
+		if (evaluated.unsolved) {
+			value = 0;
+			number16 = num16;
+			curtoken = lasttoken + 1;
+			return true;
+		}
+		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
+			value = dec_to_unsigned(evaluated.source);
+			if (value > 65535) return false;
+			number16 = num16;
+			curtoken = lasttoken + 1;
+			return true;
+		}
+		return false;
 	}
 
 	// ind16
-	bool indirect16( ExpVector* tokens, int curtoken, OperandType& number16, int& value )
+	/** Compute a 16-bit value from a numeric expression between parenthesis. If parenthesis or a value cannot be found,
+	 returns an error code. The last used token index is returned even if the expression doesn't compute a number but
+	 have correct parenthesis. */
+	OperandError indirect16( ExpVector* tokens, int curtoken, OperandType& number16, int& value, int& lasttoken )
 	{
-		if (curtoken + 2 >= tokens->size() ) return false;
+		if (curtoken + 2 >= tokens->size() ) return operrTOKENNUMBER;
 		ParseToken* token = &tokens->at(curtoken);
-		if (token->type != tokenTypePAROPEN) return false;
+		if (token->type != tokenTypePAROPEN) return operrMISSINGPAROPEN;
 		token = &tokens->at(curtoken + 1);
-		if (token->type != tokenTypeDECNUMBER) return false;
-		value = dec_to_unsigned(token->source);
-		token = &tokens->at(curtoken + 2);
-		if (token->type != tokenTypePARCLOSE) return false;
-		number16 = ind16;
-		return true;
+		// find closing parenthesis
+		lasttoken = curtoken + 2;
+		int parlevel = 1;
+		for ( ; lasttoken < tokens->size() ; lasttoken++) {
+			token = &tokens->at(lasttoken);
+			if (token->type == tokenTypePAROPEN) {
+				parlevel += 1;
+			} else if (token->type == tokenTypePARCLOSE) {
+				parlevel -= 1;
+				if (parlevel == 0) break;
+			}
+		}
+		if (token->type != tokenTypePARCLOSE) return operrMISSINGPARCLOSE;
+		// evaluate the tokens between parenthesis
+		ExpressionEvaluator eval;
+		lasttoken -= 1; // back from parenthesis close
+		ParseToken evaluated = eval.Evaluate(*tokens, curtoken + 1, lasttoken );
+		if (evaluated.unsolved) {
+			value = 0;
+			number16 = num16;
+			lasttoken = lasttoken + 1;
+			return operrOK;
+		}
+		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
+			value = dec_to_unsigned(evaluated.source);
+			number16 = ind16;
+			lasttoken = lasttoken + 1;// skips  closing parenthesis
+			return operrOK;
+		}
+		lasttoken = lasttoken + 1;// skips  closing parenthesis
+		return operrNOTNUMBER;
 	}
 
 

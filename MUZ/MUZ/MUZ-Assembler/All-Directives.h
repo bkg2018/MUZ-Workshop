@@ -50,7 +50,7 @@ namespace MUZ {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	class DirectiveINSERTHEX : public Directive {
-		
+		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 
 	// Assembler directives (.xxx)
@@ -58,6 +58,14 @@ namespace MUZ {
 	
 	/** The .PROC drective only checks that its followed by Z80. */
 	class DirectivePROC : public Directive {
+		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	};
+
+	class DirectiveCODE : public Directive {
+		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	};
+
+	class DirectiveDATA : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	class DirectiveORG : public Directive {
@@ -70,12 +78,14 @@ namespace MUZ {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	class DirectiveBYTE : public Directive {
-		
+		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	class DirectiveWORD : public Directive {
-		
+		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
-
+	class DirectiveSPACE : public Directive {
+		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	};
 
 
 }

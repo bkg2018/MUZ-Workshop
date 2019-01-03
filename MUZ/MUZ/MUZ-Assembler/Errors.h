@@ -24,8 +24,7 @@ namespace MUZ {
 	struct ErrorMessage {
 		ErrorType type;		// (see enum above): info, warning, about a file, serious error or fatal error
 		std::string text;	// message to display
-		std::string file;	// associated file: related file if ABOUTFILE, assembled source if any other type
-		int line;			// line number where it occured
+		class CodeLine* codeline;	// line number where it occured
 	};
 	
 	class ErrorList : public std::vector<ErrorMessage>

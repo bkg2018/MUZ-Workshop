@@ -11,86 +11,10 @@
 #include <stdlib.h>
 
 #include "Types.h"
+#include "StrUtils.h"
 
 namespace MUZ {
 
-	// numeric value of a char. only '0'-9'  'A'-'F' and 'a'-'f' have a value
-	static BYTE asciinum[256] = {
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 00 - 0f
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 10 - 1f
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 20 - 2f
-			0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 0, 0, 0, 0, // 30 - 3f
-			0,10,11,12,13,14,15, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 40 - 4f
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 50 - 5f
-			0,10,11,12,13,14,15, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 60 - 6f
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // 70 - 7f
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	};
-
-	// helper function to convert a 2 chars hex at an address to a byte value
-	inline BYTE hex2byte(const BYTE* p) {
-		int value = asciinum[(int)*(p+1)] + (asciinum[(int)*p] << 4);
-		return (BYTE)(value & 0xFF);
-	}
-
-	// practical consts for HEX intel format, these are byte offset of fields starting with ':' at offset 0
-	const int HEXOFS_SIZE = 1;		// offset to the 2-digits byte size
-	const int HEXOFS_ADDRESS = 3;	// offset of the 4-digits address
-	const int HEXOFS_TYPE = 7;		// offset of the 1-digit record type
-	const int HEXOFS_CONTENT = 9;	// offset of the content
-
-	// returns the type of HEX record - returns -1 if not a valid HEX
-	inline int hexType(const BYTE* hexline) {
-		if (*hexline != ':') return -1;
-		return (int)hex2byte(hexline + HEXOFS_TYPE);
-	}
-
-	// returns number of bytes in an Intel HEX record - returns 0 if not a type 0 record
-	inline int hexNbBytes(const BYTE* hexline) {
-		if (*hexline != ':') return 0;
-		int type = hex2byte(hexline + HEXOFS_TYPE);
-		if (type == 0) return hex2byte(hexline + HEXOFS_SIZE);
-		return 0;
-	}
-
-	// tells if the record is an end of file
-	inline bool hexEOF(const BYTE* hexline) {
-		if (*hexline != ':') return false;
-		int type = hex2byte(hexline + HEXOFS_TYPE);
-		return (type == 1);
-	}
-
-	// returns the address in an hex record - returns 0 if not a type 0 record
-	inline ADDRESSTYPE hexAddress(const BYTE* hexline) {
-		if (*hexline != ':') return 0;
-		int type = hex2byte(hexline + HEXOFS_TYPE);
-		if (type == 0) {
-			BYTE h = hex2byte(hexline + HEXOFS_ADDRESS);
-			BYTE l = hex2byte(hexline + HEXOFS_ADDRESS + 2);
-			return ((int)h << 8) + (int)l;
-		}
-		return 0;
-	}
-
-	// stores the hex content in a given buffer
-	inline void hexStore(const BYTE* hexline, DATATYPE* buffer) {
-
-		BYTE* psrc = (BYTE*)hexline + HEXOFS_CONTENT ;
-		DATATYPE* pdest = buffer;
-		int nbbytes = hexNbBytes(hexline);
-		for (psrc = (BYTE*)(hexline + HEXOFS_CONTENT) ; nbbytes > 0 ; nbbytes --) {
-			*pdest = (DATATYPE)hex2byte(psrc);
-			psrc += 2;
-			pdest += 1;
-		}
-	}
 
 	/** Programs a content from an Intel HEX file and sets as ROM.
 	 *  @param hexfile the HEX file containing the code to copy in ROM
