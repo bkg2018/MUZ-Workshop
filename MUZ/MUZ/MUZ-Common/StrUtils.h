@@ -18,6 +18,15 @@ namespace std {
 	string to_upper(string);
 } // namespace std
 
+/** Checks if a string contains only hexadecimal characters. */
+bool isHexa(std::string s);
+/** Checks if a string contains only octal characters. */
+bool isOctal(std::string s);
+/** Checks if a string contains only decimal characters. */
+bool isDecimal(std::string s);
+/** Checks if a string contains only binary characters. */
+bool isBinary(std::string s);
+
 /** Convert a base N number to unsigned int, */
 unsigned int base_to_unsigned(std::string s, int base);
 

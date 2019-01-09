@@ -15,6 +15,7 @@
 		866786D321D64D060027E67F /* CodeLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866786D221D64D060027E67F /* CodeLine.cpp */; };
 		866786D621D670A40027E67F /* FileUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866786D421D670A40027E67F /* FileUtils.cpp */; };
 		86892BC521B6BF4700EC24EF /* StrUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86892BC421B6BF4700EC24EF /* StrUtils.cpp */; };
+		868A32E521E0DDD800A6466A /* MUZ_WorkshopTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C5D21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm */; };
 		8694B72421B2E653006EF947 /* Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B72221B2E652006EF947 /* Assembler.cpp */; };
 		8694B72921B43873006EF947 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B72721B43873006EF947 /* Parser.cpp */; };
 		8694B72F21B47FAE006EF947 /* Z80-Instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B72D21B47FAE006EF947 /* Z80-Instructions.cpp */; };
@@ -34,7 +35,6 @@
 		869B4C5121AC4FB300E65FE7 /* simz80.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C3921AC4FB300E65FE7 /* simz80.cpp */; };
 		869B4C5221AC4FB300E65FE7 /* mem_mmu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C3B21AC4FB300E65FE7 /* mem_mmu.cpp */; };
 		869B4C5421AC50F600E65FE7 /* MuzBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C5321AC50F600E65FE7 /* MuzBridge.mm */; };
-		869B4C5E21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C5D21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm */; };
 		86C121B321AEC742005A5C36 /* PortMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86C121B121AEC742005A5C36 /* PortMgr.cpp */; };
 		86C121B621AED01D005A5C36 /* ROMPagingPort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86C121B521AED01D005A5C36 /* ROMPagingPort.cpp */; };
 		86D4D26B21CBB50E0091B0E0 /* réduction expression.numbers in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26821CBB50E0091B0E0 /* réduction expression.numbers */; };
@@ -160,7 +160,6 @@
 		86554A6C21C108C20071447E /* ExpVector.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ExpVector.cpp; sourceTree = "<group>"; };
 		86554A6E21C13DBA0071447E /* Operator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Operator.cpp; sourceTree = "<group>"; };
 		86554A6F21C13DBA0071447E /* Operator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Operator.h; sourceTree = "<group>"; };
-		86554A7121C13FA80071447E /* Operators.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = Operators.md; path = "WIP - work and design docs/Operators.md"; sourceTree = "<group>"; };
 		86554A7221C23B220071447E /* All-Operators.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "All-Operators.cpp"; sourceTree = "<group>"; };
 		86554A7321C23B220071447E /* All-Operators.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "All-Operators.h"; sourceTree = "<group>"; };
 		86554A7521C24C9E0071447E /* Asm-Exceptions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Asm-Exceptions.h"; sourceTree = "<group>"; };
@@ -168,7 +167,6 @@
 		866786CA21CFDAE10027E67F /* Z80-Operands.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "Z80-Operands.cpp"; sourceTree = "<group>"; };
 		866786CC21D112060027E67F /* Instructions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Instructions.asm; sourceTree = "<group>"; };
 		866786CE21D1144C0027E67F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		866786CF21D133990027E67F /* Z80-table.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Z80-table.md"; sourceTree = "<group>"; };
 		866786D021D530290027E67F /* Config.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		866786D121D530C40027E67F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		866786D221D64D060027E67F /* CodeLine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CodeLine.cpp; sourceTree = "<group>"; };
@@ -179,10 +177,12 @@
 		86892BC421B6BF4700EC24EF /* StrUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StrUtils.cpp; sourceTree = "<group>"; };
 		86892BC621B703B500EC24EF /* Errors.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Errors.h; sourceTree = "<group>"; };
 		86892BC721B7FE8000EC24EF /* ParsingMode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParsingMode.h; sourceTree = "<group>"; };
-		86892BC821B95B6700EC24EF /* conditionnal assembling.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = "conditionnal assembling.md"; path = "WIP - work and design docs/conditionnal assembling.md"; sourceTree = "<group>"; };
+		86892BC821B95B6700EC24EF /* conditionnal assembling.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "conditionnal assembling.md"; sourceTree = "<group>"; };
 		86892BCA21BA72F100EC24EF /* Conditionnals.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Conditionnals.asm; sourceTree = "<group>"; };
+		868A32E721E4FE2600A6466A /* CHANGES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGES.md; sourceTree = "<group>"; };
+		868F597721DEA279009C6222 /* Z80-Instructions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "Z80-Instructions.asm"; sourceTree = "<group>"; };
 		8694B71B21B13EE6006EF947 /* Assembler.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = Assembler.md; path = "WIP - work and design docs/Assembler.md"; sourceTree = "<group>"; };
-		8694B71D21B19468006EF947 /* design.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = design.md; path = "WIP - work and design docs/design.md"; sourceTree = "<group>"; };
+		8694B71D21B19468006EF947 /* design.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = design.md; sourceTree = "<group>"; };
 		8694B72021B2E484006EF947 /* AddressZone.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddressZone.h; sourceTree = "<group>"; };
 		8694B72121B2E59F006EF947 /* Label.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Label.h; sourceTree = "<group>"; };
 		8694B72221B2E652006EF947 /* Assembler.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Assembler.cpp; sourceTree = "<group>"; };
@@ -242,9 +242,9 @@
 		86C121B521AED01D005A5C36 /* ROMPagingPort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ROMPagingPort.cpp; sourceTree = "<group>"; };
 		86C121EE21B0344D005A5C36 /* muz_simz80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muz_simz80.h; sourceTree = "<group>"; };
 		86C121EF21B0344E005A5C36 /* muz_mmu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muz_mmu.h; sourceTree = "<group>"; };
-		86D4D26821CBB50E0091B0E0 /* réduction expression.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; name = "réduction expression.numbers"; path = "WIP - work and design docs/réduction expression.numbers"; sourceTree = "<group>"; };
-		86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; name = "binary comparison.numbers"; path = "WIP - work and design docs/binary comparison.numbers"; sourceTree = "<group>"; };
-		86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = "Evaluation expression.md"; path = "WIP - work and design docs/Evaluation expression.md"; sourceTree = "<group>"; };
+		86D4D26821CBB50E0091B0E0 /* réduction expression.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "réduction expression.numbers"; sourceTree = "<group>"; };
+		86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "binary comparison.numbers"; sourceTree = "<group>"; };
+		86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = "Evaluation expression.md"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -499,6 +499,7 @@
 		86892BC921BA72BA00EC24EF /* TestSources */ = {
 			isa = PBXGroup;
 			children = (
+				868F597721DEA279009C6222 /* Z80-Instructions.asm */,
 				86892BCA21BA72F100EC24EF /* Conditionnals.asm */,
 				8642232C21C6442D0053E02F /* Expressions.asm */,
 				866786CC21D112060027E67F /* Instructions.asm */,
@@ -507,17 +508,23 @@
 			path = TestSources;
 			sourceTree = "<group>";
 		};
+		868A32E621E4FDDA00A6466A /* work */ = {
+			isa = PBXGroup;
+			children = (
+				86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */,
+				86D4D26821CBB50E0091B0E0 /* réduction expression.numbers */,
+				8694B71D21B19468006EF947 /* design.md */,
+				86892BC821B95B6700EC24EF /* conditionnal assembling.md */,
+				86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */,
+			);
+			path = work;
+			sourceTree = "<group>";
+		};
 		8694B71A21B13ECF006EF947 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
-				86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */,
-				86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */,
-				86D4D26821CBB50E0091B0E0 /* réduction expression.numbers */,
+				868A32E621E4FDDA00A6466A /* work */,
 				8694B71B21B13EE6006EF947 /* Assembler.md */,
-				86892BC821B95B6700EC24EF /* conditionnal assembling.md */,
-				8694B71D21B19468006EF947 /* design.md */,
-				86554A7121C13FA80071447E /* Operators.md */,
-				866786CF21D133990027E67F /* Z80-table.md */,
 			);
 			path = Documentation;
 			sourceTree = "<group>";
@@ -604,6 +611,7 @@
 				869B4C3621AC4FB300E65FE7 /* YAZE */,
 				869B4C1A21AC4FB200E65FE7 /* MUZ */,
 				866786D121D530C40027E67F /* README.md */,
+				868A32E721E4FE2600A6466A /* CHANGES.md */,
 			);
 			name = MUZ;
 			path = ../../MUZ;
@@ -794,7 +802,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				869B4C5E21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm in Sources */,
+				868A32E521E0DDD800A6466A /* MUZ_WorkshopTests.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

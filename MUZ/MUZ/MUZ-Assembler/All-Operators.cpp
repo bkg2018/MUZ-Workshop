@@ -9,6 +9,7 @@
 #include "All-Operators.h"
 #include "StrUtils.h"
 #include "Asm-Exceptions.h"
+#include "Expression.h"
 
 namespace MUZ {
 
@@ -46,12 +47,14 @@ namespace MUZ {
 	struct OperatorNOT : public Operator
 	{
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
-			if (arg1.type == tokenTypeDECNUMBER) {
-				unsigned int n = (~dec_to_unsigned(arg1.source)) & ADDRESSMASK;
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER && arg1.type != tokenTypeBOOL) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER && arg2.type != tokenTypeBOOL) return nop;
+			if (arg1.type == tokenTypeDECNUMBER || arg1.type == tokenTypeSTRING) {
+				unsigned int n = (~arg1.asNumber()) & ADDRESSMASK;
 				ParseToken result;
 				to_numtoken(n, result);
 				return result;
-			} else if (arg1.type == tokenTypeBOOL) {
+			}else if (arg1.type == tokenTypeBOOL) {
 				ParseToken result;
 				to_booltoken(arg1.source.empty(), result);
 				return result;
@@ -64,7 +67,9 @@ namespace MUZ {
 	struct OperatorMUL : public Operator
 	{
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
-			int n = (dec_to_unsigned(arg1.source) * dec_to_unsigned(arg2.source)) & ADDRESSMASK;
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
+			int n = (arg1.asNumber() * arg2.asNumber()) & ADDRESSMASK;
 			ParseToken result ;
 			to_numtoken(n, result);
 			return result;
@@ -75,7 +80,9 @@ namespace MUZ {
 	struct OperatorDIV : public Operator
 	{
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
-			int n = (dec_to_unsigned(arg1.source) / dec_to_unsigned(arg2.source)) & ADDRESSMASK;
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
+			int n = (arg1.asNumber() / arg2.asNumber()) & ADDRESSMASK;
 			ParseToken result;
 			to_numtoken(n, result);
 			return result;
@@ -86,7 +93,9 @@ namespace MUZ {
 	struct OperatorMOD : public Operator
 	{
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
-			int n = (dec_to_unsigned(arg1.source) % (dec_to_unsigned(arg2.source) & ADDRESSMASK)) & ADDRESSMASK;
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
+			int n = (arg1.asNumber() % (arg2.asNumber() & ADDRESSMASK)) & ADDRESSMASK;
 			ParseToken result;
 			to_numtoken(n, result);
 			return result;
@@ -105,9 +114,19 @@ namespace MUZ {
 	{
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
 			ParseToken result;
-			// Boolean?
+			// Boolean + boolean?
 			if ((arg1.type == tokenTypeBOOL) || (arg2.type == tokenTypeBOOL)) {
 				to_booltoken(to_bool(arg1) || to_bool(arg2), result);
+				return result;
+			}
+			// string + number?
+			if (arg1.type == tokenTypeSTRING && arg2.type == tokenTypeDECNUMBER) {
+				std::string s;
+				unsigned int num = arg2.asNumber();
+				for (auto c: arg1.source) {
+					s = s + (char)(((int)c + num) & 0xff);
+				}
+				to_stringtoken( s, result);
 				return result;
 			}
 			// one or both arguments as string?
@@ -116,7 +135,7 @@ namespace MUZ {
 				return result;
 			}
 			// consider both are decimal numbers
-			int n = (dec_to_unsigned(arg1.source) + dec_to_unsigned(arg2.source)) & ADDRESSMASK;
+			int n = (arg1.asNumber() + arg2.asNumber()) & ADDRESSMASK;
 			to_numtoken(n, result);
 			return result;
 		}
@@ -126,8 +145,20 @@ namespace MUZ {
 	struct OperatorSUB : public Operator
 	{
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
 			ParseToken result;
-			int n = (dec_to_unsigned(arg1.source) - dec_to_unsigned(arg2.source)) & ADDRESSMASK;
+			// string - number?
+			if (arg1.type == tokenTypeSTRING && arg2.type == tokenTypeDECNUMBER) {
+				std::string s;
+				unsigned int num = arg2.asNumber();
+				for (auto c: arg1.source) {
+					s = s + (char)(((int)c - num) & DATAMASK);
+				}
+				to_stringtoken( s, result);
+				return result;
+			}
+			int n = (arg1.asNumber() - arg2.asNumber()) & ADDRESSMASK;
 			to_numtoken(n, result);
 			return result;
 		}
@@ -137,8 +168,10 @@ namespace MUZ {
 	struct OperatorLSHIFT : public Operator
 	{
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
 			ParseToken result;
-			int n = (dec_to_unsigned(arg1.source) << dec_to_unsigned(arg2.source)) & ADDRESSMASK;
+			int n = (arg1.asNumber() << arg2.asNumber()) & ADDRESSMASK;
 			to_numtoken(n, result);
 			return result;
 		}
@@ -148,8 +181,10 @@ namespace MUZ {
 	struct OperatorRSHIFT : public Operator
 	{
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
 			ParseToken result;
-			int n = (dec_to_unsigned(arg1.source) >> dec_to_unsigned(arg2.source)) & ADDRESSMASK;
+			int n = (arg1.asNumber() >> arg2.asNumber()) & ADDRESSMASK;
 			to_numtoken(n, result);
 			return result;
 		}
@@ -166,7 +201,9 @@ namespace MUZ {
 				to_booltoken( to_bool(arg1) && to_bool(arg2), result);
 				return result;
 			}
-			int n = (dec_to_unsigned(arg1.source) & ADDRESSMASK) & (dec_to_unsigned(arg2.source) & ADDRESSMASK);
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
+			int n = (arg1.asNumber() & ADDRESSMASK) & (arg2.asNumber() & ADDRESSMASK);
 			to_numtoken(n, result);
 			return result;
 		}
@@ -183,7 +220,9 @@ namespace MUZ {
 				to_booltoken( to_bool(arg1) || to_bool(arg2), result);
 				return result;
 			}
-			int n = (dec_to_unsigned(arg1.source) & ADDRESSMASK) | (dec_to_unsigned(arg2.source) & ADDRESSMASK);
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
+			int n = (arg1.asNumber() & ADDRESSMASK) | (arg2.asNumber() & ADDRESSMASK);
 			to_numtoken(n, result);
 			return result;
 		}
@@ -200,7 +239,9 @@ namespace MUZ {
 				to_booltoken( to_bool(arg1) ^ to_bool(arg2), result);
 				return result;
 			}
-			int n = (dec_to_unsigned(arg1.source) & ADDRESSMASK) ^ (dec_to_unsigned(arg2.source) & ADDRESSMASK);
+			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
+			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
+			int n = (arg1.asNumber() & ADDRESSMASK) ^ (arg2.asNumber() & ADDRESSMASK);
 			to_numtoken(n, result);
 			return result;
 		}
@@ -249,7 +290,7 @@ namespace MUZ {
 			}
 			
 			// consider both decimal numbers
-			bool inferior = (dec_to_unsigned(arg1.source) & ADDRESSMASK) < (dec_to_unsigned(arg2.source) & ADDRESSMASK);
+			bool inferior = (arg1.asNumber() & ADDRESSMASK) < (arg2.asNumber() & ADDRESSMASK);
 			to_booltoken(inferior, result);
 			return result;
 		}
@@ -301,7 +342,7 @@ namespace MUZ {
 			}
 			
 			// consider both decimal numbers
-			bool inferior = (dec_to_unsigned(arg1.source) & ADDRESSMASK) < (dec_to_unsigned(arg2.source) & ADDRESSMASK);
+			bool inferior = (arg1.asNumber() & ADDRESSMASK) < (arg2.asNumber() & ADDRESSMASK);
 			to_booltoken(inferior, result);
 			return result;
 		}
@@ -349,7 +390,7 @@ namespace MUZ {
 				return result;
 			}
 			// consider both decimal numbers
-			bool inferior = (dec_to_unsigned(arg1.source) & ADDRESSMASK) <= (dec_to_unsigned(arg2.source) & ADDRESSMASK);
+			bool inferior = (arg1.asNumber() & ADDRESSMASK) <= (arg2.asNumber() & ADDRESSMASK);
 			to_booltoken(inferior, result);
 			return result;
 		}
@@ -397,7 +438,7 @@ namespace MUZ {
 				return result;
 			}
 			// consider both decimal numbers
-			bool superior = (dec_to_unsigned(arg1.source) & ADDRESSMASK) >= (dec_to_unsigned(arg2.source) & ADDRESSMASK);
+			bool superior = (arg1.asNumber() & ADDRESSMASK) >= (arg2.asNumber() & ADDRESSMASK);
 			to_booltoken(superior, result);
 			return result;
 		}
@@ -449,7 +490,7 @@ namespace MUZ {
 			}
 			
 			// consider both decimal numbers
-			bool diff = (dec_to_unsigned(arg1.source) & ADDRESSMASK) != (dec_to_unsigned(arg2.source) & ADDRESSMASK);
+			bool diff = (arg1.asNumber() & ADDRESSMASK) != (arg2.asNumber() & ADDRESSMASK);
 			to_booltoken(diff, result);
 			return result;
 		}
@@ -498,7 +539,7 @@ namespace MUZ {
 			}
 			
 			// consider both decimal numbers
-			bool equal = (dec_to_unsigned(arg1.source) & ADDRESSMASK) == (dec_to_unsigned(arg2.source) & ADDRESSMASK);
+			bool equal = (arg1.asNumber() & ADDRESSMASK) == (arg2.asNumber() & ADDRESSMASK);
 			to_booltoken(equal, result);
 			return result;
 		}

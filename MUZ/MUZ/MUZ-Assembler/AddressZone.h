@@ -14,19 +14,11 @@
 
 namespace MUZ {
 
-	/** Structure to reference a line in a source file. */
-	struct LineReference
-	{
-		int				file;	// file reference
-		int				line;	// line number in file
-	};
-	
 	/** Structure for an address zone. */
 	struct AddressZone
 	{
 		ADDRESSTYPE		start;	// starting address
 		ADDRESSTYPE		size;	// zone size
-		std::vector<LineReference> lines;	// references of each line included in this zone
 		DATATYPE*		zone = nullptr;
 		
 		// low level increment a zone relative to current start and size - beware, no check
@@ -40,6 +32,8 @@ namespace MUZ {
 		AddressZone() : start(0), size(0), zone(nullptr) {}
 		
 		AddressZone(ADDRESSTYPE a, ADDRESSTYPE s) { Mark(a,s); }
+		
+		~AddressZone() { free(zone); }
 		
 		DATATYPE& operator[](ADDRESSTYPE a) {
 			if (zone == nullptr) throw std::out_of_range("AddressZone[] has no range");

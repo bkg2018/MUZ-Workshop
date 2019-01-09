@@ -19,6 +19,7 @@
 
 namespace MUZ {
 
+
 	/** Class for the expression evaluator. */
 	class ExpressionEvaluator
 	{

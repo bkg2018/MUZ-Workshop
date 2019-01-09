@@ -20,7 +20,7 @@ namespace MUZ {
 		tokenTypeHEXNUMBER,	/// a "0x" prefixed, "$" prefixed or "h" suffixed number (- )before decimal translation)
 		tokenTypeBINNUMBER,	/// a "b" suffixed binary number (- )before decimal translation)
 		tokenTypeOCTNUMBER,	/// a "0" prefixed octal number - followed by at least one 0-7 digit (before decimal translation)
-		tokenTypeFILENAME,	/// a filename affter an #INCLUDE or #INSERTHEX directive
+		tokenTypeFILENAME,	/// a filename after an #INCLUDE, #INSERTHEX, #INSERTBIN directive
 
 		// final stored tokens
 		tokenTypeCOMMENT,	/// ';' and all that follows on line

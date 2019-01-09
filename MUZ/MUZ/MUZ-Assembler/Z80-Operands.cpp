@@ -10,6 +10,8 @@
 #include "ParseToken.h"
 #include "StrUtils.h"
 #include "Expression.h"
+#include "CodeLine.h"
+#include "Assembler.h"
 
 #include <string>
 #include <unordered_map>
@@ -19,19 +21,21 @@ namespace MUZ {
 	
 	/** Functions for each family of operand type. */
 
+	//MARK: - Maps for register names and sub codes
 	
 	// Maps of names
 	std::unordered_map<std::string, OperandType> registers8;    // list of acceptable 8-bit registers
 	std::unordered_map<std::string, OperandType> registers16;	// list of acceptable 16-bit registers
 	std::unordered_map<std::string, OperandType> conditions;	// list of acceptable conditions
 	
-	// Maps off sub-encoding for addressing
+	// Maps of sub-encoding for addressing
 	std::map<OperandType, int> regsubcode;
+	std::map<OperandType, int> regprefix;
 
 	// Initialize registers map
-	void initRegisterMap() {
+	void InitRegisterMap() {
 		
-		// offsets for some registers in some encodings
+		// offsets for registers in some encodings
 		regsubcode[regB] = 0;
 		regsubcode[regC] = 1;
 		regsubcode[regD] = 2;
@@ -41,6 +45,15 @@ namespace MUZ {
 		regsubcode[regF] = 6;
 		regsubcode[indHL] = 6;
 		regsubcode[regA] = 7;
+		//undocumented
+		regsubcode[regIXH] = 4;
+		regsubcode[regIXL] = 5;
+		regsubcode[regIYH] = 4;
+		regsubcode[regIYL] = 5;
+		regprefix[regIXH] = 0xDD;
+		regprefix[regIYH] = 0xFD;
+		regprefix[regIXL] = 0xDD;
+		regprefix[regIYL] = 0xFD;
 
 		regsubcode[regI] = 0x07;
 		regsubcode[regR] = 0x0F;
@@ -50,8 +63,12 @@ namespace MUZ {
 		regsubcode[regHL] = 0x20;
 		regsubcode[regSP] = 0x30;
 		regsubcode[regAF] = 0x30; // push,pop
-		regsubcode[regIX] = 0xDD;
-		regsubcode[regIY] = 0xFD;
+
+		regsubcode[regIX] = 0x20;//hl
+		regsubcode[regIY] = 0x20;//hl
+
+		regprefix[regIX] = 0xDD;
+		regprefix[regIY] = 0xFD;
 		
 		regsubcode[bit0] = 0x00;
 		regsubcode[bit1] = 0x08;
@@ -82,7 +99,12 @@ namespace MUZ {
 		registers8["I"] = regI;
 		registers8["R"] = regR;
 		registers8["F"] = regF;
-		
+		// undocumented
+		registers8["IXH"] = regIXH;
+		registers8["IXL"] = regIXL;
+		registers8["IYH"] = regIYH;
+		registers8["IYL"] = regIYL;
+
 		registers16["AF"] = regAF;
 		registers16["AF'"] = regAFp;
 		registers16["BC"] = regBC;
@@ -103,6 +125,15 @@ namespace MUZ {
 
 	}
 	
+	// singleton to launch register maps init at run-time
+	struct _auto_init_register_map {
+		_auto_init_register_map() {
+			InitRegisterMap();
+		}
+	} _runtime_auto_init_register_map;
+	
+	//MARK: - Low level tokens analysis for operand types
+	
 	/** Returns the subcode for a register code. Used for instructions accepting a reg8 spec or a reg16 spec.
 	 	Returns a 0 for any invalid register or addressing code.
 	 */
@@ -112,14 +143,21 @@ namespace MUZ {
 			return regsubcode[reg];
 		return 0;
 	}
-	
-	// regA to regR
-	bool reg8( ExpVector* tokens, int& curtoken, OperandType& reg8, int& value )
+	int getprefix( OperandType reg )
+	{
+		if (regprefix.count(reg))
+			return regprefix[reg];
+		return 0;
+	}
+
+	// regA to regR + undocumented
+	bool reg8( ExpVector* tokens, int& curtoken, OperandType& reg8)
 	{
 		ParseToken& token =tokens->at(curtoken);
 		if (token.type != tokenTypeLETTERS) return false;
-		if (registers8.count(token.source)) {
-			reg8 = registers8[token.source];
+		std::string source = std::to_upper(token.source);
+		if (registers8.count(source)) {
+			reg8 = registers8[source];
 			curtoken += 1;
 			return true;
 		}
@@ -127,12 +165,13 @@ namespace MUZ {
 	}
 
 	// regAF to regIY
-	bool reg16( ExpVector* tokens, int& curtoken, OperandType& reg16, int& value )
+	bool reg16( ExpVector* tokens, int& curtoken, OperandType& reg16 )
 	{
 		ParseToken& token =tokens->at(curtoken);
 		if (token.type != tokenTypeLETTERS) return false;
-		if (registers16.count(token.source)) {
-			reg16 = registers16[token.source];
+		std::string source = std::to_upper(token.source);
+		if (registers16.count(source)) {
+			reg16 = registers16[source];
 			curtoken += 1;
 			return true;
 		}
@@ -140,7 +179,7 @@ namespace MUZ {
 	}
 
 	// indC
-	bool indirectC( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
+	bool indirectC( ExpVector* tokens, int& curtoken, OperandType& reg )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -156,7 +195,7 @@ namespace MUZ {
 	}
 
 	// indHL
-	bool indirectHL( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
+	bool indirectHL( ExpVector* tokens, int& curtoken, OperandType& reg )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -171,7 +210,7 @@ namespace MUZ {
 		return true;
 	}
 	// indBC
-	bool indirectBC( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
+	bool indirectBC( ExpVector* tokens, int& curtoken, OperandType& reg )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -186,7 +225,7 @@ namespace MUZ {
 		return true;
 	}
 	// indDE
-	bool indirectDE( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
+	bool indirectDE( ExpVector* tokens, int& curtoken, OperandType& reg )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -202,7 +241,7 @@ namespace MUZ {
 	}
 
 	// indSP
-	bool indirectSP( ExpVector* tokens, int& curtoken, OperandType& reg, int& value )
+	bool indirectSP( ExpVector* tokens, int& curtoken, OperandType& reg )
 	{
 		if (curtoken + 2 >= tokens->size() ) return false;
 		ParseToken* token = &tokens->at(curtoken);
@@ -224,7 +263,7 @@ namespace MUZ {
 		ParseToken* token = &tokens->at(curtoken);
 		if (token->type != tokenTypePAROPEN) return operrMISSINGPAROPEN;
 		int indextoken = curtoken + 1;
-		if (! reg16(tokens, indextoken, regX, value)) return operrREGISTERNAME;
+		if (! reg16(tokens, indextoken, regX )) return operrREGISTERNAME;
 		if (regX != regIX && regX != regIY) return operrWRONGREGISTER;
 		token = &tokens->at(curtoken + 2);
 		if (token->type != tokenTypeOP_PLUS) return operrWRONGOP;
@@ -247,30 +286,24 @@ namespace MUZ {
 		if (evaluated.unsolved) {
 			value = 0;
 		}
-		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
-			value = dec_to_unsigned(evaluated.source);
-		}
-		curtoken = indextoken + 2;// skips after closing parenthesis
+		value = evaluated.asNumber();
+		curtoken = indextoken + 1;// skips after closing parenthesis
 		return operrOK;
 	}
 
 	// bit0 to bit7
-	bool bitnumber( ExpVector* tokens, int& curtoken, OperandType& bit, int& value )
+	bool bitnumber( ExpVector* tokens, int& curtoken, OperandType& bit )
 	{
 		ExpressionEvaluator eval;
 		int lasttoken = -1; 
 		ParseToken evaluated = eval.Evaluate(*tokens, curtoken, lasttoken);
-		//ParseToken* token = &tokens->at(curtoken);
-		//if (token->type != tokenTypeDECNUMBER) return false;
-		//value = dec_to_unsigned(token->source);
 		if (evaluated.unsolved) {
-			value = 0;
 			bit = bit0;
 			curtoken = lasttoken;
 			return true;
 		}
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
-			value = dec_to_unsigned(evaluated.source);
+			int value = evaluated.asNumber();
 			if (value < 0 || value > 7) return false;
 			if (value == 0) bit = bit0;
 			else if (value == 1) bit = bit1;
@@ -287,7 +320,7 @@ namespace MUZ {
 	}
 
 	// condNZ to condP
-	bool condition( ExpVector* tokens, int& curtoken, OperandType& cond, int& value )
+	bool condition( ExpVector* tokens, int& curtoken, OperandType& cond )
 	{
 		ParseToken& token =tokens->at(curtoken);
 		if (token.type != tokenTypeLETTERS) return false;
@@ -300,21 +333,19 @@ namespace MUZ {
 	}
 
 	// num8
-	bool number8( ExpVector* tokens, int& curtoken, OperandType& number8, int& value )
+	bool number8( ExpVector* tokens, int& curtoken, int& value )
 	{
 		ExpressionEvaluator eval;
 		int lasttoken = -1;
 		ParseToken evaluated = eval.Evaluate(*tokens, curtoken, lasttoken);
 		if (evaluated.unsolved) {
 			value = 0;
-			number8 = num8;
 			curtoken = lasttoken + 1;
 			return true;
 		}
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
-			value = dec_to_unsigned(evaluated.source);
+			value = evaluated.asNumber();
 			if (value > 255) return false;
-			number8 = num8;
 			curtoken = lasttoken + 1;
 			return true;
 		}
@@ -322,21 +353,19 @@ namespace MUZ {
 	}
 
 	// num16
-	bool number16( ExpVector* tokens, int& curtoken, OperandType& number16, int& value )
+	bool number16( ExpVector* tokens, int& curtoken, int& value )
 	{
 		ExpressionEvaluator eval;
 		int lasttoken = -1;
 		ParseToken evaluated = eval.Evaluate(*tokens, curtoken, lasttoken);
 		if (evaluated.unsolved) {
 			value = 0;
-			number16 = num16;
 			curtoken = lasttoken + 1;
 			return true;
 		}
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
-			value = dec_to_unsigned(evaluated.source);
+			value = evaluated.asNumber();
 			if (value > 65535) return false;
-			number16 = num16;
 			curtoken = lasttoken + 1;
 			return true;
 		}
@@ -347,7 +376,7 @@ namespace MUZ {
 	/** Compute a 16-bit value from a numeric expression between parenthesis. If parenthesis or a value cannot be found,
 	 returns an error code. The last used token index is returned even if the expression doesn't compute a number but
 	 have correct parenthesis. */
-	OperandError indirect16( ExpVector* tokens, int curtoken, OperandType& number16, int& value, int& lasttoken )
+	OperandError indirect16( ExpVector* tokens, int curtoken, int& value, int& lasttoken )
 	{
 		if (curtoken + 2 >= tokens->size() ) return operrTOKENNUMBER;
 		ParseToken* token = &tokens->at(curtoken);
@@ -372,18 +401,211 @@ namespace MUZ {
 		ParseToken evaluated = eval.Evaluate(*tokens, curtoken + 1, lasttoken );
 		if (evaluated.unsolved) {
 			value = 0;
-			number16 = num16;
 			lasttoken = lasttoken + 1;
 			return operrOK;
 		}
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
-			value = dec_to_unsigned(evaluated.source);
-			number16 = ind16;
+			value = evaluated.asNumber();
 			lasttoken = lasttoken + 1;// skips  closing parenthesis
 			return operrOK;
 		}
 		lasttoken = lasttoken + 1;// skips  closing parenthesis
 		return operrNOTNUMBER;
+	}
+	
+	//MARK: - High level functions for CodeLine operands analysis
+
+	// helpers for instruction assembling
+	bool RegAccept(int flags, OperandType reg) {
+		int f = 1 << (int)reg;
+		return ((f & flags) == f);
+	}
+	
+	/** Returns true if the tokens array has at least the resquested number of tokens available starting at curtoken. */
+	bool EnoughTokensLeft(CodeLine& codeline, int number) {
+		// if curtoken is 'i' and we request 3 tokens,
+		// then the tokens size must be 'i' + 3 or more
+		return (codeline.tokens.size() >= codeline.curtoken + number) ;
+	}
+	
+	/** Returns true if current token is a comma, and go next token. */
+	bool GetComma(CodeLine& codeline) {
+		if (!EnoughTokensLeft(codeline,1)) return false;
+		if (codeline.tokens.at(codeline.curtoken).type == tokenTypeCOMMA) {
+			codeline.curtoken += 1;
+			return true;
+		}
+		return false;
+	}
+	
+	/** Returns true if current token is recognized as an 8-bit register, and go next token. */
+	bool GetReg8(CodeLine& codeline, OperandType& reg, unsigned int regs ) {
+		if (!EnoughTokensLeft(codeline, 1)) return false;
+		int worktoken = codeline.curtoken;
+		if (reg8(&codeline.tokens, worktoken, reg)) {
+			if (RegAccept(regs, reg)) {
+				codeline.curtoken = worktoken;
+				return true;
+			}
+		}
+		return false;
+	}
+	/** Returns true if current token is recognized as an 16-bit register, and go next token. */
+	bool GetReg16(CodeLine& codeline, OperandType& reg, unsigned int regs  ) {
+		if (!EnoughTokensLeft(codeline, 1)) return false;
+		int worktoken = codeline.curtoken;
+		if (reg16(&codeline.tokens, worktoken, reg)) {
+			if (RegAccept(regs, reg)) {
+				codeline.curtoken = worktoken;
+				return true;
+			}
+			
+		}
+		return false;
+	}
+	/** Returns true if current token is recognized as (C), and go next token. */
+	bool GetIndC( CodeLine& codeline ) {
+		if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandType regC;
+		if (indirectC(&codeline.tokens, codeline.curtoken, regC)) {
+			return true;
+		}
+		return false;
+	}
+	/** Returns true if current token is recognized as (HL), and go next token. */
+	bool GetIndHL( CodeLine& codeline ) {
+		if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandType regHL;
+		if (indirectHL(&codeline.tokens, codeline.curtoken, regHL)) {
+			return true;
+		}
+		return false;
+	}
+	/** Returns true if current token is recognized as (HL), and go next token. */
+	bool GetIndBC( CodeLine& codeline ) {
+		if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandType regBC;
+		if (indirectBC(&codeline.tokens, codeline.curtoken, regBC)) {
+			return true;
+		}
+		return false;
+	}
+	/** Returns true if current token is recognized as (HL), and go next token. */
+	bool GetIndDE( CodeLine& codeline ) {
+		if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandType regDE;
+		if (indirectDE(&codeline.tokens, codeline.curtoken, regDE)) {
+			return true;
+		}
+		return false;
+	}
+	/** Returns true if current token is recognized as (SP), and go next token. */
+	bool GetIndSP( CodeLine& codeline ) {
+		if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandType regSP;
+		if (indirectSP(&codeline.tokens, codeline.curtoken, regSP)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/** Returns true if current token is recognized as (IX+d) or (IY+d), and go next token. */
+	bool GetIndX(CodeLine& codeline, OperandType& regX, int& value ) {
+		if (!EnoughTokensLeft(codeline,5)) return false;
+		OperandError operr = indirectX(&codeline.tokens, codeline.curtoken, regX, value);
+		if (operr == operrOK) {
+			return true;
+		}
+		if (codeline.as->IsFirstPass() && operr == operrNOTNUMBER) {
+			// probably unresolved label, simulate success with neutral value
+			value = 0;
+			return true;
+		}
+		return false;
+	}
+	
+	/** Returns true if current token is recognized as a bit number (0-7), and go next token. */
+	bool GetBitNumber(CodeLine& codeline, OperandType& bit ) {
+		if (!EnoughTokensLeft(codeline,1)) return false;
+		int worktoken = codeline.curtoken;
+		if (reg8(&codeline.tokens, worktoken, bit)) return false;//TODO: return explicit error (register name for 8-bit value)
+		if (reg16(&codeline.tokens, worktoken, bit)) return false;//TODO: return explicit error (register name for 8-bit value)
+		if (bitnumber(&codeline.tokens, codeline.curtoken, bit)) {
+			return true;
+		}
+		if (codeline.as->IsFirstPass()) {
+			// not number: probably unresolved label, simulate success with neutral value
+			bit = bit0;
+			return true;
+		}
+		return false;
+	}
+	
+	/** Returns true if current token is recognized as a condition, and go next token. */
+	bool GetCond( CodeLine& codeline, OperandType& cond ) {
+		if (!EnoughTokensLeft(codeline, 1)) return false;
+		if (condition(&codeline.tokens, codeline.curtoken, cond)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/** Returns true if current token is recognized as an 8-bit number, and go next token. */
+	bool GetNum8(CodeLine& codeline, int& value ) {
+		if (!EnoughTokensLeft(codeline,1)) return false;
+		OperandType num8;
+		// forbid register names
+		int worktoken = codeline.curtoken;
+		if (reg8(&codeline.tokens, worktoken, num8)) return false;//TODO: return explicit error (register name for 8-bit value)
+		if (reg16(&codeline.tokens, worktoken, num8)) return false;//TODO: return explicit error (register name for 8-bit value)
+		// now only numbers or labels
+		if (number8(&codeline.tokens, codeline.curtoken, value)) {
+			return true;
+		}
+		if (codeline.as->IsFirstPass()) {
+			// not number: probably unresolved label, simulate success with neutral value
+			value = 0;
+			return true;
+		}
+		return false;
+	}
+	
+	/** Returns true if current token is recognized as an 8-bit number expression, and go next token. */
+	bool GetNum16(CodeLine& codeline, int& value ) {
+		if (!EnoughTokensLeft(codeline,1)) return false;
+		OperandType num16;
+		int worktoken = codeline.curtoken;
+		if (reg8(&codeline.tokens, worktoken, num16)) return false;//TODO: return explicit error (register name for 16-bit value)
+		if (reg16(&codeline.tokens, worktoken, num16)) return false;//TODO: return explicit error (register name for 16-bit value)
+		if (number16(&codeline.tokens, codeline.curtoken, value)) {
+			// value *= mutliplier;
+			return true;
+		}
+		if (codeline.as->IsFirstPass()) {
+			// not number: probably unresolved label, simulate success with neutral value
+			value = 0;
+			return true;
+		}
+		return false;
+	}
+	
+	/** Returns true if current token is recognized as an (16-bit) indirect addressing, and go next token. */
+	bool GetInd16(CodeLine& codeline, int& value ) {
+		if (!EnoughTokensLeft(codeline,3)) return false;
+		int lasttoken;
+		OperandError operr = indirect16(&codeline.tokens, codeline.curtoken, value, lasttoken);
+		if (operr==operrOK) {
+			codeline.curtoken = lasttoken;
+			return true;
+		}
+		if (operr==operrNOTNUMBER && codeline.as->IsFirstPass()) {
+			// not number: probably unresolved label, simulate success with neutral value
+			value = 0;
+			codeline.curtoken = lasttoken;
+			return true;
+		}
+		// other errors do not update curtoken
+		return false;
 	}
 
 

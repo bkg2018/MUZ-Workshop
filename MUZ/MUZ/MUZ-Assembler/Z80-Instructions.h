@@ -12,6 +12,9 @@
 #include "Instruction.h"
 
 namespace MUZ {
+	
+	
+
 
 /** instruction names will lead to singleton instances of theese derived classes. */
 	class InstructionLD : public Instruction {
@@ -384,6 +387,15 @@ namespace MUZ {
 	};
 	
 	class InstructionSLA : public Instruction {
+	public:
+		/** Assemble instruction at current token, returns false if error
+		 @param codeline the code line in which assembled codes will be stored
+		 @param msg the message list which will receive any warning or error information
+		 */
+		virtual bool Assemble(CodeLine& codeline, ErrorList& msg);
+	};
+	
+	class InstructionSLL : public Instruction {
 	public:
 		/** Assemble instruction at current token, returns false if error
 		 @param codeline the code line in which assembled codes will be stored

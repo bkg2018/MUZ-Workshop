@@ -13,6 +13,7 @@
 
 namespace MUZ {
 	
+
 	/** Constructor in debug mode checks that the allOps array has the right operator for each index. This
 	 	is not necessary for release code where the array will have been validated. */
 	ExpressionEvaluator::ExpressionEvaluator()
@@ -67,7 +68,7 @@ namespace MUZ {
 					index ++;
 				}
 				// did we find any operator?
-				if (found < i)
+				if (found < i || found < 0 || found + 1 > end)
 					break;// finished, no more operators
 				// 5a-2a) compute op(found) with arg(found-1) and arg(found+1)
 				result = allOps[tokens[found].type].op->Exec(tokens[found-1], tokens[found+1]);

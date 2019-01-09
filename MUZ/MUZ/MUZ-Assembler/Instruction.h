@@ -31,7 +31,7 @@ namespace MUZ {
 		 @param msg the message list which will receive any warning or error information
 		 */
 		virtual bool Assemble(class CodeLine& codeline, ErrorList& msg) {
-			ErrorMessage m = { errorTypeERROR, "Non derived instruction class used", &codeline};
+			ErrorMessage m = { errorTypeFATAL, ErrorKind::errorNonDerivedInstruction, &codeline};
 			msg.push_back(m);
 			return true;
 		};

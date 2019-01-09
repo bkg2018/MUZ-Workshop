@@ -20,9 +20,34 @@ using std::map;
 
 namespace MUZ {
 
-
+	
 	//MARK: private functions
 	
+	/** Checks if a character would act as a token separator. Used when parsing names or numbers. */
+	bool Parser::isSeparator(char c) {
+		if (c == ' ') return true;
+		if (c == '\t') return true;
+		if (c == ':') return true;
+		if (c == ';') return true;
+		if (c == ',') return true;
+		if (c == '+') return true;
+		if (c == '*') return true;
+		if (c == '/') return true;
+		if (c == '=') return true;
+		if (c == '^') return true;
+		if (c == '<') return true;
+		if (c == '>') return true;
+		if (c == '!') return true;
+		if (c == '$') return true;
+		if (c == '(') return true;
+		if (c == ')') return true;
+		if (c == '%') return true;
+		if (c == '&') return true;
+		if (c == '|') return true;
+		return false;
+	}
+	
+
 	/** Checks if current and next characters can combine into the given operator and if so, store it */
 	bool Parser::find2CharsOperator(std::string token, TokenType tokentype) {
 		if (c == token.at(0) && hasNext && nextc == token.at(1)) {
@@ -86,7 +111,15 @@ namespace MUZ {
 			char nextupperc = upperchar(nextc);
 			if (nextc >= '0' && nextc<= '9') { count += 1; continue; }
 			if (nextupperc >= 'A' && nextupperc <= 'F')  { count += 1; continue; }
-			if (nextupperc == 'H') return (count >= 1); // hexa suffix
+			if (nextupperc == 'H')  {
+				// beware of names starting with 'ch'
+				if (nextpos + 1 < source->size()) {
+					char nextnextc = source->at(nextpos + 1);
+					if (!isSeparator(nextnextc))
+						break; // NOT followed by a separator, this is not an hexa number
+				}
+				return (count >= 1); // hexa suffix
+			}
 			break; // other character, wrong
 		}
 		return false; // all hexx digits and no sufffix
@@ -103,7 +136,7 @@ namespace MUZ {
 			if (nextc >= '0' && nextc <= '9') { count += 1; continue; }
 			char nextupperc = upperchar(nextc);
 			if (nextupperc >= 'A' && nextupperc <= 'Z') return false; // letter, don't accept
-			// any other separator is ok iuf we have at least 1 digit
+			// any other separator is ok if we have at least 1 digit
 			return (count >= 1);
 		}
 		return true; // all octal digits
@@ -170,6 +203,11 @@ namespace MUZ {
 				word = (!filepath.empty() ? filepath + NORMAL_DIR_SEPARATOR : "") + filename;
 			}
 			
+			// Convert hexa, binary and octal numbers
+			if (type == tokenTypeBINNUMBER) {
+				
+			}
+			
 			// Store the token, use upper case for directives
 			if (type == tokenTypeDIRECTIVE) {
 				if (word == ".") {
@@ -177,6 +215,17 @@ namespace MUZ {
 				}
 				word = to_upper(word);
 			}
+			
+			// Test as a directive, only for letters
+			Directive* directive = nullptr;
+			if (type == tokenTypeLETTERS || type == tokenTypeDIRECTIVE) {
+				directive = as->GetDirective(word);
+				if (directive) {
+					type = tokenTypeDIRECTIVE;
+				}
+			}
+			
+			// Store token
 			ParseToken token;
 			token.source = word;
 			token.type = type;
@@ -185,12 +234,11 @@ namespace MUZ {
 			// set result flags for some directives and handle special #INCLUDE case
 			if (token.type == tokenTypeDIRECTIVE) {
 				resultFlag = hasNOTHING;
-				lastDirective = as->GetDirective(token.source);
-				if (token.source == "#IF" || token.source == "#IFDEF" || token.source == "#IFNDEF") resultFlag = hasIF;
+				lastDirective = directive;
+				if (token.source == "#IF" || token.source == "#IFDEF" || token.source == "#IFNDEF" || token.source == "COND") resultFlag = hasIF;
 				else if (token.source == "#ELSE") resultFlag = hasELSE;
 				else if (token.source == "#ENDIF") resultFlag = hasENDIF;
-				else if (token.source == "#INCLUDE") {
-					resultFlag = hasINCLUDE;
+				else if (token.isIncludingDirective()) {
 					// special case: the rest of source is a filename even if no quotes surrounds it
 					// skip white space
 					size_t len = source->length();
@@ -203,30 +251,11 @@ namespace MUZ {
 					if (doubleQuoted) {
 						pos += 1; // skip double quote
 					} else {
-						word = ch; // retain fifrst character in filename
+						word = ch; // retain first character in filename
 					}
 					type = tokenTypeFILENAME;
 					status = inFilename;
 					return;
-				}
-				else if (token.source == "#INSERTHEX") {
-					resultFlag = hasINSERTHEX;
-					// same as #INCLUDE
-					size_t len = source->length();
-					while (pos < len && (source->at(pos) == ' ' || source->at(pos) == '\t')) {
-						pos++;
-					}
-					char ch =source->at(pos);
-					doubleQuoted = (ch == '"');
-					if (doubleQuoted) {
-						pos += 1;
-					} else {
-						word = ch;
-					}
-					type = tokenTypeFILENAME;
-					status = inFilename;
-					return;
-
 				}
 			}
 		}
@@ -389,6 +418,13 @@ namespace MUZ {
 
 			// double quote running?
 			if (status == inDoubleQuotes) {
+				// ignore escaped double quote
+				if (c == '\\' && hasNext && nextc == '"') {
+					word += c;
+					word += nextc;
+					pos += 1; // skip backslash, and will skip double quote
+					continue;
+				}
 				if (c == '"') {
 					StoreToken();
 					doubleQuoted = false;
@@ -400,6 +436,13 @@ namespace MUZ {
 			}
 			// single quote running?
 			if (status == inSingleQuotes) {
+				// ignore escaped single quote
+				if (c == '\\' && hasNext && nextc == '\'') {
+					word += c;
+					word += nextc;
+					pos += 1; // skip backslash, and will skip double quote
+					continue;
+				}
 				if (c == '\'') {
 					StoreToken();
 					continue; // finished the single quoted string
@@ -408,21 +451,47 @@ namespace MUZ {
 				word += c;
 				continue;
 			}
-			// start double quotes?
-			if (c == '"') {
+
+			// End a running number?
+			if (status == inDigits) {
+				
+				// continuing digit sequence?
+				if (isHexDigit(upperc) && (type == tokenTypeHEXNUMBER)) {
+					word += c;
+					continue;
+				}
+				if (isDecDigit(c) && (type == tokenTypeDECNUMBER)) {
+					word += c;
+					continue;
+				}
+				if (isBinDigit(c) && (type == tokenTypeBINNUMBER)) {
+					word += c;
+					continue;
+				}
+				
+				// H suffix after hex digits?
+				if (upperc == 'H') {
+					type = tokenTypeHEXNUMBER;
+					StoreToken();
+					continue;
+				}
+				// B suffix after digits?
+				if (upperc == 'B' && (type != tokenTypeHEXNUMBER)) {
+					type = tokenTypeBINNUMBER;
+					StoreToken();
+					continue;
+				}
+				
+				// end of number
 				StoreToken();
-				status = inDoubleQuotes;
-				doubleQuoted = true;
-				type = tokenTypeSTRING;
+				// parse again from this position
+				pos -= 1;
+				status = inNothing;
 				continue;
 			}
-			// start single quotes?
-			if (c == '\'') {
-				StoreToken();
-				status = inSingleQuotes;
-				type = tokenTypeCHAR;
-				continue;
-			}
+			
+			// check characters which interrupt a letters sequence
+			
 			// comment?
 			if (c == ';') {
 				StoreToken();
@@ -431,6 +500,7 @@ namespace MUZ {
 				StoreToken();
 				break; // finished!
 			}
+
 			// end of label?
 			if (c == ':') {
 				StoreToken();
@@ -453,12 +523,30 @@ namespace MUZ {
 					type = tokenTypeDIRECTIVE;
 					continue;
 				}
-				// we're not  supposed to reach here: would mean a '.' or '#' contained in a word
+				// we're not supposed to reach here: would mean a '.' or '#' contained in a word
 				// so just keep going and emit a warning
 				word += c;
 				//TODO: warnings.push_back(std::string("A dubious '") + c + "' was found in a sequence of characters");
 				continue;
 			}
+			
+			// start double quotes?
+			if (c == '"' && status != inLetters) {
+				StoreToken();
+				status = inDoubleQuotes;
+				doubleQuoted = true;
+				type = tokenTypeSTRING;
+				continue;
+			}
+			
+			// start single quotes?
+			if (c == '\'' && status != inLetters) {
+				status = inSingleQuotes;
+				doubleQuoted = false; // useless?
+				type = tokenTypeCHAR;
+				continue;
+			}
+			
 			hasNext = (pos + 1 < s.length());
 			nextc = hasNext ? s[pos + 1] : '\0';
 			uppernextc = upperchar(nextc);
@@ -535,44 +623,6 @@ namespace MUZ {
 				}
 			}
 
-			// End a running number?
-			if (status == inDigits) {
-
-				// continuing digit sequence?
-				if (isHexDigit(upperc) && (type == tokenTypeHEXNUMBER)) {
-					word += c;
-					continue;
-				}
-				if (isDecDigit(c) && (type == tokenTypeDECNUMBER)) {
-					word += c;
-					continue;
-				}
-				if (isBinDigit(c) && (type == tokenTypeBINNUMBER)) {
-					word += c;
-					continue;
-				}
-			
-				// H suffix after hex digits?
-				if (upperc == 'H') {
-					type = tokenTypeHEXNUMBER;
-					StoreToken();
-					continue;
-				}
-				// B suffix after digits?
-				if (upperc == 'B' && (type != tokenTypeHEXNUMBER)) {
-					type = tokenTypeBINNUMBER;
-					StoreToken();
-					continue;
-				}
-				
-				// end of number
-				StoreToken();
-				// parse again from this position
-				pos -= 1;
-				status = inNothing;
-				continue;
-			}
-			
 			// "$" prefix of hex numbers?
 			if (word == "$") {
 				if (findHexNumberNoSuffixSkip(0)) {
@@ -625,6 +675,11 @@ namespace MUZ {
 				continue;
 			}
 			
+			if (status == inDirective) {
+				word += c;
+				continue;
+			}
+			
 			// 2 characters operators?
 			if (find2CharsOperator("<<", tokenTypeOP_LSHIFT))
 				continue;
@@ -674,7 +729,7 @@ namespace MUZ {
 				continue;
 			
 			// continue running text sequence?
-			if (status == inLetters || status == inDirective) {
+			if (status == inLetters) {
 				word += c;
 				continue;
 			}
@@ -714,7 +769,7 @@ namespace MUZ {
 		ParseToken evaluated = eval.Evaluate(*result, *curtoken, lasttoken);
 		if (evaluated.type == tokenTypeDECNUMBER) {
 			*curtoken = lasttoken;
-			return dec_to_unsigned(evaluated.source) != 0;
+			return evaluated.asNumber() != 0;
 		}
 		if ((evaluated.type == tokenTypeBOOL) || (evaluated.type == tokenTypeSTRING)) {
 			*curtoken = lasttoken;
@@ -751,7 +806,14 @@ namespace MUZ {
 		ParseToken evaluated = eval.Evaluate(*result, *curtoken, lasttoken);
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
 			*curtoken = lasttoken;
-			return dec_to_unsigned(evaluated.source);
+			// special case with one character: return character code
+			if (evaluated.type == tokenTypeSTRING) {
+				if (evaluated.source.length() == 1) {
+					return evaluated.source.at(0);
+				}
+			}
+			// else, interpret as a number or return 0
+			return evaluated.asNumber();
 		}
 		//TODO: generate an error when EvaluateAddress() doesn't get a string or number
 		return 0;

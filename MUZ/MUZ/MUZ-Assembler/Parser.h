@@ -27,8 +27,6 @@ namespace MUZ {
 		hasIF  				,			// there is an #IF #IFDEF or #IFNDEF directive
 		hasELSE 			,			// there is an #ELSE directive
 		hasENDIF 			,			// there is an #ENDIF directive
-		hasINCLUDE			,			// there is an #INCLUDE directive
-		hasINSERTHEX		,			// there is an INSERTHEX directive
 	} ;
 	
 	/** Current parsing status. */
@@ -71,6 +69,8 @@ namespace MUZ {
 		/** Points to the original source string. */
 		std::string* source;
 
+		/** Checks if a character acts as a token separator. */
+		bool isSeparator(char c);
 
 		/** Checks if current and next characters can combine into the given operator and if so, store it as token and goes forward. */
 		bool find2CharsOperator(std::string token, TokenType tokentype);

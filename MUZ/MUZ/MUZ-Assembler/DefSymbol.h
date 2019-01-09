@@ -20,7 +20,8 @@ namespace MUZ {
 	class DefSymbol : public Instruction
 	{
 	public:
-		LineReference line; 	// file and line reference for this #DEFINE
+		//LineReference line; 	// file and line reference for this #DEFINE
+		class CodeLine* codeline;
 		std::string value;		// value of this symbol if it is defined by a string value
 		bool singledefine = false; // true if this symbol is just defined with no value
 	};

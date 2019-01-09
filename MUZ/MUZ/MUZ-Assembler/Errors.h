@@ -21,10 +21,22 @@ namespace MUZ {
 		errorTypeFATAL		// breaks assembly
 	};
 	
+	enum ErrorKind {
+		errorOK,						// no error
+		errorUnknown,					// unknown error
+		errorInvalidSymbol,				// invalid symbol name after DEFINE
+		errorDefine,					// #DEFINE could not define a symbol
+		errorNonDerivedInstruction,		// SHOULD NOT OCCUR: Non derived Instruction class used (fatal)
+		errorNonDerivedDirective,		// SHOULD NOT OCCUR: Non derived Directive class used (fatal)
+		errorWritingListing,			// Cannot write listing file (about file)
+		errorOpeningSource,				// "cannot open source file" asm, hex or binary file not found
+	};
+	
 	struct ErrorMessage {
-		ErrorType type;		// (see enum above): info, warning, about a file, serious error or fatal error
-		std::string text;	// message to display
-		class CodeLine* codeline;	// line number where it occured
+		ErrorType type=errorTypeINFO;			// (see enum above): info, warning, about a file, serious error or fatal error
+		ErrorKind kind=errorUnknown;			// (see enum above): what kind of error it is
+		class CodeLine* codeline=nullptr;		// code line where it occured
+		std::string file="";					// file name for errorTypeABOUTFILE errors
 	};
 	
 	class ErrorList : public std::vector<ErrorMessage>

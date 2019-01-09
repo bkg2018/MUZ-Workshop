@@ -44,6 +44,9 @@
 // do a step from current program counter
 -(void) step;
 
+// Assemble a source file
+-(void) assemble;
+
 // get current values for registers
 -(nonnull MuzRegisters*) registers;
 

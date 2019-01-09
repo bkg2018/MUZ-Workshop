@@ -34,6 +34,7 @@ std::string SourceFilePath;
 std::string ConditionnalsSourcePath;
 std::string ExpressionsSourcePath;
 std::string InstructionsSourcePath;
+std::string Z80InstructionsSourcePath;
 
 - (void)setUp {
 	
@@ -42,7 +43,7 @@ std::string InstructionsSourcePath;
 	ConditionnalsSourcePath = SourcesRootDir + "Conditionnals.asm";
 	ExpressionsSourcePath = SourcesRootDir + "Expressions.asm";
 	InstructionsSourcePath = SourcesRootDir + "Instructions.asm";
-	MUZ::initRegisterMap();
+	Z80InstructionsSourcePath = SourcesRootDir + "Z80-Instructions.asm";
 }
 
 - (void)tearDown {
@@ -265,8 +266,11 @@ std::string InstructionsSourcePath;
 	MUZ::ErrorList msg;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testAssembler.LST");
+	as.SetMemoryFilename("testAssemblerMemory.LST");
+	as.SetIntelHexFilename("testAssemblerIntelHex.HEX");
+	as.EnableFullListing(false); // limit .DB/.DS/.DW sequences to 8 bytes
 	try {
-		as.AssembleFile(SourceFilePath, msg); // false = not included
+		as.AssembleFile(SourceFilePath, msg);
 	} catch (std::exception &e) {
 		perror(e.what());
 	}
@@ -277,7 +281,7 @@ std::string InstructionsSourcePath;
 	MUZ::ErrorList msg;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testConditionnalsAssembler.LST");
-	as.AssembleFile(ConditionnalsSourcePath, msg); // false = not included
+	as.AssembleFile(ConditionnalsSourcePath, msg);
 }
 
 - (void)testExpressionsAssembler {
@@ -285,7 +289,7 @@ std::string InstructionsSourcePath;
 	MUZ::ErrorList msg;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testExpressionsAssembler.LST");
-	as.AssembleFile(ExpressionsSourcePath, msg); // false = not included
+	as.AssembleFile(ExpressionsSourcePath, msg);
 }
 
 -(void) testInclude {
@@ -309,6 +313,13 @@ std::string InstructionsSourcePath;
 		XCTAssertTrue(label->equate);
 		XCTAssertEqual(label->AddressFrom(0), 0x1234);
 	}
+}
+
+-(void) testDB {
+	MUZ::Assembler as;
+	MUZ::CodeLine codeline;
+	MUZ::ErrorList msg;
+	codeline = as.AssembleLine(".DB  0xDB,0xFF,0x44,0x23,0x03", msg);
 }
 
 -(void) testParseUnitaryExpressions {
@@ -446,7 +457,7 @@ std::string InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = reg8(&tokens, curtoken, optype, value);
+			bool result = reg8(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		for (auto & reg: reg8bad) {
@@ -454,7 +465,7 @@ std::string InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = reg8(&tokens, curtoken, optype, value);
+			bool result = reg8(&tokens, curtoken, optype);
 			XCTAssertEqual(result, false);
 		}
 	}
@@ -467,7 +478,7 @@ std::string InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = reg16(&tokens, curtoken, optype, value);
+			bool result = reg16(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		for (auto & reg: reg16bad) {
@@ -475,7 +486,7 @@ std::string InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = reg16(&tokens, curtoken, optype, value);
+			bool result = reg16(&tokens, curtoken, optype);
 			XCTAssertEqual(result, false);
 		}
 	}
@@ -488,7 +499,7 @@ std::string InstructionsSourcePath;
 			tokens.push_back(token);
 			tokens.push_back(tokPC);
 			int curtoken = 0;
-			bool result = indirectC(&tokens, curtoken, optype, value);
+			bool result = indirectC(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		{
@@ -498,7 +509,7 @@ std::string InstructionsSourcePath;
 			tokens.push_back(token);
 			tokens.push_back(tokPC);
 			int curtoken = 0;
-			bool result = indirectHL(&tokens, curtoken, optype, value);
+			bool result = indirectHL(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		{
@@ -508,7 +519,7 @@ std::string InstructionsSourcePath;
 			tokens.push_back(token);
 			tokens.push_back(tokPC);
 			int curtoken = 0;
-			bool result = indirectSP(&tokens, curtoken, optype, value);
+			bool result = indirectSP(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		{
@@ -538,7 +549,7 @@ std::string InstructionsSourcePath;
 		token.type = MUZ::tokenTypeDECNUMBER;
 		tokens.push_back(token);
 		int curtoken = 0;
-		bool result = bitnumber( &tokens, curtoken, optype, value);
+		bool result = bitnumber( &tokens, curtoken, optype);
 		XCTAssertTrue(result);
 		XCTAssertEqual(optype, MUZ::bit7);
 	}
@@ -552,7 +563,7 @@ std::string InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = condition(&tokens, curtoken, optype, value);
+			bool result = condition(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		for (auto & reg: condbad) {
@@ -561,7 +572,7 @@ std::string InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = condition(&tokens, curtoken, optype, value);
+			bool result = condition(&tokens, curtoken, optype);
 			XCTAssertEqual(result, false);
 		}
 	}
@@ -572,9 +583,8 @@ std::string InstructionsSourcePath;
 		token.type = MUZ::tokenTypeDECNUMBER;
 		tokens.push_back(token);
 		int curtoken = 0;
-		bool result = number8( &tokens, curtoken, optype, value);
+		bool result = number8( &tokens, curtoken, value);
 		XCTAssertTrue(result);
-		XCTAssertEqual(optype, MUZ::num8);
 		XCTAssertEqual(value, 127);
 	}
 	// 16-bit direct data
@@ -584,9 +594,8 @@ std::string InstructionsSourcePath;
 		token.type = MUZ::tokenTypeDECNUMBER;
 		tokens.push_back(token);
 		int curtoken = 0;
-		bool result = number16( &tokens, curtoken, optype, value);
+		bool result = number16( &tokens, curtoken, value);
 		XCTAssertTrue(result);
-		XCTAssertEqual(optype, MUZ::num16);
 		XCTAssertEqual(value, 65535);
 	}
 	// indirect 16-bit address
@@ -603,9 +612,8 @@ std::string InstructionsSourcePath;
 		tokens.push_back(token);
 		int curtoken = 0;
 		int lasttoken = 0;
-		bool result = (MUZ::operrOK==indirect16( &tokens, curtoken, optype, value, lasttoken));
+		bool result = (MUZ::operrOK==indirect16( &tokens, curtoken, value, lasttoken));
 		XCTAssertTrue(result);
-		XCTAssertEqual(optype, MUZ::ind16);
 		XCTAssertEqual(value, 65535);
 	}
 }
@@ -615,72 +623,18 @@ std::string InstructionsSourcePath;
 	MUZ::ErrorList msg;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testInstructionsCodes.LST");
+	as.SetMemoryFilename("testInstructionsCodesMemory.LST");
+	as.SetIntelHexFilename("testInstructionsCodesIntelHex.HEX");
 	as.AssembleFile(InstructionsSourcePath, msg); // false = not included
 }
 
--(void) testAllCodes {
+-(void) testZ80InstructionCodes {
 	MUZ::Assembler as;
-	MUZ::CodeLine codeline;
 	MUZ::ErrorList msg;
-	
-	struct CHECKDEF
-	{
-		std::string source;
-		std::string code[4];
-	};
-	
-	// table of all codes
-	// empty string means no code
-	// hexa uppercase values for all codes
-	// "d" represents an 8-bit data with value 0xAA
-	// "n" represents an 8-bit data with value 0x55
-	// "NN" and "nn" represent high and low order bytes of an address with value 0x1234, so NN=0x12 and nn=0x34
-	std::vector<CHECKDEF> instructions = {
-		{"ADC A,A", {"8F","","",""}},
-		{"ADC A,B", {"88","","",""}},
-		{"ADC A,C", {"89","","",""}},
-		{"ADC A,D", {"8A","","",""}},
-		{"ADC A,E", {"8B","","",""}},
-		{"ADC A,H", {"8C","","",""}},
-		{"ADC A,L", {"8D","","",""}},
-		{"ADC A,$AA", {"CE","d","",""}},
-		{"ADC A,(HL)", {"8E","","",""}},
-		{"ADC A,(IX+$AA)", {"DD","8E","d",""}},
-		{"ADC A,(IY+$AA)", {"FD","8E","d",""}},
-		{"ADC HL,BC", {"ED","4A","",""}},
-		{"ADC HL,DE", {"ED","5A","",""}},
-		{"ADC HL,HL", {"ED","6A","",""}},
-		{"ADC HL,SP", {"ED","7A","",""}},
-	};
-	
-	for (auto def: instructions ) {
-		printf("Assemble %s: \n",def.source.c_str());
-		codeline = as.AssembleLine(def.source, msg);
-		for (int i = 0 ; i < 4 ; i++) {
-			if (i < codeline.code.size()) {
-				std::string hex = data_to_hex(codeline.code.at(i));
-				if        (def.code[i]=="d") {
-					XCTAssertEqual(hex, "AA");
-				} else if (def.code[i]=="n") {
-					XCTAssertEqual(hex, "55");
-				} else if (def.code[i]=="nn") {
-					XCTAssertEqual(hex, "34");
-				} else if (def.code[i]=="NN") {
-					XCTAssertEqual(hex, "12");
-				} else {
-					XCTAssertEqual(hex, def.code[i]);
-				}
-			}
-		}
-	}
-				
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetListingFilename("testZ80InstructionsCodes.LST");
+	as.AssembleFile(Z80InstructionsSourcePath, msg); // false = not included
 }
-/*
-- (void)testPerformanceExample {
-    // This is an example of a performance test case.
-    [self measureBlock:^{
-        // Put the code you want to measure the time of here.
-    }];
-}
-*/
+
+
 @end

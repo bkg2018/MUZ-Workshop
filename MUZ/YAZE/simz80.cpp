@@ -2292,7 +2292,7 @@ FASTWORK simz80(FASTREG PC) {
 								SETFLAG(Z, hreg(BC) == 0);
 								break;
 							case 0xB0: /* LDIR */
-								acu = hreg(AF);
+								//acu = hreg(AF); // deadstore signaled by xcode analysis
 								BC &= 0xffff;
 								if (BC == 0)
 									BC = 0x10000;

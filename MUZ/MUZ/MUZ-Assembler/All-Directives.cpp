@@ -14,18 +14,20 @@
 
 namespace MUZ {
 	
+	
+	//MARK: - Preprocessor directives (#)
+	
 	/** #DEFINE <symbol> <stringexpression>
 	 	and
 	 	#DEFINE <symbol>
-	 
 	 	returns true if the new symbol has been defined
 	 */
 	bool DirectiveDEFINE::Parse( Assembler& as, Parser& parser, CodeLine& codeline, Label* label, ErrorList& msg) {
-		//TODO: string expressions for argument starting at curtoken +2
+
 		if (!parser.ExistMoreToken(1)) return false;
 		ParseToken& symbol = parser.NextToken();
 		if (symbol.type != tokenTypeLETTERS) {
-			//TODO: error, invalid name for symbol
+			msg.push_back({ errorTypeERROR, errorInvalidSymbol, &codeline});
 			return false;
 		}
 		// skip directive
@@ -43,11 +45,10 @@ namespace MUZ {
 		}
 		DefSymbol* defsymbol = as.CreateDefSymbol(symbol.source, value);
 		if (defsymbol) {
-			defsymbol->line.file = codeline.file;
-			defsymbol->line.line = codeline.line;
+			defsymbol->codeline = &codeline;
 			return true;
 		}
-		msg.push_back({ errorTypeERROR, "couldn't create #DEFINE symbol", &codeline});
+		msg.push_back({ errorTypeERROR, errorDefine, &codeline});
 		return false;
 	}
 
@@ -73,14 +74,10 @@ namespace MUZ {
 	bool DirectiveIFDEF::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
 		// and now check existence of the symbol
 		if (!parser.ExistMoreToken(1)) return false;
-		ParseToken& symbol = parser.NextToken();
-		if (symbol.type != tokenTypeLETTERS) {
-				//TODO: error, invalid name for symbol
-				return false;
-			}
-		parser.JumpTokens(1);
-		//TODO: resolve symbols and evaluate as string?
-		return as.ExistSymbol(symbol.source);
+		std::string symbol;
+		parser.JumpNextToken();
+		symbol = parser.EvaluateString(); // do not resolve symbols here!
+		return as.ExistSymbol(symbol);
 	}
 
 	/** #IFNDEF <symbol>
@@ -88,14 +85,10 @@ namespace MUZ {
 	 */
 	bool DirectiveIFNDEF::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
 		if (!parser.ExistMoreToken(1)) return false;
-		ParseToken& symbol = parser.NextToken();
-		if (symbol.type != tokenTypeLETTERS) {
-			//TODO: error, invalid name for symbol
-			return false;
-		}
-		parser.JumpTokens(1);
-		//TODO: resolve symbols and evaluate as string?
-		return ! as.ExistSymbol(symbol.source);
+		std::string symbol;
+		parser.JumpNextToken();
+		symbol = parser.EvaluateString(); // // do not resolve symbols here!
+		return ! as.ExistSymbol(symbol);
 	}
 
 	/** #IF <expression>
@@ -123,11 +116,14 @@ namespace MUZ {
 		}
 		// trim spaces at the end of filename
 		strtrimright(filetoken.source);
+		//TODO: anything special to do if assembly returned ok or not ok?
 		if (as.IsFirstPass()) {
 			codeline.includefile = (int)as.m_files.size();
-		}
-		if (as.AssembleFile(filetoken.source, true, codeline, msg)) {
-			//TODO: anything special to do if assembly replied ok?
+			if (as.AssembleIncludedFilePassOne(filetoken.source, codeline, msg)) {
+			}
+		} else {
+			if (as.AssembleIncludedFilePassTwo(filetoken.source, codeline, msg)) {
+			}
 		}
 		
 		// tells the parser that the file must be included
@@ -159,6 +155,33 @@ namespace MUZ {
 		parser.JumpTokens(1);
 		return true;
 	}
+	/** #INSERTBIN <file>
+	 */
+	bool DirectiveINSERTBIN::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
+		if (!parser.ExistMoreToken(1)) return false;
+		parser.ResolveNextSymbols();
+		ParseToken& filetoken = parser.NextToken();
+		// and include new file
+		if ((filetoken.type != tokenTypeSTRING) && (filetoken.type != tokenTypeFILENAME)) {
+			//TODO: invalid name for an include file
+			return false;
+		}
+		// trim spaces at the end of filename
+		strtrimright(filetoken.source);
+		if (as.IsFirstPass()) {
+			codeline.includefile = (int)as.m_files.size();
+		}
+		if (as.AssembleBinFile(filetoken.source, codeline, msg)) {
+			//TODO: anything special to do if assembly replied ok?
+		}
+		
+		// tells the parser that the file must be included
+		parser.JumpTokens(1);
+		return true;
+	}
+	
+	//MARK: - Assembler directives (.)
+	
 	/** .PROC Z80
 	 	returns true if Z80 has been specified
 	 */
@@ -174,21 +197,42 @@ namespace MUZ {
 		return true;
 	}
 	
-	/** [label:] .CODE
+	/** [label:] .CODE [name]
 	 */
 	bool DirectiveCODE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
-		as.SetCodeSection(  );
+		std::string name;
+		if (parser.ExistMoreToken(1)) {
+			parser.JumpNextToken();
+			name = parser.EvaluateString();
+		}
+		as.SetCodeSection( name );
 		return true;
 	}
 	
-	/** [label:] .DATA
+	/** [label:] .DATA [name] [,SAVE]
 	 */
 	bool DirectiveDATA::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
-		as.SetDataSection(  );
+		std::string name;
+		bool save = false;
+		if (parser.ExistMoreToken(1)) {
+			ParseToken& token = parser.JumpNextToken();
+			if (token.type != tokenTypeCOMMA) {
+				name = parser.EvaluateString();
+			}
+			if (GetComma(codeline)) {
+				std::string param = parser.EvaluateString();
+				param = std::to_upper(param);
+				if (param == "SAVE") {
+					save = true;
+				}
+			}
+		}
+		as.SetDataSection( name, save );
 		return true;
 	}
 	
-	/** [label:] .ORG <value>
+	/** Sets the current address in the current section.
+	 [label:] .ORG <value>
 	 	returns true if the assembling address must be changed
 	 */
 	bool DirectiveORG::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
@@ -197,11 +241,15 @@ namespace MUZ {
 		ADDRESSTYPE address = 0;
 		parser.JumpTokens(1); // skip after .EQU
 		address = parser.EvaluateAddress();
+		Section* section= as.GetSection();
+		if (section) {
+			section->SetOrg(address);
+		}
 		as.SetAddress( address );
 		return true;
 	}
 	
-	/** label[:]  .EQU <expression>
+	/** label[:]  [.]EQU <expression>
 	 	returns true if the label has been created with the value as a decimal number
 	 */
 	bool DirectiveEQU::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg)
@@ -301,11 +349,9 @@ namespace MUZ {
 		if (!parser.ExistMoreToken(1)) return false;
 		parser.ResolveNextSymbols();
 		ParseToken& token = parser.NextToken();
-		if (token.type == tokenTypeDECNUMBER) {
-			int size = dec_to_unsigned(token.source);
-			for (int i = 0 ; i < size ; i++) {
-				codeline.AddCode(0xFF);
-			}
+		int size = token.asNumber();
+		for (int i = 0 ; i < size ; i++) {
+			codeline.AddCode(0xFF);
 		}
 		return true;
 	}

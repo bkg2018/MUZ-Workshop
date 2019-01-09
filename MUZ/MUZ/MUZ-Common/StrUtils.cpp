@@ -57,43 +57,86 @@ unsigned int base_to_unsigned(string s, int base)
 	return value;
 }
 
-/** Converts an hexadecimal number to unsigned int, */
+/** Checks if a string contains only hexadecimal characters. */
+bool isHexa(string s)
+{
+	for (unsigned char c: s) {
+		if (c >= 'a' && c <= 'f') continue;
+		if (c >= 'A' && c <= 'F') continue;
+		if (c >= '0' && c <= '9') continue;
+		return false;
+	}
+	return true;
+}
+/** Checks if a string contains only octal characters. */
+bool isOctal(string s)
+{
+	for (unsigned char c: s) {
+		if (c >= '0' && c <= '7') continue;
+		return false;
+	}
+	return true;
+}
+/** Checks if a string contains only decimal characters. */
+bool isDecimal(string s)
+{
+	for (unsigned char c: s) {
+		if (c >= '0' && c <= '9') continue;
+		return false;
+	}
+	return true;
+}
+/** Checks if a string contains only binary characters. */
+bool isBinary(string s)
+{
+	for (unsigned char c: s) {
+		if (c >= '0' && c <= '1') continue;
+		return false;
+	}
+	return true;
+}
+
+/** Converts an hexadecimal number to unsigned int, returns 0 if invalid character is found. */
 unsigned int hex_to_unsigned(string s)
 {
 	unsigned int value = 0;
 	for (unsigned char c: s) {
 		if (c >= 'a' && c<= 'f') value = (c - 'a' + 10) + 16 * value;
 		else if (c >= 'A' && c<= 'F') value = (c - 'A' + 10) + 16 * value;
-		else value = (c - '0') + 16 * value;
+		else if (c >= '0' && c<= '9') value = (c - '0') + 16 * value;
+		else return 0;
 	}
 	return value;
 }
 
-/** Converts a binary number to unsigned int, */
+/** Converts a binary number to unsigned int, returns 0 if invalid character is found.  */
 unsigned int bin_to_unsigned(string s)
 {
 	unsigned int value = 0;
 	for (unsigned char c: s) {
+		if (c < '0' || c > '1') return 0;
 		value = (c - '0') + 2 * value;
 	}
 	return value;
 }
 
-/** Converts an octal number to unsigned int, */
+/** Converts an octal number to unsigned int, returns 0 if invalid character is found. */
 unsigned int oct_to_unsigned(string s)
 {
 	unsigned int value = 0;
 	for (unsigned char c: s) {
+		if (c < '0' || c > '7') return 0;
 		value = (c - '0') + 8 * value;
 	}
 	return value;
 }
 
-/** Converts a decimal number string to unsigned int. */
+/** Converts a decimal number string to unsigned int, returns 0 if invalid character is found. */
 unsigned int dec_to_unsigned(string s)
 {
 	unsigned int value = 0;
 	for (unsigned char c: s) {
+		if (c < '0' || c > '9') return 0;
 		value = (c - '0') + 10 * value;
 	}
 	return value;
@@ -239,13 +282,12 @@ bool fgetline(MUZ::BYTE** buffer, int *length, FILE* f)
 {
 	if (feof(f)) return false;
 	MUZ::BYTE c;
-	long offset = ftell(f);
 	int size = 0;
 	while (fread(&c, 1, 1, f) == 1) {
 		if (c == 0) break; // ending null
 		if (c == '\n') break; // CR = UNIX end of line
 		if (c == '\r') { // LF: end of line on old macs, but maybe followed by CR
-			offset = ftell(f);
+			long offset = ftell(f);
 			if (fread(&c, 1, 1, f) != 1) break; // EOF
 			if (c == '\n') break; // CR+LF
 			// '\r': alone: back to prev character and EOL
@@ -393,10 +435,9 @@ MUZ::ADDRESSTYPE hexAddress(const MUZ::BYTE* hexline) {
 // stores the hex content in a given buffer
 void hexStore(const MUZ::BYTE* hexline, MUZ::DATATYPE* buffer) {
 	
-	MUZ::BYTE* psrc = (MUZ::BYTE*)hexline + HEXOFS_CONTENT ;
 	MUZ::DATATYPE* pdest = buffer;
 	int nbbytes = hexNbBytes(hexline);
-	for (psrc = (MUZ::BYTE*)(hexline + HEXOFS_CONTENT) ; nbbytes > 0 ; nbbytes --) {
+	for (MUZ::BYTE* psrc = (MUZ::BYTE*)(hexline + HEXOFS_CONTENT) ; nbbytes > 0 ; nbbytes --) {
 		*pdest = (MUZ::DATATYPE)hex2byte(psrc);
 		psrc += 2;
 		pdest += 1;

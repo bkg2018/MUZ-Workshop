@@ -14,6 +14,7 @@
 // MUZ
 #include "YAZE/muz_simz80.h"
 #include "MUZ-Computer/ROMPagingPort.h"
+#include "MUZ-Assembler/Assembler.h"
 
 @implementation MuzRegisters
 
@@ -101,5 +102,21 @@
 	regs.ir = computer->ir;
 	regs.iff = computer->IFF;
 	return regs;
+}
+
+-(void) assemble
+{
+	MUZ::Assembler as;
+	MUZ::ErrorList msg;
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetListingFilename("testAssembler.LST");
+	as.EnableFullListing(true);
+	as.EnableTrace(false);
+	try {
+		as.AssembleFile("/Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm", msg);
+	} catch (std::exception &e) {
+		perror(e.what());
+	}
+
 }
 @end
