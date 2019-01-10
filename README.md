@@ -1,15 +1,16 @@
 # MUZ-Workshop
 
-***NOTICE: this is preliminary work actively mutating on a daily basis and cannot be used for any pratical use yet.***
+***NOTICE: this is preliminary work ***
 
+MUZ is a Z-80 development C++ 11 code base aimed at all OS-es, inspired by the [Small Computer Monitor Workshop from Steven Cousins](https://smallcomputercentral.wordpress.com/projects/small-computer-workshop/).
 
-MUZ is a Z-80 development C++ 11 code base aimed at all OSes, inspired by the [Small Computer Monitor Workshop from Steven Cousins](https://smallcomputercentral.wordpress.com/projects/small-computer-workshop/).
+It's a *standard-as-can-be* C++ library featuring an internal C++ **Z-80 assembler** and a **computer model**, integrating the [YAZE Z-80 emulator](http://www.mathematik.uni-ulm.de/users/ag/yaze-ag) as the **virtual CPU**.
 
-It's a *standard-as-can-be* C++ library featuring an internal C++ **Z-80 assembler**, a **disassembler** and a **computer model**, integrating the [YAZE Z-80 emulator](http://www.mathematik.uni-ulm.de/users/ag/yaze-ag) as the **virtual CPU**.
+With MUZ, you can define IO ports and what they do, assign them to a virtual computer, set memory modules at the addresses of your choice, load hex files into them, run the program, or simply assemble source files right into memory.
 
-With MUZ, you can define IO ports and what they do, assign them to a virtual computer, set memory modules at the addresses of your choice, load hex files into them, run the program ... 
+MUZ has been designed to emulate the RC2014 backplane Pro with Z-80 CPU, Clock, Pageable ROM, 64KB RAM and SIO/2 Serial modules.
 
-From birth, MUZ has been designed to emulate the RC2014 backplane Pro with Z-80 CPU, Clock, Pageable ROM, 64KB RAM and SIO/2 Serial modules.
+MUZ Assembler is designed to be compatible with Small Computer Workshop outputs, and can compile the SC Monitor sources with no modification.
 
 The project also features a MacOS workshop, which uses the C++ MUZ library into a multi editor / debugguer / assembler development system which tries to bring to the Mac the same services as Steve Cousins SCWorkshop on Windows.
 
