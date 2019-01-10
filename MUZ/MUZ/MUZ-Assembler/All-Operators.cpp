@@ -448,7 +448,7 @@ namespace MUZ {
 	// DIFF string string
 	/** Compare two strings, numbers or booleans for difference.
 	 - strings are considered as different if any character doesn't match before either the end of both strings, either a "*" is met
-	 - numbers are differehnt if their numeric value is different
+	 - numbers are different if their numeric values are different
 	 - booleans are different if they are not both true or both false
 	 
 	 if one argument is a boolean, the comparison is a boolean comparison
@@ -479,7 +479,7 @@ namespace MUZ {
 					for (size_t i = 0 ; !diff && (i < len1) ; i++) {
 						const char c1 = arg1.source[i];
 						const char c2 = arg2.source[i];
-						if ((c1 == '*') || (c2 == '*'))
+						if ((c1 == '\x1A') || (c2 == '\x1A'))
 							break;
 						if (c1 != c2)
 							diff = true;
@@ -529,7 +529,7 @@ namespace MUZ {
 				for (size_t i = 0 ; equal && (i < len) ; i++) {
 					const char c1 = arg1.source[i];
 					const char c2 = arg2.source[i];
-					if ((c1 == '*') || (c2 == '*'))
+					if ((c1 == '\x1A') || (c2 == '\x1A'))
 						break;
 					if (c1 != c2)
 						equal = false;

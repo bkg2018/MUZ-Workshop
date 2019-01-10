@@ -62,13 +62,15 @@ inline bool isHexDigit(char c) { return (c >= '0' && c <= '9') || (c >= 'A' && c
  '\t' : replaced by the $09 tabulation character
  '\n' : replaced by 0x0D carriage return
  '\r' : replaced by 0x0A line feed
+ '\*' : replaced by star, cancels joker in comparisons
+ '*'  : replaced by joker 0x1A (ASCII SUB) if joker flag is true
  '\\' : replaced by a single backslash
  '\h' : replaced by 0x08 del character
  '\NNN': replaced by the character with decimal code NNN if doesn't start with a 0 (max 255)
  '\xHH': replaced by the character with hexadecimal code 0xHH (max 0xFF)
  '\0NNN' : replaced by the character with octal code 0NNN (max 0377)
  */
-std::string unescape(std::string s);
+std::string unescape(std::string s, bool joker);
 
 /** Trim spaces at the end */
 void strtrimright(std::string& s);

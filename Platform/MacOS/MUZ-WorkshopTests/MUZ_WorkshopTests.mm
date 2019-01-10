@@ -12,6 +12,9 @@
 #include "MUZ-Computer/ROMPagingPort.h"
 #include "muz_simz80.h"
 
+// WIP
+#include "AddressZone.h"
+
 // assembling and parsing
 #include "Parser.h"
 #include "Assembler.h"

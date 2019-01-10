@@ -10,7 +10,6 @@
 #define DefSymbol_h
 
 #include <unordered_map>
-#include "AddressZone.h"
 #include "Name.h"
 #include "Instruction.h"
 

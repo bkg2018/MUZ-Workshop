@@ -149,16 +149,19 @@ namespace MUZ {
 		}
 		
 		/** Resolve symbol, equates and labels starting in a given token. */
-		bool ResolveSymbolAt(int index);
+		bool ResolveSymbolAt(int index, bool joker);
 		
-		/** Resolve symbols, equates and labels starting at given token index. If no start index is given, will start at current token.
+		/** Resolve symbols, equates and labels starting at given token index. If no start index is given, will start at current token. If the 'joker' flag is true, the '*' character in strings will be replaced by a special character which
+		 	is the end-of-string joker for equal and diff operators.
 		 Returns a list of unsolved label tokens.
+		 @param start the first token to resolve symbols in, -1 to start at current token
+		 @param joker true to use the '*' joker for DIFF and EQUAL operators, false to let '*' be '*'
 		 */
-		std::vector<int> ResolveSymbols(int start = -1);
+		std::vector<int> ResolveSymbols(int start, bool joker);
 		
 		/** Resolve symbols, equates and labels starting at next token. */
-		std::vector<int> ResolveNextSymbols() {
-			return ResolveSymbols( *curtoken + 1 );
+		std::vector<int> ResolveNextSymbols(bool joker) {
+			return ResolveSymbols( *curtoken + 1, joker );
 		}
 		
 		/** Evaluate next tokens to produce a boolean result. */

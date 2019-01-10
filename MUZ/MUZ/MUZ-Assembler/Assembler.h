@@ -103,11 +103,11 @@ namespace MUZ {
 		/** Generates a listing line for an assembled codeline. */
 		void GenerateListing(CodeLine& codeline, ErrorList& msg);
 		/** Initializes memory listing file, close previous if any. */
-		void GenerateMemoryListing(DATATYPE* memory, std::vector<Section>& zones, ErrorList& msg);
+		void GenerateMemoryListing(DATATYPE* memory, Section& section, ErrorList& msg);
 		/** Generate Intel HEX output. */
-		void GenerateIntelHex(DATATYPE* memory, std::vector<Section>& zones, ErrorList& msg);
+		void GenerateIntelHex(DATATYPE* memory, Section& section, ErrorList& msg);
 		/** Fill a memory image and list of sections from an assembled source file. */
-		void FillFromFile(int file, DATATYPE* memory, std::vector<Section>& zones, ErrorList& msg);
+		void FillFromFile(int file, DATATYPE* memory, Section& section, ErrorList& msg);
 		
 		//MARK: - Private Sections management
 		/** Gets or create a named section. */

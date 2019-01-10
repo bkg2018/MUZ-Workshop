@@ -181,13 +181,15 @@ string data_to_hex(MUZ::DATATYPE data)
  '\t' : replaced by the $09 tabulation character
  '\n' : replaced by 0x0D carriage return
  '\r' : replaced by 0x0A line feed
+ '\*' : replaced by star
+ '*'  : replaced by joker (0x1A = ASCII SUB) if the joker parameter is true
  '\\' : replaced by a single backslash
  '\h' : replaced by 0x08 del character
  '\NNN': replaced by the character with decimal code NNN if doesn't start with a 0 (max 255)
  '\xHH': replaced by the character with hexadecimal code 0xHH (max 0xFF)
  '\0NNN' : replaced by the character with octal code 0NNN (max 0377)
  */
-string unescape(string s)
+string unescape(string s, bool joker)
 {
 	string result;
 	int i = 0;
@@ -205,6 +207,9 @@ string unescape(string s)
 				inescape = false;
 			} else if (c =='r') {
 				result += "\x0A";
+				inescape = false;
+			} else if (c =='*') {
+				result += "*";
 				inescape = false;
 			} else if (c =='\\') {
 				result += "\\";
@@ -270,6 +275,8 @@ string unescape(string s)
 			}
 		} else if (c == '\\') {
 			inescape = true;
+		} else if (joker && (c == '*')) {
+			result += '\x1A';
 		} else {
 			result += c;
 		}

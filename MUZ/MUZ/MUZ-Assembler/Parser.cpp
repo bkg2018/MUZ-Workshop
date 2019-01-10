@@ -271,7 +271,7 @@ namespace MUZ {
 	/** Resolve symbol, equates and labels starting in a given token.
 	 	If a symbol cannot be replaced by a value, the function returns false.
 	 */
-	bool Parser::ResolveSymbolAt(int index)
+	bool Parser::ResolveSymbolAt(int index, bool joker)
 	{
 #ifdef DEBUG
 		if (!curtoken || !result) throw PARSERNotInitialized();
@@ -322,7 +322,7 @@ namespace MUZ {
 		}
 		// translate characters in bytes
 		if (token.type == tokenTypeCHAR) {
-			token.source = unescape(token.source); // take care of escaped characters
+			token.source = unescape(token.source, joker); // take care of escaped characters
 			unsigned int uint = token.source.size() > 0 ? token.source.at(0) : 0; // '' will be 00
 			token.source = std::to_string(uint);
 			token.type = tokenTypeDECNUMBER;
@@ -330,7 +330,7 @@ namespace MUZ {
 		}
 		// translate escape sequences in strings
 		if (token.type == tokenTypeSTRING) {
-			token.source = unescape(token.source);
+			token.source = unescape(token.source, joker);
 			return true;
 		}
 		
@@ -341,7 +341,7 @@ namespace MUZ {
 	/** Resolve symbols, equates and labels starting at given token index. If no start index is given, will start at current token.
 	 Returns a list of indexes of unsolved label tokens. Unsolved labels are replaced by a decimal "0" value.
 	 */
-	std::vector<int> Parser::ResolveSymbols(int start /* = -1 */)
+	std::vector<int> Parser::ResolveSymbols(int start /* = -1 */, bool joker)
 	{
 		// next token if no start
 		if (start == -1) start = *curtoken;
@@ -349,7 +349,7 @@ namespace MUZ {
 		
 		std::vector<int> unsolved;
 		for (int i = start ; i < result->size() ; i++) {
-			if (!ResolveSymbolAt(i)) {
+			if (!ResolveSymbolAt(i, joker)) {
 				unsolved.push_back(i);
 			}
 		}

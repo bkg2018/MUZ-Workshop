@@ -313,7 +313,6 @@ namespace MUZ {
 		//TODO: warning if already existing global label ?
 		if (label) {
 			label->SetAddress(GetAddress());
-			codeline.label = label;
 		}
 		
 		// Handle the last directives (#INCLUDE, #INSERTHEX, #INSERTBIN) as well as '.' directives
@@ -327,7 +326,10 @@ namespace MUZ {
 					return false;
 				}
 				// Let the directive do further parsing and symbols resolving
-				return directive->Parse(*this, parser, codeline, label, msg);
+				bool result = directive->Parse(*this, parser, codeline, label, msg);
+				// replace last code line label
+				codeline.label = label;
+				return result;
 				
 				// anything else can be an instruction
 			} else if (token.type == tokenTypeLETTERS) {
@@ -343,7 +345,7 @@ namespace MUZ {
 				Instruction* instruction = GetInstruction(token.source);
 				if (instruction) {
 					// resolve any symbols, and prepare the token index for assembling
-					vector<int> unsolved = parser.ResolveSymbols(codeline.curtoken + 1);
+					vector<int> unsolved = parser.ResolveSymbols(codeline.curtoken + 1, false);
 					codeline.ResetInstruction( codeline.curtoken );
 					codeline.as = this;
 					// let the instruction set the assembled code in the coode line
@@ -357,9 +359,11 @@ namespace MUZ {
 			}
 			// assume it is something to convert, like HEXNUMBER
 			else {
-				parser.ResolveSymbolAt(codeline.curtoken);
+				parser.ResolveSymbolAt(codeline.curtoken, false);
 			}
 		}
+		// replace last code line label
+		codeline.label = label;
 		return true;
 	}
 
@@ -405,7 +409,7 @@ namespace MUZ {
 	
 	/** Initializes memory listing file, close previous if any.
 	 */
-	void Assembler::GenerateMemoryListing(DATATYPE* memory, std::vector<Section>& zones, ErrorList& mergingMsg)
+	void Assembler::GenerateMemoryListing(DATATYPE* memory, Section& section, ErrorList& mergingMsg)
 	{
 		FILE* memoryfile = nullptr;
 		if ( ! m_outputdir.empty() && ! m_memoryfilename.empty()) {
@@ -427,29 +431,40 @@ namespace MUZ {
 			std::string s = "\nSections:\n";
 			fprintf(memoryfile, "%s", s.c_str());
 			for (auto section: m_sections) {
-				s = string("\t") + section.first + ": [" + address_to_hex(section.second->start()) + "-" + address_to_hex(section.second->end()-1) + "]\n";
-				fprintf(memoryfile, "%s", s.c_str());
+				s = string("\t") + section.first + ":";
+				if (section.second->m_ranges.size() == 0) {
+					s += "<empty>";
+				} else {
+					// sort ranges by starting addresses
+					std::sort(section.second->m_ranges.begin(), section.second->m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
+						return a.start < b.start;
+					});
+					for (auto range: section.second->m_ranges) {
+						s += " [" + address_to_hex(range.start) + "-" + address_to_hex(range.end) + "]";
+					}
+				}
+				fprintf(memoryfile, "%s\n", s.c_str());
 			}
 			fprintf(memoryfile, "%s\n", "");
 		}
 		
-		for (auto &zone: zones) {
+		for (auto &range: section.m_ranges) {
 			
-			string line = "[" + address_to_hex(zone.start()) + "-" + address_to_hex(zone.end()) + "]:";
-			Section* section = FindSection(zone.start(), zone.end());
-			if (section) {
-				line = line + section->name();
+			string line = "[" + address_to_hex(range.start) + "-" + address_to_hex(range.end) + "]:";
+			Section* namedsection = FindSection(range.start, range.end);
+			if (namedsection) {
+				line = line + namedsection->name();
 			}
 			fprintf(memoryfile, "%s\n", line.c_str());
 			
-			ADDRESSTYPE startdumpaddress = (zone.start() >> 4) << 4; // zero last 4 bits so we dump 16 bytes
-			ADDRESSTYPE enddumpaddress = (zone.end() >> 4) << 4;
+			ADDRESSTYPE startdumpaddress = (range.start >> 4) << 4; // zero last 4 bits so we dump 16 bytes
+			ADDRESSTYPE enddumpaddress = (range.end >> 4) << 4;
 			for (ADDRESSTYPE dumpaddress = startdumpaddress ; dumpaddress <= enddumpaddress ; dumpaddress += 16) {
 				// Address
 				string line = address_to_hex(dumpaddress) + ":" + spaces(2);
 				// 16-bytes hex dump
 				for (ADDRESSTYPE address = dumpaddress ; address < dumpaddress + 16 ; address += 1) {
-					if (address < zone.start() || address > zone.end())
+					if (address < range.start || address > range.end)
 						line = line + "  " + " ";
 					else
 						line = line + data_to_hex(memory[address]) + " ";
@@ -460,7 +475,7 @@ namespace MUZ {
 				line = line + " ";
 				// 16-bytes ASCII dump
 				for (ADDRESSTYPE address = dumpaddress ; address < dumpaddress + 16 ; address += 1) {
-					if (address < zone.start() || address > zone.end()) {
+					if (address < range.start || address > range.end) {
 						line = line + " ";
 					} else {
 						char c = memory[address];
@@ -477,7 +492,7 @@ namespace MUZ {
 	}
 
 	/** Generate Intel HEX output. */
-	void Assembler::GenerateIntelHex(DATATYPE* memory, std::vector<Section>& zones, ErrorList& msg)
+	void Assembler::GenerateIntelHex(DATATYPE* memory, Section& section, ErrorList& msg)
 	{
 		FILE* hexfile = nullptr;
 		if ( ! m_outputdir.empty() && ! m_hexfilename.empty()) {
@@ -498,13 +513,13 @@ namespace MUZ {
 		// '4CC101A0FF4DC101B0FF4EC10144FF4F' - up to nbbytes data
 		// '2A' - control byte
 		
-		for (auto &zone: zones) {
+		for (auto &range: section.m_ranges) {
 			
-			for (ADDRESSTYPE dumpaddress = zone.start() ; dumpaddress <= zone.end() ; dumpaddress += 16) {
+			for (ADDRESSTYPE dumpaddress = range.start ; dumpaddress <= range.end ; dumpaddress += 16) {
 				
 				int nbbytes = 16;
-				if (dumpaddress + 15 > zone.end()) {
-					nbbytes = zone.end() - dumpaddress;
+				if (dumpaddress + 15 > range.end) {
+					nbbytes = range.end - dumpaddress;
 				}
 				// check sections
 				Section* section = FindSection(dumpaddress, dumpaddress + nbbytes - 1);
@@ -534,55 +549,25 @@ namespace MUZ {
 	}
 
 	/** Fill a memory image and list of sections from an assembled source file. */
-	void Assembler::FillFromFile(int file, DATATYPE* memory, std::vector<Section>& zones, ErrorList& msg)
+	void Assembler::FillFromFile(int file, DATATYPE* memory, Section& section, ErrorList& msg)
 	{
 		SourceFile* sourcefile = m_files.at(file);
 		for (auto & codeline : sourcefile->lines) {
 			
 			// #include lines will recursively call this function
 			if (codeline.includefile > codeline.file) {
-				FillFromFile(codeline.includefile, memory, zones, msg);
+				FillFromFile(codeline.includefile, memory, section, msg);
 			} else if (codeline.code.size() > 0) {
 				// copy this line code in memory image
-				ADDRESSTYPE start = codeline.address;
-				ADDRESSTYPE end = start + codeline.code.size() - 1;
-				ADDRESSTYPE address = start;
+				ADDRESSTYPE address = codeline.address;
 				for (auto c: codeline.code) {
 					memory[address] = c;
+					section.SetAddress(address);
 					address += 1;
-				}
-				// check if new address range will fit in one existing zone
-				bool stored = false;
-				for (auto & zone: zones) {
-					// extend this zone with new address range?
-					Section::MERGINGTYPE merging = zone.extendedBy(start, end );
-					if (merging == Section::mergingNOT) {
-						// do nothing, test next zone
-					} else {
-						stored = true;
-						if (merging == Section::mergingOVERWRITE) {
-							//TODO: add a memory overwriting warning
-						}
-						break;
-					}
-					// try next zone
-				}
-				// if not stored, create a new zone
-				if (!stored) {
-					Section newzone;
-					newzone.SetOrg( start );
-					newzone.SetAddress( end );
-					zones.push_back(newzone);
 				}
 			}
 			
 		}
-		
-		// now we have a full memory image and a list of zones
-		if (zones.size()) {
-			
-		}
-		
 	}
 	
 	//MARK: - Private Sections management
@@ -872,9 +857,19 @@ namespace MUZ {
 				fprintf(m_listingfile, "%s", s.c_str());
 				if (m_status.trace) printf("%s", s.c_str());
 				for (auto section: m_sections) {
-					s = string("\t") + section.first + ": [" + address_to_hex(section.second->start()) + "-" + address_to_hex(section.second->end()-1) + "]\n";
-					fprintf(m_listingfile, "%s", s.c_str());
-					if (m_status.trace) printf("%s", s.c_str());
+					s = string("\t") + section.first + ":";
+					if (section.second->m_ranges.size() == 0) {
+						s += "<empty>";
+					} else {
+						// sort ranges by starting addresses
+						std::sort(section.second->m_ranges.begin(), section.second->m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
+							return a.start < b.start;
+						});
+						for (auto range: section.second->m_ranges) {
+							s += " [" + address_to_hex(range.start) + "-" + address_to_hex(range.end) + "]";
+						}
+					}
+					fprintf(m_listingfile, "%s\n", s.c_str());
 				}
 			}
 			
@@ -1234,6 +1229,7 @@ namespace MUZ {
 				}
 				// Store assembly result
 				sourcefile->lines.push_back(cl);
+				// mark section and advance address to next position for code
 				AdvanceAddress(cl.code.size());
 				// advance in binary file
 				nbbytes = (int)fread(binbuffer, 1, 16, f);
@@ -1475,16 +1471,20 @@ namespace MUZ {
 		m_status.cursection->SetAddress( address );
 	}
 	
-	/** Advance the current assembling address. */
+	/** Advance the current assembling address. Marks the section for addresses from current to just before the new position. */
 	void Assembler::AdvanceAddress( ADDRESSTYPE advance )
 	{
 		if (advance) {
-			ADDRESSTYPE newaddress = GetAddress() + advance;
-			SetAddress(newaddress);
+			// touch current address to just before current address
+			ADDRESSTYPE start = GetAddress();
+			for (int i = 0 ; i < advance ; i++)
+				 SetAddress(start + i);
+			// set new current address
+			m_status.cursection->m_curaddress = start + advance;
 		}
 	}
 	
-	/** Returns the current address. */
+	/** Returns the current address in current section. */
 	ADDRESSTYPE Assembler::GetAddress()
 	{
 		if (m_status.cursection == nullptr) SetCodeSection();
@@ -1501,7 +1501,8 @@ namespace MUZ {
 	Section* Assembler::FindSection(ADDRESSTYPE s, ADDRESSTYPE e)
 	{
 		for (auto& section: m_sections) {
-			if (section.second->contains(s, e))
+			int range = section.second->FindRange(s, e);
+			if (range >= 0)
 				return section.second;
 		}
 		return nullptr;
@@ -1559,19 +1560,19 @@ namespace MUZ {
 
 				// first build memory image and list of written zones
 				DATATYPE* memory = (DATATYPE*)calloc(ADDRESSMASK+1, 1);
-				vector<Section> zones;
+				Section section;
 				ErrorList mergingMsg;
-				FillFromFile(0, memory, zones, mergingMsg); // this handles recursive calls for included files
-				// sort zones by starting addresses
-				std::sort(zones.begin(), zones.end(), []( Section const& a, Section const& b) {
-					return a.start() < b.start();
+				FillFromFile(0, memory, section, mergingMsg); // this handles recursive calls for included files
+				// sort ranges by starting addresses
+				std::sort(section.m_ranges.begin(), section.m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
+					return a.start < b.start;
 				});
 				
 				// dump this memory and zones in listing
-				GenerateMemoryListing(memory, zones, mergingMsg);
+				GenerateMemoryListing(memory, section, mergingMsg);
 				
 				// and Intel Hex format
-				GenerateIntelHex(memory, zones, mergingMsg);
+				GenerateIntelHex(memory, section, mergingMsg);
 			}
 		}
 		return false;

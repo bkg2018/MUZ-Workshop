@@ -181,7 +181,7 @@
 		86892BCA21BA72F100EC24EF /* Conditionnals.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Conditionnals.asm; sourceTree = "<group>"; };
 		868A32E721E4FE2600A6466A /* CHANGES.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGES.md; sourceTree = "<group>"; };
 		868F597721DEA279009C6222 /* Z80-Instructions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = "Z80-Instructions.asm"; sourceTree = "<group>"; };
-		8694B71B21B13EE6006EF947 /* Assembler.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = Assembler.md; path = "WIP - work and design docs/Assembler.md"; sourceTree = "<group>"; };
+		8694B71B21B13EE6006EF947 /* Assembler.md */ = {isa = PBXFileReference; explicitFileType = net.daringfireball.markdown; name = Assembler.md; path = "WIP - work and design docs/Assembler.md"; sourceTree = "<group>"; };
 		8694B71D21B19468006EF947 /* design.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = design.md; sourceTree = "<group>"; };
 		8694B72021B2E484006EF947 /* AddressZone.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AddressZone.h; sourceTree = "<group>"; };
 		8694B72121B2E59F006EF947 /* Label.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Label.h; sourceTree = "<group>"; };

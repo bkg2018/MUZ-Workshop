@@ -19,6 +19,7 @@ namespace MUZ {
 	{
 		ADDRESSTYPE		start;	// starting address
 		ADDRESSTYPE		size;	// zone size
+		ADDRESSTYPE		end;	// = start + size - 1
 		DATATYPE*		zone = nullptr;
 		
 		// low level increment a zone relative to current start and size - beware, no check
