@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8611114021E8DC8E00BAB5FB /* Section.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8611113E21E8DC8E00BAB5FB /* Section.cpp */; };
 		86554A6621C01D110071447E /* Expression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86554A6421C01D110071447E /* Expression.cpp */; };
 		86554A6D21C108C20071447E /* ExpVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86554A6C21C108C20071447E /* ExpVector.cpp */; };
 		86554A7021C13DBA0071447E /* Operator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86554A6E21C13DBA0071447E /* Operator.cpp */; };
@@ -53,6 +54,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8611113E21E8DC8E00BAB5FB /* Section.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Section.cpp; sourceTree = "<group>"; };
+		8611113F21E8DC8E00BAB5FB /* Section.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Section.h; sourceTree = "<group>"; };
 		8642232C21C6442D0053E02F /* Expressions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Expressions.asm; sourceTree = "<group>"; };
 		8642232E21C862490053E02F /* CodeLine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CodeLine.h; sourceTree = "<group>"; };
 		8642239F21CB964E0053E02F /* Alpha.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Alpha.asm; sourceTree = "<group>"; };
@@ -265,6 +268,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8611113D21E8DC4E00BAB5FB /* unused */ = {
+			isa = PBXGroup;
+			children = (
+				8694B72021B2E484006EF947 /* AddressZone.h */,
+			);
+			path = unused;
+			sourceTree = "<group>";
+		};
 		8642232B21C3D60C0053E02F /* MUZ-Computer */ = {
 			isa = PBXGroup;
 			children = (
@@ -492,6 +503,8 @@
 				86892BC421B6BF4700EC24EF /* StrUtils.cpp */,
 				866786D421D670A40027E67F /* FileUtils.cpp */,
 				866786D521D670A40027E67F /* FileUtils.h */,
+				8611113E21E8DC8E00BAB5FB /* Section.cpp */,
+				8611113F21E8DC8E00BAB5FB /* Section.h */,
 			);
 			path = "MUZ-Common";
 			sourceTree = "<group>";
@@ -534,7 +547,6 @@
 			children = (
 				866786D221D64D060027E67F /* CodeLine.cpp */,
 				8642232E21C862490053E02F /* CodeLine.h */,
-				8694B72021B2E484006EF947 /* AddressZone.h */,
 				8694B73321B4A390006EF947 /* All-Directives.cpp */,
 				8694B73421B4A390006EF947 /* All-Directives.h */,
 				86554A6E21C13DBA0071447E /* Operator.cpp */,
@@ -620,6 +632,7 @@
 		869B4C1A21AC4FB200E65FE7 /* MUZ */ = {
 			isa = PBXGroup;
 			children = (
+				8611113D21E8DC4E00BAB5FB /* unused */,
 				8642232B21C3D60C0053E02F /* MUZ-Computer */,
 				86892BC221B6BC0300EC24EF /* MUZ-Common */,
 				8694B71C21B193C4006EF947 /* MUZ-Assembler */,
@@ -773,6 +786,7 @@
 				86554A7421C23B220071447E /* All-Operators.cpp in Sources */,
 				869B4C0C21AC4F8000E65FE7 /* ViewController.swift in Sources */,
 				869B4C5421AC50F600E65FE7 /* MuzBridge.mm in Sources */,
+				8611114021E8DC8E00BAB5FB /* Section.cpp in Sources */,
 				869B4C4221AC4FB300E65FE7 /* Module.cpp in Sources */,
 				869B4C4121AC4FB300E65FE7 /* PortModule.cpp in Sources */,
 				8694B72421B2E653006EF947 /* Assembler.cpp in Sources */,

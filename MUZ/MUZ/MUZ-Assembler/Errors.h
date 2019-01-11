@@ -16,7 +16,7 @@ namespace MUZ {
 	enum ErrorType {
 		errorTypeINFO,		// warmless informations
 		errorTypeWARNING,	// doesn't break assembly
-		errorTypeABOUTFILE,	// Warning or error about a filename
+		errorTypeABOUTFILE,	// Warning or error about a filename (#include, #insertbin, #inserthex)
 		errorTypeERROR,		// doesn't generate code but can continue assembly with possibly wrong addresses
 		errorTypeFATAL		// breaks assembly
 	};

@@ -27,6 +27,7 @@ using std::string;
 #include <sstream>
 #include <iostream>
 #include <stdio.h>
+#include "Section.h"
 
 namespace MUZ {
 	
@@ -512,26 +513,33 @@ namespace MUZ {
 		// '00'   - Intel record type = 0
 		// '4CC101A0FF4DC101B0FF4EC10144FF4F' - up to nbbytes data
 		// '2A' - control byte
+		string line;
+		int nbbytes;
+		Section* asmsection;
 		
+		// for each address range in the parameter section
 		for (auto &range: section.m_ranges) {
 			
+			// for each address in the range
 			for (ADDRESSTYPE dumpaddress = range.start ; dumpaddress <= range.end ; dumpaddress += 16) {
 				
-				int nbbytes = 16;
+				// prepare up to 16 bytes
+				nbbytes = 16;
 				if (dumpaddress + 15 > range.end) {
 					nbbytes = range.end - dumpaddress;
 				}
-				// check sections
-				Section* section = FindSection(dumpaddress, dumpaddress + nbbytes - 1);
-				if (!section) {
-					//TODO: IMPOSSIBLE generated code with no section!
-				} else if ( ! section->saved ) {
+				// get the assembled section it comes from
+				asmsection = FindSection(dumpaddress, dumpaddress + nbbytes - 1);
+				if (!asmsection) {
+					//TODO: MUZ error, generated code with no section: CANNOT happen!
+				} else if ( ! asmsection->save() ) {
+					// Comes from a non saved .data section, don't output
 					continue;
 				}
-				// code comes from a section with save attribute
-				string line = ":";
+				// code comes from a code or saved-data section
+				line = ":";
 				line = line + data_to_hex(nbbytes) + address_to_hex(dumpaddress) + "00"; // nbbytes, address, record type
-				int sum = nbbytes + (dumpaddress >> 8) + (dumpaddress & 0xFF); // bytes values after ':'
+				int sum = nbbytes + (dumpaddress >> 8) + (dumpaddress & 0xFF); // start control sum with bytes after ':'
 				for (ADDRESSTYPE address = dumpaddress ; address < dumpaddress + nbbytes ; address += 1) {
 					line = line + data_to_hex(memory[address]);
 					sum = sum + memory[address];
@@ -791,7 +799,7 @@ namespace MUZ {
 		// now explore the file line by line
 		BYTE* buffer = nullptr;
 		int linesize = 0;
-		long offset = ftell(f);
+		//long offset = ftell(f);
 		Label* lastLabel = nullptr;
 		while (fgetline(&buffer, &linesize, f)) {
 			
@@ -804,10 +812,10 @@ namespace MUZ {
 			cl.section = GetSection();
 			cl.assembled = false;
 			cl.file = (int)filenum;
-			cl.offset = offset;
-			cl.line = (int)sourcefile->lines.size()  + 1;
-			cl.size = linesize;
+			//cl.offset = offset;
+			//cl.size = linesize;
 			cl.source = string((char*)buffer);
+			cl.line = (int)sourcefile->lines.size()  + 1;
 			cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
 			// Assemble this line, will include another file if #INCLUDE is met
 			cl.assembled = AssembleCodeLine(cl, msg);
@@ -819,7 +827,7 @@ namespace MUZ {
 			// Store assembly result
 			sourcefile->lines.push_back(cl);
 			// update current address and file position
-			offset = ftell(f);
+			//offset = ftell(f);
 			AdvanceAddress(cl.code.size());
 		}
 		
@@ -1005,10 +1013,10 @@ namespace MUZ {
 			cl.section = GetSection();
 			cl.assembled = false;
 			cl.file = (int)filenum;
-			cl.offset = offset;
-			cl.line = (int)sourcefile->lines.size()  + 1;
-			cl.size = linesize;
+			//cl.offset = offset;
+			//cl.size = linesize;
 			cl.source = string((char*)buffer);
+			cl.line = (int)sourcefile->lines.size()  + 1;
 			cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
 			// Assemble this line, will include another file if #INCLUDE is met
 			cl.assembled = AssembleCodeLine(cl, msg);
@@ -1136,10 +1144,10 @@ namespace MUZ {
 					cl.section = GetSection();
 					cl.assembled = false;
 					cl.file = (int)filenum;
-					cl.offset = offset;
-					cl.line = (int)sourcefile->lines.size()  + 1;
-					cl.size = linesize;
+					//cl.offset = offset;
+					//cl.size = linesize;
 					cl.source = source;
+					cl.line = (int)sourcefile->lines.size()  + 1;
 					cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
 					// Assemble this line, will include another file if #INCLUDE is met
 					cl.assembled = AssembleCodeLine(cl, msg);
@@ -1216,10 +1224,10 @@ namespace MUZ {
 				cl.section = GetSection();
 				cl.assembled = false;
 				cl.file = (int)filenum;
-				cl.offset = ftell(f);;
-				cl.line = (int)sourcefile->lines.size()  + 1;
-				cl.size = nbbytes;
+				//cl.offset = ftell(f);;
+				//cl.size = nbbytes;
 				cl.source = source;
+				cl.line = (int)sourcefile->lines.size()  + 1;
 				cl.label = nullptr;
 				// Assemble this line, will include another file if #INCLUDE is met
 				cl.assembled = AssembleCodeLine(cl, msg);
@@ -1447,7 +1455,7 @@ namespace MUZ {
 		bool justcreated = !ExistSection(fullname);
 		m_status.cursection = GetSection(fullname);
 		if  (justcreated) {
-			m_status.cursection->saved = true;
+			m_status.cursection->SetSave(true);
 			m_status.cursection->SetName(fullname);
 		}
 	}
@@ -1459,7 +1467,7 @@ namespace MUZ {
 		bool justcreated = !ExistSection(fullname);
 		m_status.cursection = GetSection(fullname);
 		if  (justcreated) {
-			m_status.cursection->saved = save;
+			m_status.cursection->SetSave(save);
 			m_status.cursection->SetName(fullname);
 		}
 	}
@@ -1532,8 +1540,8 @@ namespace MUZ {
 		codeline.address = 0;
 		codeline.assembled = false;
 		codeline.file = -1;
-		codeline.offset = 0;
-		codeline.size = 0;
+		//codeline.offset = 0;
+		//codeline.size = 0;
 		codeline.source = sourceline;
 		codeline.assembled = AssembleCodeLine(codeline, msg);
 		return codeline;
@@ -1558,20 +1566,21 @@ namespace MUZ {
 				
 				// All ok, now output memory listing
 
-				// first build memory image and list of written zones
-				DATATYPE* memory = (DATATYPE*)calloc(ADDRESSMASK+1, 1);
+				// first build memory image and a section with all the written address ranges
+				DATATYPE* memory = (DATATYPE*)calloc(MEMMAXSIZE, 1);
 				Section section;
 				ErrorList mergingMsg;
 				FillFromFile(0, memory, section, mergingMsg); // this handles recursive calls for included files
+				
 				// sort ranges by starting addresses
 				std::sort(section.m_ranges.begin(), section.m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
 					return a.start < b.start;
 				});
 				
-				// dump this memory and zones in listing
+				// dump in memory listing
 				GenerateMemoryListing(memory, section, mergingMsg);
 				
-				// and Intel Hex format
+				// Output Intel Hex format
 				GenerateIntelHex(memory, section, mergingMsg);
 			}
 		}

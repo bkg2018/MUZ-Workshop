@@ -11,6 +11,7 @@
 #include "Errors.h"
 #include "Expression.h"
 #include "Parser.h"
+#include "Section.h"
 
 namespace MUZ {
 	

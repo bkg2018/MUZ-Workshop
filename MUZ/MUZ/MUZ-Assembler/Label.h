@@ -65,7 +65,7 @@ namespace MUZ {
 			// compute delta
 			int delta = AddressFrom(from) - from;
 			// then 2-complement
-			return ((((int)ADDRESSMASK + 1) - delta) & ADDRESSMASK);
+			return ((((int)MEMMAXSIZE) - delta) & ADDRESSMASK);
 		}
 		
 		/** Returns the nearest available address. It returns INT_MAX if no address is assigned. */

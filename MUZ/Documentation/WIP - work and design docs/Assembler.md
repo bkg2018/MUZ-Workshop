@@ -24,7 +24,7 @@ The main features of MUZ assembler are:
 
 The syntax of MUZ assembler has been made compatible with Steve Cousins's SC Monitor Workshop. The same assembler source files generate the same Hex and binary files. Listing files are very similar with minor differences. Unnamed Code and Data sections works identically.
 
-## Syntax in This Document
+***Syntax in This Document***
 
 This documentation uses a simple syntax in source code samples and syntax descriptions.
 
@@ -51,6 +51,23 @@ The directives can be preprocessor directives like `#INCLUDE` or `#DEFINE` (see 
 
 Directives and instructions names are not case sensitive (`ld` is the same as `LD`), but the labels are.
 
+The assembler recognizes the following elements, which will be detailed in this documentation:
+
+* Preprocessing directives
+* Preprocessor symbols
+* Labels
+* Instructions
+* Comments
+* Registers
+* Numeric constants
+* Character constants
+* String constants
+* Expressions
+* Assembler directives
+
+There is also some contexts in which the assembler adopts a specific behaviour and the documentation will xxplain them.
+
+
 ### Preprocessing Directives
 
 
@@ -67,12 +84,12 @@ The preprocessor has been made compatible with *Steve Cousins Workshop* assemble
 |`#DEFINE <defsymbol> [expression]`   |`#DEFINE TARGET RC2014`                             |Defines `defsymbol` for the rest of assembling. If this symbol has no particular value, it is still considered as true when used in `#IF`. The optional expression can be a string or numerical expression. (See Expressions later in this document.) |
 |`#UNDEF <defsymbol>`                 |`#UNDEF TARGET`                                     |Undefines `defsymbol` for the rest of assembling.|
 |`#IFDEF <defsymbol>`                 |`#IFDEF IncludeFDOS`                                |if the `defsymbol` is defined, the lines following the `#IF` will be assembled, until an `#ELSE` or `#ENDIF` is meet. When an `#ELSE` is found, the following lines are ignored until an `#ENDIF` is found. If it is not defined, the assembler jumps over following lines until it finds an `#ELSE` or `#ENDIF`|
-|`#IF <expression>`                   |`#IF BUILD = "W*"`                                  |Evaluates the expression and if the result is true or not null, the lines following the `#IF` will be assembled, until an `#ELSE` or `#ENDIF` is meet. When an `#ELSE` is found, the following lines are ignored until an `#ENDIF` is found. If the result is null, the assembler jumps over following lines until it finds an `#ELSE` or `#ENDIF`.  (See Expressions later in this document.)|
+|`#IF <expression>`                   |`#IF BUILD = "W*"`                                  |Evaluates the expression and if the result is true or not null, the lines following the `#IF` will be assembled, until an `#ELSE` or `#ENDIF` is meet. When an `#ELSE` is found, the following lines are ignored until an `#ENDIF` is found. If the result is null, the assembler jumps over following lines until it finds an `#ELSE` or `#ENDIF`.  (See **Expressions** later in this document.)|
 |`#ELSE`                              |`#ELSE`                                             |Defines the lines which will be assembled if the condition is false or null in the previous `#IF` or if the symbol is not defined in the previous `#ifdef`directive.|
 |`#ENDIF`                             |`#ENDIF`                                            |Ends an `#IF/#ELSE` sequence.|
 |`#INCLUDE <filepath>`                |`#INCLUDE    Hardware\Workshop\!Manager.asm`        |Includes another assembler source file. The current defsymbols, labels, address and sections are all active during the assembly of the included file. Absolute and relative paths can be used. Both Windows `\` and UNIX `/` are path separators. Multiples separators are considered as one: `///` and `\\\` are the same as `/`. Relative paths are relative to the main source path. File names with no path are searched in the parent path first, and if not found, in the main source directory.|
-|`#INSERTHEX <hexfile>`               |                                                    |Inserts an Intel Hex File in code. Each Intel HEX record has its own fixed address and will update the current assembling address counter. MUZ Assembler only processes the type-0 (16-bit address and up to 255 bytes) and type-1 (end of file) records. The file path follows the same rules as for #INCLUDE directive (see above.)|
-|`#INSERTBIN <binfile>`               |                                                    |Inserts the content of a file byte by byte at current address of current section. The file path follows the same rules as for #INCLUDE directive (see above.)|
+|`#INSERTHEX <hexfile>`               |                                                    |Inserts an Intel Hex File in code. Each Intel HEX record has its own fixed address and will update the current assembling address counter. MUZ Assembler only processes the type-0 (16-bit address and up to 255 bytes) and type-1 (end of file) records. The file path follows the same rules as for `#INCLUDE` directive (see above.)|
+|`#INSERTBIN <binfile>`               |                                                    |Inserts the content of a file byte by byte at current address of current section. The file path follows the same rules as for `#INCLUDE` directive (see above.)|
 
 
 
@@ -238,9 +255,75 @@ Operators in expressions follow the hierarchy from the following table, similar 
 |  &&     | 9          | 2 | boolean | boolean | boolean AND: `(1 < 2) && (3 < 4)` is true
 |  \|\|   | 10         | 2 | boolean | boolean | boolean OR: `('A'='a') || ('3'='3')` is true
 
+
+### Assembler Directives
+
+The assembler has directives which are not generating CPU instructions but rather impact the assembling process itself. A few directives also allow insertion of bytes or characters sequences at current address.
+
+The assembler directives start with a dot `.` character, except for the comment `;` directive.
+
+Before we see the syntax of all directives we will present code and data sections.
+
+#### CODE and DATA Sections
+
+The assembler allows the programmer to place parts of its source files at different places in the processor address space. On a Z-80, this simply cuts the 0000-FFFF address space in different parts, under the programmer control. There is no actual difference between a code and data section other than its current address and address range: it's mostly a programmer's choice. On more recent processors, sections types have an actual impact on what you can do with code or data, for example the program won't be allowed to write into a code section or to transfer control into a data section. 
+
+Most of the time, a CODE and a DATA section are sufficient because 8-bit processors were thought as mono-task processors and don't need to share memory with other programs, except maybe the operating system or BASIC interpreter.
+
+As their name imply, the CODE section will be used for the space where the program instructions resides, while the DATA section will be placed elsewhere where the program stores its internal data or the user data when he or she's using the program.
+
+In MUZ-Assembler, CODE and DATA sections can have names, so the programmer can create more than one section of both. This can be used to separate program datas from user datas for example, or various parts of the program code itself.
+
+By default, MUZ-Assembler is compatible with Small Computer Workshop and will have the "CODE" and "DATA" sections that you can switch using the `.CODE` and `.DATA` directives. Once you issue these directives, all the following instructions or directives will be addressing the relevant section current address.
+
+The interesting point in having named sections is that MUZ-Assembler will list the address spaces used by each section at the end of assembly, and will issue warnings for overwriting cases.
+
+**Remark:** if no section is used in source files, all the assembled code will be stored in a unique CODE section.
+
+#### Output in Hex File
+
+By default, MUZ-Assembler will write each CODE section in the HEX output file, but *not the DATA sections*.
+
+This behaviour is compatible with Small Computer Workshop.
+
+MUZ-Assembler accepts an optional `SAVE` attribute for DATA sections. When the `.DATA` directive is used for the first time to start a data section, it can be added `,SAVE` to tell the assembler that this data section must be saved in output HEX files just as the code sections. 
+
+#### Directives
+
+The assembler directives all start with a `'.'`character.
+
+|Syntax|Example|Details|
+|---|---|---|
+|`;<comment>`  ||Ends the current source line with a comment. Everything including and following the `;` is ignored by the assembler|
+|`.CODE [name]`|| Starts a new code section or switches to it. The name is optional. After this directive, all the instructions and directives will be applied to the section current address. Notice that the CODE section are mostly supposed to receive instruction code, but can also contain `.DB`-like storage directives: this is a programmer's choice. 
+|`.DATA [name] [,SAVE]`|| Starts a new data section or switch to it. The name is optional. After this directive, all the instructions and directives will be applied to the section current address. Notice that the DATA section is supposed to receive temporary or work storage areas with `.DB`-like directives. The content of a data section is only saved in HEX output if the `,SAVE` attribute is added to the *first* `.DATA` directive for this section.
+|`.ORG <expression>` | `.ORG 0x2000`   `.ORG CodeORG`|Changes the current address for assembly in the current section. The `.ORG` directive starts a new assembly sequence at a new address. This can be used to generate different portions of code and data at different memory address ranges.
+|`<symbol>: .EQU <expression>` |`kData: .EQU 0xFC00` `LF .EQU 0AH`|Defines a label with a given numeric or string value. The symbol will be replaced by its value during further assembling. Notice that *the symbols defined with `.EQU` don't have an address* and are normally not interacting with the current code or data section. However, you can use the `$` special symbol to refer to the current section current address in the expression.|
+|`[<label>:] .DB <expression> [[, <expression>] ...]` or `[<label>:] .BYTE <expression> [[, <expression>] ...]`|`szStartup: .DB "Custom",kNull` `iHwFlags: .DB 0x00`|Inserts a sequence of 8-Bit numbers in the assembled code at the current address in the current section. This is generally preceded by a label or other DB lines. Strings can be used and will generate one byte for each character. Strings and numbers can be separated with a comma. If a label is provided it will represent the address where this directive stores the data.| 
+|`[<label>:] .DW <expression> [[, <expression>] ...]` or `[<label>:] .WORD <expression> [[, <expression>] ...]`|`.DW 0xAA55`  `.DW EndOfMonitor-StartOfMonitor`|Insert a sequence of 16-Bit numbers in the assembled code at the current address in the current section. This is generally preceded by a label or other DW lines. Strings can be used but for each character they will generate an 8-bit zero followed by the byte value of each character. Strings and numbers can be separated with a comma. If a label is provided it will represent the address where this directive stores the data.|   
+|`.PROC <processor code>`|`.PROC Z80`|Defines the processor instruction set to use. Ignored for now, should be defined as `Z80` for SCWorkshop compatibility.|
+|`.HEXBYTES <expression>`||Ignored|
+
+
+### EQU Symbols
+
+Symbols defined with an `.EQU` directive are replaced by the result of the expression in their `.EQU` directive. 
+Example:
+
+In the following lines, the symbol `WRKSPC` is defined with the value being the value defined by another symbol, `kWRKSPC`. The next line defines `USR` as being the sum of `WRKSPC` and 3, which in this context means that the `USR` symbol represents the address 3 bytes after the address represented by `WRKSPC`. 
+
+    WRKSPC      .EQU    kWRKSPC     ; BASIC Work space    <SCC> original 2045H  
+    USR         .EQU    WRKSPC+3H   ; "USR (x)" jump
+
+Remark: because the assembler does 2 passes on source files, the `.EQU` symbols can be used in expressions even before they appear in their `.EQU` directive. Their actual value will be known on the second pass, when code is actually generated.
+
+## Special Contexts
+
+There are contexts where MUZ-Assembler adopt a specific behaviour. Here are some details.
+
 ### Parenthesis and Indirect Addressing
 
-In general parenthesis can be used anywhere in expressions, however there is a special case where they surround something else than a numerical expression: it's when an indirect address is expected.
+Parenthesis can be used anywhere in expressions, however there is a special case where they surround something else than a numerical expression: it's when an indirect address is expected.
 
 Indirect addressing is a mode where a number is not used as a direct value, but rather as an address where the actual data will be read or written.
 
@@ -299,74 +382,34 @@ This only works with the `+` and `-` operators.
 
 If `+` is used on two strings, it concatenates them. 
 
+## Assembler Output
 
-## Assembler Directives
+MUZ-Assembler outputs a number of files on demand. Using C++ calls, the programmer can set an output directory and various file names. An empty file name will disable the output.
 
-The assembler has directives which are not generating CPU instructions but rather impact the assembling process itself. A few directives also allow insertion of bytes or characters sequences at current address.
+### Output Directory
 
-The assembler directives start with a dot `.` character, except for the comment `;` directive.
+The assembler must be set up with an output directory. It will write each file in this directory.
 
-Before we see the syntax of all directives we will present code and data sections.
+### Listing File
 
-### CODE and DATA Sections
+The *listing file* is a text file which shows the result of the assembly process, along with the original source lines of code and various informations.
 
-The assembler allows the programmer to place parts of its source files at different places in the processor address space. On a Z-80, this simply cuts the 0000-FFFF address space in different parts, under the programmer control. There is no actual difference between a code and data section other than its current address and address range: it's mostly a programmer's choice. On more recent processors, sections types have an actual impact on what you can do with code or data, for example the program won't be allowed to write into a code section or to transfer control into a data section. 
+* each line of a source file is listed, along with address, value, line number and source
+* after all lines have been listed, the file receives a list of each section with their name and all the separate address ranges it contains
+* then the assembler lists all the symbols defined by `#DEFINE` with their value if they have one
+* then the labels set to a value with `.EQU` are listed with their value
+* finaly the listing lists all the global labels on two columns: on the first, labels are sorted by name and on the second, they are listed by address
 
-Most of the time, a CODE and a DATA section are sufficient because 8-bit processors were thought as mono-task processors and don't need to share memory with other programs, except maybe the operating system or BASIC interpreter.
-
-As their name imply, the CODE section will be used for the space where the program instructions resides, while the DATA section will be placed elsewhere where the program stores its internal data or the user data when he or she's using the program.
-
-In MUZ-Assembler, CODE and DATA sections can have names, so the programmer can create more than one section of both. This can be used to separate program datas from user datas for example, or various parts of the program code itself.
-
-By default, MUZ-Assembler is compatible with Small Computer Workshop and will have the "CODE" and "DATA" sections that you can switch using the `.CODE` and `.DATA` directives. Once you issue these directives, all the following instructions or directives will be addressing the relevant section current address.
-
-The interesting point in having named sections is that MUZ-Assembler will list the address spaces used by each section at the end of assembly, and will issue warnings for overwriting cases.
-
-**Remark:** if no section is used in source files, all the assembled code will be stored in a unique CODE section.
-
-#### Output in Hex File
-
-By default, MUZ-Assembler will write each CODE section in the HEX output file, but *not the DATA sections*.
-
-This behaviour is compatible with Small Computer Workshop.
-
-MUZ-Assembler accepts an optional `SAVE` attribute for DATA sections. When the `.DATA` directive is used for the first time to start a data section, it can be added `,SAVE` to tell the assembler that this data section must be saved in output HEX files just as the code sections. 
-
-### Directives
-
-The assembler directives all start with a `'.'`character.
-
-|Syntax|Example|Details|
-|---|---|---|
-|`;<comment>`  ||Ends the current source line with a comment. Everything including and following the `;` is ignored by the assembler|
-|`.CODE [name]`|| Starts a new code section or switches to it. The name is optional. After this directive, all the instructions and directives will be applied to the section current address. Notice that the CODE section are mostly supposed to receive instruction code, but can also contain `.DB`-like storage directives: this is a programmer's choice. 
-|`.DATA [name] [,SAVE]`|| Starts a new data section or switch to it. The name is optional. After this directive, all the instructions and directives will be applied to the section current address. Notice that the DATA section is supposed to receive temporary or work storage areas with `.DB`-like directives. The content of a data section is only saved in HEX output if the `,SAVE` attribute is added to the *first* `.DATA` directive for this section.
-|`.ORG <expression>` | `.ORG 0x2000`   `.ORG CodeORG`|Changes the current address for assembly in the current section. The `.ORG` directive starts a new assembly sequence at a new address. This can be used to generate different portions of code and data at different memory address ranges.
-|`<symbol>: .EQU <expression>` |`kData: .EQU 0xFC00` `LF .EQU 0AH`|Defines a label with a given numeric or string value. The symbol will be replaced by its value during further assembling. Notice that *the symbols defined with `.EQU` don't have an address* and are normally not interacting with the current code or data section. However, you can use the `$` special symbol to refer to the current section current address in the expression.|
-|`[<label>:] .DB <expression> [[, <expression>] ...]` or `[<label>:] .BYTE <expression> [[, <expression>] ...]`|`szStartup: .DB "Custom",kNull` `iHwFlags: .DB 0x00`|Inserts a sequence of 8-Bit numbers in the assembled code at the current address in the current section. This is generally preceded by a label or other DB lines. Strings can be used and will generate one byte for each character. Strings and numbers can be separated with a comma. If a label is provided it will represent the address where this directive stores the data.| 
-|`[<label>:] .DW <expression> [[, <expression>] ...]` or `[<label>:] .WORD <expression> [[, <expression>] ...]`|`.DW 0xAA55`  `.DW EndOfMonitor-StartOfMonitor`|Insert a sequence of 16-Bit numbers in the assembled code at the current address in the current section. This is generally preceded by a label or other DW lines. Strings can be used but for each character they will generate an 8-bit zero followed by the byte value of each character. Strings and numbers can be separated with a comma. If a label is provided it will represent the address where this directive stores the data.|   
-|`.PROC <processor code>`|`.PROC Z80`|Defines the processor instruction set to use. Ignored for now, should be defined as `Z80` for SCWorkshop compatibility.|
-|`.HEXBYTES <expression>`||Ignored|
+**Remarks:** Some labels may not appear in the second column because only one label is listed for each address and some labels can point to the same address.
 
 
-### EQU Symbols
+### Memory Listing File
 
-Symbols defined with an `.EQU` directive are replaced by the result of the expression in their `.EQU` directive. 
-Example:
+The memory listing file shows the list of sections, and then the binary content of each section address range, both in hecadecimal and ASCII form. Characters with a code greater than 127 (0x7F) are displayed as a simple dot `.`.
 
-In the following lines, the symbol `WRKSPC` is defined with the value being the value defined by another symbol, `kWRKSPC`. The next line defines `USR` as being the sum of `WRKSPC` and 3, which in this context means that the `USR` symbol represents the address 3 bytes after the address represented by `WRKSPC`. 
+### Intel HEX Output
 
-    WRKSPC      .EQU    kWRKSPC     ; BASIC Work space    <SCC> original 2045H  
-    USR         .EQU    WRKSPC+3H   ; "USR (x)" jump
+The HEX output file contains the result of the assembly in a fform which can be directly used to set up a computer memory content:
 
-Remark: because the assembler does 2 passes on source files, the `.EQU` symbols can be used in expressions even before they appear in their `.EQU` directive. Their actual value will be known on the second pass, when code is actually generated.
-
-
-## Z-80 Instructions
-
-MUZ-Assembler knows all the Z-80 documented instructions from Zilog official documentation.
-
-
-
-
-
+* An EPROM burner can generaly use HEX Intel files to program an EPROM
+* On the RC2014 computer, the SC Monitor program can receive and interpret the HEX file contents and put the binary content directly at the right address.

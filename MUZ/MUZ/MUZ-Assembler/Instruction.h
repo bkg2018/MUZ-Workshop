@@ -18,7 +18,7 @@
 namespace MUZ {
 	
 	/** Base class for each possible CPU instruction name.
-	 Each derived instruction class will implement its argument parsing and use.
+	 Each derived instruction class will implement its operands detection and use.
 	 There may be a lot of different functioning modes for an instruction, but there is only
 	 one derived class for each instruction name, so the instruction class will have to manage
 	 any possible sub-deriving to delegate its work to different internal derived classes.
