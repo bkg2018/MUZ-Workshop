@@ -357,11 +357,11 @@ Strings can be compared using all comparison operators for equality or inequalit
 
 #### Joker `*` Character
 
-In equakity and difference comparisons, the `*` character acts as a joker which ends the comparison. If the characters are identical to the string expression until this joker, the result is true.
+In equality and difference comparisons, the `*` character acts as a joker which ends the comparison. If the characters are identical to the string expression until this joker, the result is true.
 
 This joker is only for equality and difference: in all other expressions, the `*` character is left unchanged.
 
-The actual `*` character can be forced by escaping it iwth a backslash character: `"\*"` represents the `"*"` in all contexts.
+The actual `*` character can be forced and the joker disabled by escaping it with a backslash character: `"\*"` represents the `"*"` in all contexts.
 
 Examples:
 
@@ -370,17 +370,18 @@ Examples:
 * `#IF BUILD = "R0"` is true if the defsymbol `BUILD` has been defined as `R0`. 
 * `#IF BUILD = "T\*"` is true if the defsymbol `BUILD` has been defined as `T\*`
 
+**Remark:** the joker is only available in `#IF` directives, and only for the `=`/`==`and `!=`/`<>` comparisons.
+
 #### Concatenation Addition and Subtraction
 
 A special feature allows the programmer to add or subtract numerical values to character codes. 
 
-When a number is added or subtracted to a string in an expression, the effect is to add or subtract the numerical value to each of the characters in the string. 
+When a string is being added or subtracted a number in an expression, the effect is to add or subtract the numerical value to each of the characters in the string. If `+` is used on two strings, it concatenates them.
 
-For example the expression `"AB" + 1` adds 1 to each character, resulting in the string `"BC"`.
+This only works with the `+` and `-` operators, and only for the `string <operator> number` expressions.
 
-This only works with the `+` and `-` operators.
+For example the expression `"AB" + 1` adds 1 to each character, resulting in the string `"BC"`. But the expression `"AB" + "1"` works on two strings and results in the string `"AB1"`.
 
-If `+` is used on two strings, it concatenates them. 
 
 ## Assembler Output
 
@@ -394,11 +395,80 @@ The assembler must be set up with an output directory. It will write each file i
 
 The *listing file* is a text file which shows the result of the assembly process, along with the original source lines of code and various informations.
 
-* each line of a source file is listed, along with address, value, line number and source
-* after all lines have been listed, the file receives a list of each section with their name and all the separate address ranges it contains
-* then the assembler lists all the symbols defined by `#DEFINE` with their value if they have one
-* then the labels set to a value with `.EQU` are listed with their value
-* finaly the listing lists all the global labels on two columns: on the first, labels are sorted by name and on the second, they are listed by address
+Each line of a source file is listed, along with address, value, line number and source:
+
+    00C1: 11 01 00      0031  Selftest:   LD   DE,1           ;Prepared for delay loop
+    00C4: 7B            0032              LD   A,E            ;First byte to write to LEDs = 0x01
+    
+In this part of the listing, the lines defining a label or an EQU symbol show the address or value for that symbol at the beginning of the line:
+
+    0052:               0022  kConfMajor: .EQU 'R'            ;Config: Letter = official, number = user
+    ...
+    0223:               0630  OutputMessage:
+
+The `#INCLUDE`, `#INSERTBIN` and `#INSERTHEX` directives show a break in the listing with the listing of the included file, and show the return to the original source when the listing of the included file is finished:
+
+                        0077  #IF         BUILD = "R0"
+                        0078  #INCLUDE    Hardware\Custom\Config_R0.asm
+
+                        Hardware/Custom/Config_R0.asm
+
+                        0001  ; **********************************************************************
+                        0002  ; **  Config: R0 = RC2014                       by Stephen C Cousins  **
+                        ...
+                        0095  
+                        0096  
+
+                        /Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm
+                        0079  #ELSE
+
+
+The lines which are not assembled following an `#IF` or `#IFDEF` test directive or an `#ELSE` are listed with no address and code and do not follow the include or insert directives:
+
+                        0326  #IFDEF      IncludeScripting
+                        0327              CALL ScrInitialise  ;Initialise script language
+                        0328  #ENDIF
+                        
+The lines which are assembled following a test directive are listed with address and code:                      
+                    
+                        0329  #IFDEF      IncludeRomFS
+    012A: CD E3 1A      0330              CALL RomInitialise  ;Initialise ROM filing system
+                        0331  #ENDIF
+
+After all lines have been listed, the file receives a list of each section with their name and all the separate address ranges it contains:
+
+    Sections:
+    -----------------------------------------------------------------------
+    DATA: [FE00-FEB0]
+    CODE: [0000-1E7F] [2000-3E21] [3F80-3FFF]
+
+
+Then the assembler lists all the symbols defined by `#DEFINE` with their value if they have one:
+
+    Defines:
+    ------------------------------------------------------------------------
+    BUILD                          :R0
+    IncludeAPI                     :
+    IncludeAssembler               :
+    ...
+
+Then the labels set to a value with `.EQU` are listed with their value:
+
+    Equates:
+    ------------------------------------------------------------------------
+    BasicCodeW                     :2003
+    CmdReset                       :0000
+    ...
+
+Finaly the listing lists all the global labels on two columns: labels are sorted by name in the first column and by address in the second:
+
+    Global labels:
+    --- By Name -------------------------------|---By Address --------------
+    	APIHandler                     :04FD   |   0000: ColdStart
+    	APITable                       :050F   |   0003: WarmStart
+    	AsmSkipOverDelimiter           :0CE4   |   0014: WStrt
+    	...
+
 
 **Remarks:** Some labels may not appear in the second column because only one label is listed for each address and some labels can point to the same address.
 
@@ -407,9 +477,38 @@ The *listing file* is a text file which shows the result of the assembly process
 
 The memory listing file shows the list of sections, and then the binary content of each section address range, both in hecadecimal and ASCII form. Characters with a code greater than 127 (0x7F) are displayed as a simple dot `.`.
 
+    Sections:
+    	DATA: [FE00-FEB0]
+     	CODE: [0000-1E7F] [2000-3E21] [3F80-3FFF]
+    
+    [0000-1E7F]:CODE
+    0000:  C3 BD 00 18  0F C3 64 05  C3 03 FE 00  C3 BD 00 00   ......d.........
+    0010:  C3 06 FE 00  C3 4B 01 00  C3 09 FE 00  00 00 00 00   .....K..........
+    0020:  C3 0C FE 00  00 00 00 00  C3 0F FE 00  00 00 00 00   ................
+    ...
+    3E10:  65 70 61 72  65 64 20 43  46 20 63 61  72 64 29 0D   epared CF card).
+    3E20:  0A 00                                                ..              
+    
+    [3F80-3FFF]:CODE
+    3F80:  55 AA 43 50  4D 20 20 20  20 20 03 00  DE 3D 44 00   U.CPM     ...=D.
+    3F90:  55 AA 43 50  4D 20 20 20  20 20 41 80  60 3C B4 00   U.CPM     A.`<..
+    ...
+
 ### Intel HEX Output
 
-The HEX output file contains the result of the assembly in a fform which can be directly used to set up a computer memory content:
+The HEX output file contains the result of the assembly in a form which can be directly used to set up a computer memory content in various contexts.
 
-* An EPROM burner can generaly use HEX Intel files to program an EPROM
-* On the RC2014 computer, the SC Monitor program can receive and interpret the HEX file contents and put the binary content directly at the right address.
+    :10000000C3BD00180FC36405C303FE00C3BD0000D9
+    :10001000C306FE00C34B0100C309FE000000000040
+    ...
+    :103FE00055AA424153494320202001000020601C73
+    :103FF00055AA4D6F6E69746F722002000000801E1A
+    :00000001FF
+
+Here are some of the contexts where an HEX file can be used:
+
+* EPROM burners can generaly use HEX Intel files to program an EPROM
+* On the RC2014 computer, the SC Monitor program can receive and interpret the HEX file contents and put the binary content directly at the right address. Some BASIC programs exists which accepts HEX files as well.
+* In MUZ-Computer, the MemoryModule class can load an HEX file.
+
+
