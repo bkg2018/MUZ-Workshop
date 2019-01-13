@@ -16,42 +16,55 @@
 
 namespace MUZ {
 	
+	/** Returns true if current token is a comma, and go next token. Don't change current token if not found.
+	 @param codeline the code line to assemble, with curtoken set to the start token for analysis
+	 @return true if a comma has been found
+	 */
+	bool GetComma(class MUZ::CodeLine& codeline) ;
+	
+	/** Returns true if the tokens array has at least the resquested number of tokens available starting at curtoken.
+	 @param codeline the code line to assemble, with curtoken set to the start token for analysis
+	 */
+	bool EnoughTokensLeft(class CodeLine& codeline, int number) ;
+	
+
 	// Preprocessor directives (#xxx)
 	
+	/** #DEFINE directive. */
 	class DirectiveDEFINE : public Directive {
-		// Defines the new symbol or returns false.
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
-	
+	/** #UNDEF */
 	class DirectiveUNDEFINE : public Directive {
-		// Undefines the existing symbol or returns false.
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** #IF */
 	class DirectiveIF : public Directive {
-		// evaluate expression and return true if non null
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** #IFDEF */
 	class DirectiveIFDEF : public Directive {
-		// Returns true if the symbol exists
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** #IFNDEF */
 	class DirectiveIFNDEF : public Directive {
-		// returns true if the symbol doesn't exist
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** #ELSE - does nothing, handled by Assembler. */
 	class DirectiveELSE : public Directive {
-		
 	};
+	/** #ENDIF - does nothing, handled by Assembler. */
 	class DirectiveENDIF : public Directive {
-		
 	};
+	/** #INCLUDE */
 	class DirectiveINCLUDE : public Directive {
-		// returns true if a file must be included
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** #INSERTHEX */
 	class DirectiveINSERTHEX : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** #INSERTBIN */
 	class DirectiveINSERTBIN : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
@@ -63,29 +76,31 @@ namespace MUZ {
 	class DirectivePROC : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
-
+	/** .CODE */
 	class DirectiveCODE : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
-
+	/** .DATA */
 	class DirectiveDATA : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** .ORG */
 	class DirectiveORG : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
-	class DirectiveHEXBYTES : public Directive {
-		
-	};
+	/** .EQU */
 	class DirectiveEQU : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** .DB */
 	class DirectiveBYTE : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** .DW */
 	class DirectiveWORD : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** .DS */
 	class DirectiveSPACE : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};

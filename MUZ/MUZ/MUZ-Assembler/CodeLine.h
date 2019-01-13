@@ -14,7 +14,6 @@
 
 #include "Types.h"
 #include "ExpVector.h"
-#include "Z80-Operands.h"
 
 namespace MUZ {
 	
@@ -22,28 +21,47 @@ namespace MUZ {
 	struct CodeLine
 	{
 		// source
-		int					file;						// source file reference (index in Assembler SourceFile array)
-		int					line;						// duplicates the CodeLine
-		std::string 		source;						// TODO: replace with file direct access?
+		
+		/** Source file reference for the Assembler (index in SourceFile array). */
+		int					file;
+		/** Line number of this CodeLine in the file. */
+		int					line;
+		/** Content of the line (may be replaced by file direct access in later release.) */
+		std::string 		source;
+		// Direct file access for content
 		//long				offset;						// position in the source file
 		//int 				size;						// number of bytes in this source line
 
 		// parsed tokens
-		ExpVector			tokens;						// Tokens as prepared by the parser
-		int					instructiontoken;			// The instruction token index
-		int					curtoken;					// current position for Reset/Next functions
+		 
+		/** Array of tokens prepared by the Parser::Split() function. */
+		ExpVector			tokens;
+		/** Index for the instruction token in the tokens array.*/
+		int					instructiontoken;
+		/** current position for Reset/Next functions. */
+		int					curtoken;
 		
 		// assembled code
-		bool				assembled = false; 			// true when assembled
-		std::vector<BYTE>	code;						// assembled code
-		int					cyclesmin;					// machine cycles for this code
-		int					cyclesmax;					// machine cycles for this code
-		ADDRESSTYPE			address = 0;				// starting address for this code
-		class Section*		section = nullptr;
-		int					includefile = 0;			// file reference when this line includes another sourcefile
-		class Label*		label = nullptr;			// label if there is one on this line
-		class Assembler*	as = nullptr;				// referenc for pass check
 		
+		/** Flag to tell if the line has been assembled or not (also happens for disabled #IF blocks). */
+		bool				assembled = false;
+		/** Array of code bytes once assembled. May be empty. */
+		std::vector<BYTE>	code;
+		/** Minimum clock cycles spent in the code. */
+		int					cyclesmin;
+		/** Maximum clock cycles, generally when a jump happens because a condition is met. */
+		int					cyclesmax;
+		/** Starting address for this line. */
+		ADDRESSTYPE			address = 0;
+		/** Pointer to the code or data section where this line is stored iff it contains code. */
+		class Section*		section = nullptr;
+		/** File reference for the Assembler if this line includes another file. */
+		int					includefile = 0;
+		/** Label reference for the Assembler if this line has a label or is after a line containing only a label. */
+		class Label*		label = nullptr;
+		/** Assembler reference. */
+		class Assembler*	as = nullptr;
+	
 		
 		/** Resets the token exploration system to the first token after the instruction. */
 		void ResetInstruction(int start);
@@ -51,7 +69,7 @@ namespace MUZ {
 		/** Set machine cycles. */
 		void SetCycles(int mintime, int maxtime = -1);
 		
-		/** Pushes codes. */
+		/** Set 1 to 4 code bytes. */
 		void ResetCode();
 		void AddCode(DATATYPE b0);
 		void AddCode(DATATYPE b0, DATATYPE b1);

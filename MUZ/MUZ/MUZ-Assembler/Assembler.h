@@ -214,6 +214,10 @@ namespace MUZ {
 		bool AssembleFile(std::string file, ErrorList& msg);
 
 		//MARK: - Interface to instructions, labels, directives, symbols
+		
+		/** Sets the instruction and operand set. */
+		void SetInstructions(std::string name);
+		
 		/** Tries to find a directive by name. Must include the '#' or '.' prefix. */
 		Directive* GetDirective(std::string name);
 		/** Try to find a n instruction in the instruction set. */

@@ -343,6 +343,9 @@ namespace MUZ {
 					if (nexttoken.type == tokenTypeDIRECTIVE) continue;
 				}
 				// Should be an instruction
+				//If no .PROC directive has been used, the assembler adopts
+				//the Z80 instruction set the first time this instruction is used.
+				if (m_instructions.empty()) SetInstructions("Z80");
 				Instruction* instruction = GetInstruction(token.source);
 				if (instruction) {
 					// resolve any symbols, and prepare the token index for assembling
@@ -1259,75 +1262,6 @@ namespace MUZ {
 	Assembler::Assembler()
 	{
 		Reset();
-		// Instructions
-		m_instructions["LD"] = new InstructionLD();
-		m_instructions["PUSH"] = new InstructionPUSH();
-		m_instructions["POP"] = new InstructionPOP();
-		m_instructions["EXX"] = new InstructionEXX();
-		m_instructions["EX"] = new InstructionEX();
-		m_instructions["LDI"] = new InstructionLDI();
-		m_instructions["LDIR"] = new InstructionLDIR();
-		m_instructions["LDD"] = new InstructionLDD();
-		m_instructions["LDDR"] = new InstructionLDDR();
-		m_instructions["CPI"] = new InstructionCPI();
-		m_instructions["CPIR"] = new InstructionCPIR();
-		m_instructions["CPD"] = new InstructionCPD();
-		m_instructions["CPDR"] = new InstructionCPDR();
-		m_instructions["ADD"] = new InstructionADD();
-		m_instructions["ADC"] = new InstructionADC();
-		m_instructions["SUB"] = new InstructionSUB();
-		m_instructions["SBC"] = new InstructionSBC();
-		m_instructions["AND"] = new InstructionAND();
-		m_instructions["OR"] = new InstructionOR();
-		m_instructions["XOR"] = new InstructionXOR();
-		m_instructions["CP"] = new InstructionCP();
-		m_instructions["INC"] = new InstructionINC();
-		m_instructions["DEC"] = new InstructionDEC();
-		m_instructions["DAA"] = new InstructionDAA();
-		m_instructions["CPL"] = new InstructionCPL();
-		m_instructions["NEG"] = new InstructionNEG();
-		m_instructions["CCF"] = new InstructionCCF();
-		m_instructions["SCF"] = new InstructionSCF();
-		m_instructions["NOP"] = new InstructionNOP();
-		m_instructions["HALT"] = new InstructionHALT();
-		m_instructions["DI"] = new InstructionDI();
-		m_instructions["EI"] = new InstructionEI();
-		m_instructions["IM"] = new InstructionIM();
-		m_instructions["RLCA"] = new InstructionRLCA();
-		m_instructions["RLA"] = new InstructionRLA();
-		m_instructions["RRCA"] = new InstructionRRCA();
-		m_instructions["RRA"] = new InstructionRRA();
-		m_instructions["RLC"] = new InstructionRLC();
-		m_instructions["RL"] = new InstructionRL();
-		m_instructions["RRC"] = new InstructionRRC();
-		m_instructions["RR"] = new InstructionRR();
-		m_instructions["SLA"] = new InstructionSLA();
-		m_instructions["SLL"] = new InstructionSLL();//undoc
-		m_instructions["SRA"] = new InstructionSRA();
-		m_instructions["SRL"] = new InstructionSRL();
-		m_instructions["RLD"] = new InstructionRLD();
-		m_instructions["RRD"] = new InstructionRRD();
-		m_instructions["BIT"] = new InstructionBIT();
-		m_instructions["SET"] = new InstructionSET();
-		m_instructions["RES"] = new InstructionRES();
-		m_instructions["JP"] = new InstructionJP();
-		m_instructions["JR"] = new InstructionJR();
-		m_instructions["DJNZ"] = new InstructionDJNZ();
-		m_instructions["CALL"] = new InstructionCALL();
-		m_instructions["RET"] = new InstructionRET();
-		m_instructions["RETI"] = new InstructionRETI();
-		m_instructions["RETN"] = new InstructionRETN();
-		m_instructions["RST"] = new InstructionRST();
-		m_instructions["IN"] = new InstructionIN();
-		m_instructions["INI"] = new InstructionINI();
-		m_instructions["INIR"] = new InstructionINIR();
-		m_instructions["IND"] = new InstructionIND();
-		m_instructions["INDR"] = new InstructionINDR();
-		m_instructions["OUT"] = new InstructionOUT();
-		m_instructions["OUTI"] = new InstructionOUTI();
-		m_instructions["OTIR"] = new InstructionOTIR();
-		m_instructions["OUTD"] = new InstructionOUTD();
-		m_instructions["OTDR"] = new InstructionOTDR();
 		
 		// Preprocessor directives
 		m_directives["#DEFINE"] = new DirectiveDEFINE();
@@ -1385,6 +1319,82 @@ namespace MUZ {
 		}
 	}
 	
+	/** Sets the instruction and operand set. */
+	void Assembler::SetInstructions(std::string name)
+	{
+		if (name=="Z80") {
+			m_instructions.clear();
+			m_instructions["LD"] = new Z80::InstructionLD();
+			m_instructions["PUSH"] = new Z80::InstructionPUSH();
+			m_instructions["POP"] = new Z80::InstructionPOP();
+			m_instructions["EXX"] = new Z80::InstructionEXX();
+			m_instructions["EX"] = new Z80::InstructionEX();
+			m_instructions["LDI"] = new Z80::InstructionLDI();
+			m_instructions["LDIR"] = new Z80::InstructionLDIR();
+			m_instructions["LDD"] = new Z80::InstructionLDD();
+			m_instructions["LDDR"] = new Z80::InstructionLDDR();
+			m_instructions["CPI"] = new Z80::InstructionCPI();
+			m_instructions["CPIR"] = new Z80::InstructionCPIR();
+			m_instructions["CPD"] = new Z80::InstructionCPD();
+			m_instructions["CPDR"] = new Z80::InstructionCPDR();
+			m_instructions["ADD"] = new Z80::InstructionADD();
+			m_instructions["ADC"] = new Z80::InstructionADC();
+			m_instructions["SUB"] = new Z80::InstructionSUB();
+			m_instructions["SBC"] = new Z80::InstructionSBC();
+			m_instructions["AND"] = new Z80::InstructionAND();
+			m_instructions["OR"] = new Z80::InstructionOR();
+			m_instructions["XOR"] = new Z80::InstructionXOR();
+			m_instructions["CP"] = new Z80::InstructionCP();
+			m_instructions["INC"] = new Z80::InstructionINC();
+			m_instructions["DEC"] = new Z80::InstructionDEC();
+			m_instructions["DAA"] = new Z80::InstructionDAA();
+			m_instructions["CPL"] = new Z80::InstructionCPL();
+			m_instructions["NEG"] = new Z80::InstructionNEG();
+			m_instructions["CCF"] = new Z80::InstructionCCF();
+			m_instructions["SCF"] = new Z80::InstructionSCF();
+			m_instructions["NOP"] = new Z80::InstructionNOP();
+			m_instructions["HALT"] = new Z80::InstructionHALT();
+			m_instructions["DI"] = new Z80::InstructionDI();
+			m_instructions["EI"] = new Z80::InstructionEI();
+			m_instructions["IM"] = new Z80::InstructionIM();
+			m_instructions["RLCA"] = new Z80::InstructionRLCA();
+			m_instructions["RLA"] = new Z80::InstructionRLA();
+			m_instructions["RRCA"] = new Z80::InstructionRRCA();
+			m_instructions["RRA"] = new Z80::InstructionRRA();
+			m_instructions["RLC"] = new Z80::InstructionRLC();
+			m_instructions["RL"] = new Z80::InstructionRL();
+			m_instructions["RRC"] = new Z80::InstructionRRC();
+			m_instructions["RR"] = new Z80::InstructionRR();
+			m_instructions["SLA"] = new Z80::InstructionSLA();
+			m_instructions["SLL"] = new Z80::InstructionSLL();//undoc
+			m_instructions["SRA"] = new Z80::InstructionSRA();
+			m_instructions["SRL"] = new Z80::InstructionSRL();
+			m_instructions["RLD"] = new Z80::InstructionRLD();
+			m_instructions["RRD"] = new Z80::InstructionRRD();
+			m_instructions["BIT"] = new Z80::InstructionBIT();
+			m_instructions["SET"] = new Z80::InstructionSET();
+			m_instructions["RES"] = new Z80::InstructionRES();
+			m_instructions["JP"] = new Z80::InstructionJP();
+			m_instructions["JR"] = new Z80::InstructionJR();
+			m_instructions["DJNZ"] = new Z80::InstructionDJNZ();
+			m_instructions["CALL"] = new Z80::InstructionCALL();
+			m_instructions["RET"] = new Z80::InstructionRET();
+			m_instructions["RETI"] = new Z80::InstructionRETI();
+			m_instructions["RETN"] = new Z80::InstructionRETN();
+			m_instructions["RST"] = new Z80::InstructionRST();
+			m_instructions["IN"] = new Z80::InstructionIN();
+			m_instructions["INI"] = new Z80::InstructionINI();
+			m_instructions["INIR"] = new Z80::InstructionINIR();
+			m_instructions["IND"] = new Z80::InstructionIND();
+			m_instructions["INDR"] = new Z80::InstructionINDR();
+			m_instructions["OUT"] = new Z80::InstructionOUT();
+			m_instructions["OUTI"] = new Z80::InstructionOUTI();
+			m_instructions["OTIR"] = new Z80::InstructionOTIR();
+			m_instructions["OUTD"] = new Z80::InstructionOUTD();
+			m_instructions["OTDR"] = new Z80::InstructionOTDR();
+		}
+	}
+
 	//MARK: - Initializer and setting output files
 	
 	/** Resets the assembler. */
@@ -1598,7 +1608,7 @@ namespace MUZ {
 		return nullptr;
 	}
 	
-	/** Try to find a n instruction in the instruction set. */
+	/** Try to find an instruction in the instruction set.  */
 	Instruction* Assembler::GetInstruction(std::string name)
 	{
 		name = std::to_upper(name);

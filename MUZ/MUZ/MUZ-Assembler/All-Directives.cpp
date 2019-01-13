@@ -15,7 +15,24 @@
 
 namespace MUZ {
 	
+	/** Returns true if current token is a comma, and go next token. */
+	bool GetComma(CodeLine& codeline) {
+		if (!EnoughTokensLeft(codeline,1)) return false;
+		if (codeline.tokens.at(codeline.curtoken).type == tokenTypeCOMMA) {
+			codeline.curtoken += 1;
+			return true;
+		}
+		return false;
+	}
 	
+	/** Returns true if the tokens array has at least the resquested number of tokens available starting at curtoken. */
+	bool EnoughTokensLeft(CodeLine& codeline, int number) {
+		// if curtoken is 'i' and we request 3 tokens,
+		// then the tokens size must be 'i' + 3 or more
+		return (codeline.tokens.size() >= codeline.curtoken + number) ;
+	}
+	
+
 	//MARK: - Preprocessor directives (#)
 	
 	/** #DEFINE <symbol> <stringexpression>
@@ -184,6 +201,7 @@ namespace MUZ {
 	//MARK: - Assembler directives (.)
 	
 	/** .PROC Z80
+	 	Sets the instructions set for the Z80 processor.
 	 	returns true if Z80 has been specified
 	 */
 	bool DirectivePROC::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
@@ -194,6 +212,8 @@ namespace MUZ {
 			//errors.push_back(".PROC only handles Z80");
 			return false;
 		}
+		// sets the instructions set into the assembler
+		as.SetInstructions(proc.source);
 		parser.JumpTokens(1);
 		return true;
 	}

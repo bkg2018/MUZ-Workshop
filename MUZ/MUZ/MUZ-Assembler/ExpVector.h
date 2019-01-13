@@ -14,7 +14,7 @@
 
 namespace MUZ {
 	
-	/** Specialized vector to store expression tokens and operators. It has a few extended functions useffull for 2 operands operators. */
+	/** Specialized vector to store expression tokens and operators. It has a few extended functions usefull for 2 operands operators. */
 	class ExpVector : public std::vector<ParseToken>
 	{
 		static ParseToken dummyToken;// = { "", tokenTypeUNKNOWN };

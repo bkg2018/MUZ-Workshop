@@ -448,7 +448,7 @@ std::string Z80InstructionsSourcePath;
 	MUZ::ParseToken tokPO ={"", MUZ::tokenTypePAROPEN};;
 	MUZ::ParseToken tokPC ={"", MUZ::tokenTypePARCLOSE};;
 	token.type = MUZ::tokenTypeLETTERS;
-	MUZ::OperandType optype;
+	MUZ::Z80::OperandType optype;
 	int value;
 	
 	// 8 bit registers tests
@@ -539,9 +539,9 @@ std::string Z80InstructionsSourcePath;
 			tokens.push_back(token);
 			tokens.push_back(tokPC);
 			int curtoken = 0;
-			MUZ::OperandError result = indirectX(&tokens, curtoken, optype, value);
-			XCTAssertEqual(result, MUZ::operrOK);
-			XCTAssertEqual(optype, MUZ::regIX);
+			MUZ::Z80::OperandError result = indirectX(&tokens, curtoken, optype, value);
+			XCTAssertEqual(result, MUZ::Z80::operrOK);
+			XCTAssertEqual(optype, MUZ::Z80::regIX);
 			XCTAssertEqual(value, 8);
 		}
 	}
@@ -554,7 +554,7 @@ std::string Z80InstructionsSourcePath;
 		int curtoken = 0;
 		bool result = bitnumber( &tokens, curtoken, optype);
 		XCTAssertTrue(result);
-		XCTAssertEqual(optype, MUZ::bit7);
+		XCTAssertEqual(optype, MUZ::Z80::bit7);
 	}
 	// conditions
 	{
@@ -586,7 +586,7 @@ std::string Z80InstructionsSourcePath;
 		token.type = MUZ::tokenTypeDECNUMBER;
 		tokens.push_back(token);
 		int curtoken = 0;
-		bool result = number8( &tokens, curtoken, value);
+		bool result = MUZ::Z80::number8( &tokens, curtoken, value);
 		XCTAssertTrue(result);
 		XCTAssertEqual(value, 127);
 	}
@@ -597,7 +597,7 @@ std::string Z80InstructionsSourcePath;
 		token.type = MUZ::tokenTypeDECNUMBER;
 		tokens.push_back(token);
 		int curtoken = 0;
-		bool result = number16( &tokens, curtoken, value);
+		bool result = MUZ::Z80::number16( &tokens, curtoken, value);
 		XCTAssertTrue(result);
 		XCTAssertEqual(value, 65535);
 	}
@@ -615,7 +615,7 @@ std::string Z80InstructionsSourcePath;
 		tokens.push_back(token);
 		int curtoken = 0;
 		int lasttoken = 0;
-		bool result = (MUZ::operrOK==indirect16( &tokens, curtoken, value, lasttoken));
+		bool result = (MUZ::Z80::operrOK==MUZ::Z80::indirect16( &tokens, curtoken, value, lasttoken));
 		XCTAssertTrue(result);
 		XCTAssertEqual(value, 65535);
 	}

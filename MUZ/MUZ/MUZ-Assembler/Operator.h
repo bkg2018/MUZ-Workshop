@@ -16,8 +16,7 @@ namespace MUZ {
 	/** This structure has an Exec() function which let a token execute its operations on 1 or 2 other tokens, returning a token as a result. */
 	struct Operator : public ParseToken
 	{
-		
-		/** Execute the operation with the given arguments and return result. Argument type must have been checked first. */
+		/** Execute the operation with the given arguments and return result. */
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2);
 	};
 	
