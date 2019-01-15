@@ -1,4 +1,4 @@
-#  MUZ C++ Assembler
+#  MUZ C++ Workshop
 
 MUZ-Workshop is a C++ code base to integrate an Assembler with a virtual computer and debugger.
 
