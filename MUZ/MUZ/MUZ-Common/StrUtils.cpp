@@ -142,17 +142,22 @@ unsigned int dec_to_unsigned(string s)
 	return value;
 }
 
-/** Converts an address to an hexa string. */
-const char hexchar[17] = "0123456789ABCDEF";
-string address_to_hex(MUZ::ADDRESSTYPE address)
+/** Converts an address to a binary, octal or hexa string. */
+const char allChars[] = "0123456789ABCDEF";// includes a final \0
+
+string address_to_base(MUZ::ADDRESSTYPE address, int base, int nbdigits)
 {
+	if (base < 0 || base > 16) return "";
 	unsigned int value = address;
-	char result[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	// enough space for binary 64 bits
+	char result[] = {
+		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		0};
 	char* last = result + sizeof(result) - 2; // points to last digit before ending 0
-	int count = 4;
+	int count = nbdigits;
 	while (count > 0) {
-		*last = hexchar[value % 16];
-		value = value / 16;
+		*last = allChars[value % base];
+		value = value / base;
 		last -= 1;
 		count -= 1;
 	};
@@ -162,18 +167,7 @@ string address_to_hex(MUZ::ADDRESSTYPE address)
 /** Converts a byte to an hexa string. */
 string data_to_hex(MUZ::DATATYPE data)
 {
-	unsigned int value = data;
-	char result[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-	char* last = result + sizeof(result) - 2; // points to last digit before ending 0
-	int count = 2;
-	while (count > 0) {
-		*last = hexchar[value % 16];
-		value = value / 16;
-		last -= 1;
-		count -= 1;
-	};
-	string sresult = string(last + 1);
-	return sresult;
+	return address_to_base(data, 16, 2);
 }
 
 /** Unescapes the escape sequences in a character string.

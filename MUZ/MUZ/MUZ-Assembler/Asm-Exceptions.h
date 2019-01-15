@@ -28,5 +28,21 @@ namespace MUZ {
 	class PARSERDivisionByZero: public std::exception {
 		virtual const char *what() const _NOEXCEPT{ return "PARSER division by zero"; }
 	};
+	
+	class EXPRESSIONOpenParenthesisTooMuch: public std::exception {
+		virtual const char *what() const _NOEXCEPT{ return "too much opening parenthesis in expression"; }
+	};
+	class EXPRESSIONCloseParenthesisTooMuch: public std::exception {
+		virtual const char *what() const _NOEXCEPT{ return "too much closing parenthesis in expression"; }
+	};
+	class EXPRESSIONNotAddress: public std::exception {
+		virtual const char *what() const _NOEXCEPT{ return "expression doesn't compute as an address"; }
+	};
+	class EXPRESSIONNotBoolean: public std::exception {
+		virtual const char *what() const _NOEXCEPT{ return "expression doesn't compute as a boolean"; }
+	};
+	class EXPRESSIONNotString: public std::exception {
+		virtual const char *what() const _NOEXCEPT{ return "expression doesn't compute as a string"; }
+	};
 }
 #endif /* Asm_Exceptions_h */

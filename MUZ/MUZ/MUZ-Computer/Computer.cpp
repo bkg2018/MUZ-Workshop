@@ -9,13 +9,10 @@
 
 namespace MUZ {
 
-Computer::Computer() {
-	// TODO Auto-generated constructor stub
+	Computer::Computer() {
+	}
 
-}
-
-Computer::~Computer() {
-	// TODO Auto-generated destructor stub
-}
+	Computer::~Computer() {
+	}
 
 } /* namespace MUZ */

@@ -9,13 +9,10 @@
 
 namespace MUZ {
 
-CPU::CPU() {
-	// TODO Auto-generated constructor stub
+	CPU::CPU() {
+	}
 
-}
-
-CPU::~CPU() {
-	// TODO Auto-generated destructor stub
-}
+	CPU::~CPU() {
+	}
 
 } /* namespace MUZ */

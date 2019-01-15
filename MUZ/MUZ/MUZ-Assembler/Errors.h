@@ -10,9 +10,34 @@
 #define Errors_h
 
 #include <vector>
+#include <map>
 #include <string>
 
 namespace MUZ {
+
+	/** Errors for the OperandTools functions. The tools are processor specific (e.g. MUZ::Z80::OperandTools) but
+	 the error codes are generic and accessible to non-Z80 sources (parser, assembler...)
+	 */
+	enum OperandError {
+		
+		operrOK,
+		operrMISSINGPAROPEN,		// missing opened parenthesis
+		operrMISSINGPARCLOSE,		// missing closed parenthesis
+		operrMISSINGCOMMA,			// missing comma between arguments
+		operrTOKENNUMBER,			// wrong token number
+		operrREGISTERNAME,			// unknown register name
+		operrWRONGREGISTER,			// wrong register used, like LD H,L
+		operrWRONGOP,				// wrong operator, like (IX-2)
+		operrNOTNUMBER,				// a number was needed
+		operrNOTBIT,				// value too big for a bit number
+		operrUNSOLVED,				// unsolved symbol in expression
+		operrNOTSTRING,				// token is not a string or letters
+		operrNOTCONDITION,			// token is not a condition name
+		operrTOOBIG,				// too big for 8 or 16 bits
+		operrNOTREGISTER,			// register name not found
+	};
+	
+	/** Error type for the errors/warnings list. */
 	enum ErrorType {
 		errorTypeINFO,		// warmless informations
 		errorTypeWARNING,	// doesn't break assembly
@@ -21,27 +46,83 @@ namespace MUZ {
 		errorTypeFATAL		// breaks assembly
 	};
 	
+	/** Error codes for the errors/warnings list. */
 	enum ErrorKind {
 		errorOK,						// no error
 		errorUnknown,					// unknown error
-		errorInvalidSymbol,				// invalid symbol name after DEFINE
-		errorDefine,					// #DEFINE could not define a symbol
 		errorNonDerivedInstruction,		// SHOULD NOT OCCUR: Non derived Instruction class used (fatal)
 		errorNonDerivedDirective,		// SHOULD NOT OCCUR: Non derived Directive class used (fatal)
 		errorWritingListing,			// Cannot write listing file (about file)
 		errorOpeningSource,				// "cannot open source file" asm, hex or binary file not found
+		errorElseNoIf,					// #ELSE without corresponding #IF/#IFDEF/#IFNDEF
+		errorEndifNoIf,					// #ENDIF without #ELSE or #IF
+		errorLabelExists,				// A label already exists with the same name
+		errorUnknownSyntax,				// line does not start with a label, a directive or an instruction
+		errorUnknownDirective,			// directive starting with '.' or '#' is unknown
+		errorUknownInstruction,			// an instruction should have been found, probable wrong syntax
+		errorMUZNoSection,				// SHOULD NOT OCCUR: assembled code has no section
+		warningMisplacedChar,			// a '.' or '#' was found in an unsusual place
+		
+		// general syntax
+		errorMissingComma,				// a ',' is missing in instruction operands
+		errorWrongOperand1,				// first operand is wrong type
+		errorWrongOperand2,				// second operand is wrong type
+		errorWrongOperand3,				// third operand is wrong type
+		errorWrongRegister,				// register name is not valid
+		errorMissingParenthesisClose,	// a ')' is missing
+		errorWrongCondition,			// A condition is invalid (e.g. JR PO,nn)
+		errorNotRegister,				// expected register name was not found
+		errorWrongComma,				// unexpected comma
+
+		// errors detected by directives
+		errorDefine,					// #DEFINE could not define a symbol
+		errorInvalidSymbol,				// invalid symbol name after DEFINE
+		errorFileSyntax,				// invalid syntax for file name
+		errorProcessor,					// unsupported processor in .PROC
+		warningUnsolvedExpression,		// a symbol was unsolved in an expression
+		errorEquate,					// .EQU could not create label or assign value
+		
+		// errors on numbers
+		errorTooBigValue,				// number too big for accepted values
+		errorTooBigBit,					// number too big for a bit number (0-7)
+		warningTooBig8,					// number too big for 8 bits
+		warningTooBig16,				// number too big for 16 bits
+		warningTooFar,					// DJNZ or JR target is too far
 	};
 	
 	struct ErrorMessage {
 		ErrorType type=errorTypeINFO;			// (see enum above): info, warning, about a file, serious error or fatal error
 		ErrorKind kind=errorUnknown;			// (see enum above): what kind of error it is
-		class CodeLine* codeline=nullptr;		// code line where it occured
-		std::string file="";					// file name for errorTypeABOUTFILE errors
+		int file;								// code file where it occured
+		int line;								// code line in code file
+		std::string filename="";					// relevant file name, or empty()
 	};
 	
 	class ErrorList : public std::vector<ErrorMessage>
 	{
-
+		static std::map<ErrorKind,std::string> messageText;
+	public:
+		/** Clears the message list. */
+		void Clear();
+		/** Returns a message text for an error code (kind). */
+		static std::string GetMessage( ErrorKind kind ) ;
+		/** Stores an information message if the Assembler is doing Pass 1. */
+		void Info( ErrorKind kind, class CodeLine& codeline, int pass = 1) ;
+		/** Stores a warning message if the Assembler is doing Pass 1. */
+		void Warning( ErrorKind kind, class CodeLine& codeline, int pass = 1);
+		/** Stores a warning message. Ignore the assembler pass. */
+		void ForceWarning( ErrorKind kind, class CodeLine& codeline);
+		/** Stores a message about a file name if the Assembler is doing Pass 1. */
+		void AboutFile( ErrorKind kind, class CodeLine& codeline, std::string filename, int pass = 1);
+		/** Stores an error message if the Assembler is doing Pass 1. */
+		bool Error( ErrorKind kind, class CodeLine& codeline, int pass = 1);
+		/** Stores an error message if the Assembler is doing Pass 1. */
+		bool Error( ErrorKind kind, class CodeLine& codeline, std::string filename, int pass = 1) ;
+		/** Stores a fatal error message if the Assembler is doing Pass 1. */
+		bool Fatal( ErrorKind kind, class CodeLine& codeline, int pass = 1);
+		/** Stores a fatal error message if the Assembler is doing Pass 1. */
+		bool Fatal( ErrorKind kind, class CodeLine& codeline, std::string filename, int pass = 1) ;
+		
 	};
 	
 } // namespace MUZ

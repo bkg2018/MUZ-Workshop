@@ -62,8 +62,13 @@ namespace MUZ {
 		class Directive* lastDirective = nullptr;		/// Direct directive access for conditionnal and including directives
 		class Assembler* as = nullptr;					/// Direct assembler access
 		
+		// Specialized Expression evaluators for restricted types
+		class ExpressionEvaluator* evalString = nullptr;
+		class ExpressionEvaluator* evalBool = nullptr;
+		class ExpressionEvaluator* evalNumber = nullptr;
+
 		/** Points to the parsing result. Each parsed token will be pushed in this result. */
-		ExpVector* result = nullptr;
+		ExpVector* tokens = nullptr;
 		/** Points to the current token variable from caller. */
 		int* curtoken = nullptr;
 		/** Points to the original source string. */
@@ -104,32 +109,20 @@ namespace MUZ {
 	
 	public:
 		
-		Parser(class Assembler& assembler) {
-			result = nullptr;
-			curtoken = nullptr;
-			as = &assembler;
-		}
-		
-		/** Init to work on a vector of tokens.*/
-		void Init(ExpVector& tokens, int& starttoken) {
-			result = &tokens;
-			curtoken = &starttoken;
-			*curtoken = 0;
-			tokens.clear();
-			resultFlag = hasNOTHING;
-		}
+		Parser(class Assembler& assembler);
+		~Parser();
 		
 		/** Test particular results (directives). */
 		bool Test(ResultFlag f) { return resultFlag == f; }
 		
 		/** Tells if there are more tokens after the current one. */
 		bool ExistMoreToken(int howmany) {
-			return (*curtoken + howmany < result->size());
+			return (*curtoken + howmany < tokens->size());
 		}
 		
 		/** Returns the next token. */
 		ParseToken& NextToken(int increment = 1) {
-			return (*result)[*curtoken + increment];
+			return (*tokens)[*curtoken + increment];
 		}
 
 		/** Jumps over next tokens, done by the directives or assembler after arguments have been treated. */
@@ -140,7 +133,7 @@ namespace MUZ {
 		/** Jumps to next token and returns it. */
 		ParseToken& JumpNextToken() {
 			*curtoken += 1;
-			return (*result)[*curtoken];
+			return (*tokens)[*curtoken];
 		}
 		
 		/** Returns the current token index. Notice that this token is external to the parser and was set by Init() call. */
@@ -165,22 +158,22 @@ namespace MUZ {
 		}
 		
 		/** Evaluate next tokens to produce a boolean result. */
-		bool EvaluateBoolean();
+		bool EvaluateBoolean(bool & result);
 
 		/** Evaluate next tokens to produce a string result. Operands must be strings, but automatic conversion will happen on
 		 	decimal numbers and booleans.
 		 */
-		std::string EvaluateString();
+		bool EvaluateString(std::string & result);
 		
 		/** Evaluate nexxt tokens to produce an integer number masked by the address size.
 		 */
-		ADDRESSTYPE EvaluateAddress();
+		bool EvaluateAddress(ADDRESSTYPE & result);
 
 		/** Cuts a string into a vector of tokens.
 		 Spaces and tabs are not stored in tokens, only the significant parts are stored.
 		 A vector of warnings can be returned.
 		 */
-		void Split(std::string s, ErrorList& msg);
+		void Split(CodeLine& codeline, ErrorList& msg);
 		
 		/** Execute the last directive and returns its result: this is used by IF directives called from CodeLine.Assemble() to choose
 		 the parsing mode. */

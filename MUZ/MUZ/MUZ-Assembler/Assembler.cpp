@@ -84,9 +84,9 @@ namespace MUZ {
 	{
 		string thisline;
 		if (code.empty() && label != nullptr && label->codeline && label->codeline->file == file && label->codeline->line == line) {
-			thisline = address_to_hex(label->AddressFrom(address)) + ": ";
+			thisline = address_to_base(label->AddressFrom(address), 16, 4) + ": ";
 		} else {
-			thisline = (code.empty()) ? spaces(6) : address_to_hex(address) + ": ";
+			thisline = (code.empty()) ? spaces(6) : address_to_base(address, 16, 4) + ": ";
 		}
 		
 		//prepare line number
@@ -251,8 +251,7 @@ namespace MUZ {
 	{
 		// cut the source line into a vector of tokens
 		Parser parser(*this); // give reference of the assembbler to the parser
-		parser.Init(codeline.tokens, codeline.curtoken); // give references of this codeline token array to the parser
-		parser.Split(codeline.source, msg);
+		parser.Split(codeline,msg);
 		
 		// Handle conditionnal assembling for IF/ELSE/ENDIF directives
 		ParsingMode curmode = m_modes.top();
@@ -271,11 +270,13 @@ namespace MUZ {
 			switch (curmode) {
 					
 				case parsingModeROOT:
-					return false; //TODO: error, ELSE without an IF
+					if (! IsFirstPass()) msg.ForceWarning(errorElseNoIf, codeline);
+					return false;
 				case parsingModeSKIPTOEND:
 					return false; // ignore
 				case parsingModeDOTOEND:
-					return false; //TODO: error, ELSE without an IF
+					if (! IsFirstPass()) msg.ForceWarning(errorElseNoIf, codeline);
+					return false;
 					
 				case parsingModeSKIPTOELSE:
 					ExitMode(curmode);
@@ -292,7 +293,8 @@ namespace MUZ {
 		}
 		else if (parser.Test(hasENDIF)) {
 			if (curmode == parsingModeROOT) {
-				return false;//TODO: error, ELSE without an IF
+				if (! IsFirstPass()) msg.ForceWarning(errorEndifNoIf, codeline);
+				return false;
 			}
 			ExitMode(curmode);
 			ScanLabel(codeline, msg);
@@ -311,7 +313,6 @@ namespace MUZ {
 		
 		// If there is a label it can be assigned the current address. Local labels
 		// can store more than one address, while global labels store only one address
-		//TODO: warning if already existing global label ?
 		if (label) {
 			label->SetAddress(GetAddress());
 		}
@@ -323,7 +324,7 @@ namespace MUZ {
 			if (token.type == tokenTypeDIRECTIVE) {
 				Directive* directive = GetDirective(token.source);
 				if (!directive) {
-					//TODO: msg.push_back("Unkown directive: " + token.source );
+					msg.Error(errorUnknownDirective, codeline);
 					return false;
 				}
 				// Let the directive do further parsing and symbols resolving
@@ -335,8 +336,7 @@ namespace MUZ {
 				// anything else can be an instruction
 			} else if (token.type == tokenTypeLETTERS) {
 				
-				//TODO:USELESS NOW?
-				// ignore if followed by a colon or a directive, next token will handle it
+				// USELESS? ignore if followed by a colon or a directive, next token will handle it
 				if (codeline.curtoken + 1 < codeline.tokens.size()) {
 					ParseToken& nexttoken = codeline.tokens[codeline.curtoken + 1];
 					if (nexttoken.type == tokenTypeCOLON) continue;
@@ -352,13 +352,11 @@ namespace MUZ {
 					vector<int> unsolved = parser.ResolveSymbols(codeline.curtoken + 1, false);
 					codeline.ResetInstruction( codeline.curtoken );
 					codeline.as = this;
-					// let the instruction set the assembled code in the coode line
-					if (instruction->Assemble(codeline, msg)) {
-					} else {
-						// TODO: signal an assembling error
-					}
+					// let the instruction do the work and/or signal errors/warnings
+					instruction->Assemble(codeline, msg);
+					break;
 				} else {
-					// TODO: should be an instruction, probably syntax error?
+					msg.Error(errorUknownInstruction, codeline);
 				}
 			}
 			// assume it is something to convert, like HEXNUMBER
@@ -373,7 +371,7 @@ namespace MUZ {
 
 	/** Initializes listing file, close previous if any.
 	 */
-	void Assembler::PrepareListing(ErrorList& msg)
+	void Assembler::PrepareListing(CodeLine& codeline, ErrorList& msg)
 	{
 		if ( ! m_outputdir.empty() && ! m_listingfilename.empty()) {
 			string filename = m_outputdir + NORMAL_DIR_SEPARATOR + m_listingfilename;
@@ -382,7 +380,7 @@ namespace MUZ {
 			}
 			m_listingfile = fopen(filename.c_str(), "w");
 			if (m_listingfile == nullptr) {
-				msg.push_back({errorTypeABOUTFILE, errorWritingListing, nullptr, filename});
+				msg.AboutFile(errorWritingListing, codeline, filename);
 			}
 		}
 	}
@@ -421,7 +419,8 @@ namespace MUZ {
 			memoryfile = fopen(filename.c_str(), "w");
 		}
 		if (memoryfile == nullptr) {
-			mergingMsg.push_back({errorTypeABOUTFILE, errorWritingListing, nullptr, m_memoryfilename});
+			CodeLine codeline;
+			mergingMsg.AboutFile(errorWritingListing, codeline, m_memoryfilename);
 			return;
 		}
 		// output listing
@@ -444,7 +443,7 @@ namespace MUZ {
 						return a.start < b.start;
 					});
 					for (auto range: section.second->m_ranges) {
-						s += " [" + address_to_hex(range.start) + "-" + address_to_hex(range.end) + "]";
+						s += " [" + address_to_base(range.start, 16, 4) + "-" + address_to_base(range.end, 16, 4) + "]";
 					}
 				}
 				fprintf(memoryfile, "%s\n", s.c_str());
@@ -454,7 +453,7 @@ namespace MUZ {
 		
 		for (auto &range: section.m_ranges) {
 			
-			string line = "[" + address_to_hex(range.start) + "-" + address_to_hex(range.end) + "]:";
+			string line = "[" + address_to_base(range.start, 16, 4) + "-" + address_to_base(range.end, 16, 4) + "]:";
 			Section* namedsection = FindSection(range.start, range.end);
 			if (namedsection) {
 				line = line + namedsection->name();
@@ -465,7 +464,7 @@ namespace MUZ {
 			ADDRESSTYPE enddumpaddress = (range.end >> 4) << 4;
 			for (ADDRESSTYPE dumpaddress = startdumpaddress ; dumpaddress <= enddumpaddress ; dumpaddress += 16) {
 				// Address
-				string line = address_to_hex(dumpaddress) + ":" + spaces(2);
+				string line = address_to_base(dumpaddress, 16, 4) + ":" + spaces(2);
 				// 16-bytes hex dump
 				for (ADDRESSTYPE address = dumpaddress ; address < dumpaddress + 16 ; address += 1) {
 					if (address < range.start || address > range.end)
@@ -498,13 +497,14 @@ namespace MUZ {
 	/** Generate Intel HEX output. */
 	void Assembler::GenerateIntelHex(DATATYPE* memory, Section& section, ErrorList& msg)
 	{
+		CodeLine codeline;
 		FILE* hexfile = nullptr;
 		if ( ! m_outputdir.empty() && ! m_hexfilename.empty()) {
 			string filename = m_outputdir + NORMAL_DIR_SEPARATOR + m_hexfilename;
 			hexfile = fopen(filename.c_str(), "w");
 		}
 		if (hexfile == nullptr) {
-			msg.push_back({errorTypeABOUTFILE, errorWritingListing, nullptr, m_hexfilename});
+			msg.AboutFile(errorWritingListing, codeline, m_hexfilename);
 			return;
 		}
 		// output listing
@@ -534,14 +534,14 @@ namespace MUZ {
 				// get the assembled section it comes from
 				asmsection = FindSection(dumpaddress, dumpaddress + nbbytes - 1);
 				if (!asmsection) {
-					//TODO: MUZ error, generated code with no section: CANNOT happen!
+					msg.Error(errorMUZNoSection, codeline);
 				} else if ( ! asmsection->save() ) {
 					// Comes from a non saved .data section, don't output
 					continue;
 				}
 				// code comes from a code or saved-data section
 				line = ":";
-				line = line + data_to_hex(nbbytes) + address_to_hex(dumpaddress) + "00"; // nbbytes, address, record type
+				line = line + data_to_hex(nbbytes) + address_to_base(dumpaddress, 16, 4) + "00"; // nbbytes, address, record type
 				int sum = nbbytes + (dumpaddress >> 8) + (dumpaddress & 0xFF); // start control sum with bytes after ':'
 				for (ADDRESSTYPE address = dumpaddress ; address < dumpaddress + nbbytes ; address += 1) {
 					line = line + data_to_hex(memory[address]);
@@ -577,10 +577,50 @@ namespace MUZ {
 					address += 1;
 				}
 			}
-			
 		}
+		// sort ranges by starting addresses
+		std::sort(section.m_ranges.begin(), section.m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
+			return a.start < b.start;
+		});
+
 	}
-	
+
+	/** Generate warning/error file. */
+	void Assembler::GenerateLog(ErrorList& msg)
+	{
+		FILE* logfile = nullptr;
+		if ( ! m_outputdir.empty() && ! m_logfilename.empty()) {
+			string filename = m_outputdir + NORMAL_DIR_SEPARATOR + m_logfilename;
+			logfile = fopen(filename.c_str(), "w");
+		}
+		if (logfile == nullptr) {
+			return;
+		}
+		std::sort(msg.begin(), msg.end(), []( ErrorMessage& m1, ErrorMessage& m2) {
+			return m1.file < m2.file || m1.line < m2.line;
+		});
+		// dump warnings?
+		string mainfile = m_files[0]->fileprefix + m_files[0]->filepath + NORMAL_DIR_SEPARATOR + m_files[0]->filename;
+		fprintf(logfile, "%s\n", mainfile.c_str());
+		fprintf(logfile, "%s\n", "WARNING:");
+		if (m_status.trace) printf("%s\n", "WARNING:");
+		for (MUZ::ErrorMessage& m : msg) {
+			if (m.type == MUZ::errorTypeWARNING) {
+				fprintf(logfile, "%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
+				if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
+			}
+		}
+		fprintf(logfile, "%s\n", "ERRORS:");
+		if (m_status.trace) printf("%s\n", "ERRORS:");
+		for (MUZ::ErrorMessage& m : msg) {
+			if (m.type == MUZ::errorTypeERROR) {
+				fprintf(logfile, "%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
+				if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
+			}
+		}
+		fclose(logfile);
+	}
+
 	//MARK: - Private Sections management
 	
 	Section* Assembler::GetSection(std::string name)
@@ -609,46 +649,49 @@ namespace MUZ {
 			return nullptr;
 		}
 		// <letters> ?
+		string labelName = codeline.tokens[0].source;
+		TokenType tokenType = codeline.tokens[0].type;
 		if (nbtokens == 1) {
-			if (codeline.tokens[0].type == tokenTypeLETTERS) {
+			if (tokenType == tokenTypeLETTERS) {
 				// <directive> ? (ex: .CODE)
-				if (GetDirective(codeline.tokens[0].source)) return nullptr;
+				if (GetDirective(labelName)) return nullptr;
 				// <instruction> ? (ex: RET)
-				if (GetInstruction(codeline.tokens[0].source)) return nullptr;
-				// must be 	 <labelname>
-				if (codeline.tokens[0].source[0] != '@' && codeline.tokens[1].source != ".EQU" && codeline.tokens[1].source != "EQU") {
-					SetLastLabelName(codeline.tokens[0].source) ;
-				}
-				return CreateLabel(codeline.tokens[0].source, &codeline);
+				if (GetInstruction(labelName)) return nullptr;
+				// set as last global label name if not local and create label
+				SetLastLabelName(labelName) ;
+				return CreateLabel(labelName, codeline, msg);
 			}
-			///TODO: return error, only one token and unknown case
+			// error, only one token and unknown case
+			if (tokenType != tokenTypeCOMMENT && tokenType != tokenTypeDIRECTIVE) {
+				msg.Error(errorUnknownSyntax, codeline);
+			}
 			return nullptr;
 		}
 		// <letters> <token> ... ?
-		if (codeline.tokens[0].type == tokenTypeLETTERS) {
+		if (tokenType == tokenTypeLETTERS) {
 			// <letters> <:> ... ?
 			if (codeline.tokens[1].type == tokenTypeCOLON) {
 				// neutralize colon for parser
 				codeline.tokens[1].type = tokenTypeIGNORE;
-				// store as last global label unless it is an .EQU or local label
-				if (codeline.tokens[0].source[0] != '@' && ((nbtokens <= 2) || ((codeline.tokens[2].source != ".EQU") && (codeline.tokens[2].source != "EQU")))) {
-					SetLastLabelName(codeline.tokens[0].source) ;
+				// store as last global label iff not followed by .EQU
+				if ((nbtokens <= 2) || ((codeline.tokens[2].source != ".EQU") && (codeline.tokens[2].source != "EQU"))) {
+					SetLastLabelName(labelName) ;
 				}
-				return CreateLabel(codeline.tokens[0].source, &codeline);
+				return CreateLabel(labelName, codeline, msg);
 			}
 			// <letters> <directive> ?
 			if (GetDirective(codeline.tokens[1].source)) {
 				// store as last global label unless it is an .EQU or local label
-				if (codeline.tokens[0].source[0] != '@' && codeline.tokens[1].source != ".EQU" && codeline.tokens[1].source != "EQU") {
-					SetLastLabelName(codeline.tokens[0].source) ;
+				if (codeline.tokens[1].source != ".EQU" && codeline.tokens[1].source != "EQU") {
+					SetLastLabelName(labelName) ;
 				}
-				return CreateLabel(codeline.tokens[0].source, &codeline);
+				return CreateLabel(labelName, codeline, msg);
 			}
 			// <letters> <instruction> ?
 			if (GetInstruction(codeline.tokens[1].source)) {
 				// store as last global label
-				SetLastLabelName(codeline.tokens[0].source) ;
-				return CreateLabel(codeline.tokens[0].source, &codeline);
+				SetLastLabelName(labelName) ;
+				return CreateLabel(labelName, codeline, msg);
 			}
 		}
 		return nullptr;
@@ -656,10 +699,13 @@ namespace MUZ {
 
 	/** Create a label at current address. If the label name starts with a '@', a local label is created for current file and is prefixed with the last
 	 global label name, else the label is global. */
-	Label* Assembler::CreateLabel(std::string name, CodeLine* codeline)
+	Label* Assembler::CreateLabel(std::string name, CodeLine& codeline, ErrorList& msg)
 	{
-		if (name.empty()) return nullptr;
+		if (name.empty()) return nullptr;				// warning if this label already exists
 		Label* label = GetLabel(name);
+		if (label) {
+			msg.Warning(errorLabelExists, codeline);
+		}
 		if (label == nullptr) {
 			label = new Label();
 			if (!label) throw OutOfMemoryException();
@@ -672,14 +718,15 @@ namespace MUZ {
 				label->multiple = false;
 			}
 		}
-		label->codeline = codeline;
+		label->codeline = &codeline;
 		return label;
 	}
 
-	/** Sets the last global label name. */
+	/** Sets the last global label name. Does nothing if the name is empty or starts with a '@'. */
 	void Assembler::SetLastLabelName(std::string name)
 	{
-		m_status.lastlabel = name;
+		if (name.length() > 0 && name[0] != '@')
+			m_status.lastlabel = name;
 	}
 	
 	/** Returns the last global label name. */
@@ -790,7 +837,8 @@ namespace MUZ {
 		file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
 		FILE* f = fopen(file.c_str(), "r");
 		if (!f) {
-			msg.push_back({errorTypeFATAL, errorOpeningSource, nullptr, file});
+			CodeLine codeline;
+			msg.Fatal(errorOpeningSource, codeline, file);
 			throw MUZ::NoFileException();
 		}
 		
@@ -798,6 +846,208 @@ namespace MUZ {
 		size_t filenum = m_files.size();
 		m_files.push_back(sourcefile);
 		m_status.curfile = (int)filenum;
+		
+		// now explore the file line by line
+		BYTE* buffer = nullptr;
+		int linesize = 0;
+		//long offset = ftell(f);
+		Label* lastLabel = nullptr;
+		while (fgetline(&buffer, &linesize, f)) {
+			
+			// debug
+			if (m_status.trace) printf("%04X: [%4d] %s\n", GetAddress(),(int)sourcefile->lines.size()  + 1, buffer);
+			
+			// prepare the codeline to assemble
+			CodeLine cl;
+			cl.address = GetAddress();
+			cl.section = GetSection();
+			cl.assembled = false;
+			cl.as = this;
+			cl.file = (int)filenum;
+			//cl.offset = offset;
+			//cl.size = linesize;
+			cl.source = string((char*)buffer);
+			cl.line = (int)sourcefile->lines.size()  + 1;
+			cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
+			// Assemble this line, will include another file if #INCLUDE is met
+			cl.assembled = AssembleCodeLine(cl, msg);
+			if (cl.assembled) {
+				cl.address = GetAddress();// useless?
+				cl.section = GetSection();
+				lastLabel = cl.label;
+			}
+			// Store assembly result
+			sourcefile->lines.push_back(cl);
+			// update current address and file position
+			//offset = ftell(f);
+			AdvanceAddress(cl.code.size());
+		}
+		
+		// close main source and release IO buffer
+		fclose(f);
+		free(buffer);
+
+		return true;
+	}
+
+	bool Assembler::AssembleMainFilePassTwo(string file, ErrorList& msg)
+	{
+		
+		// reset sections
+		for (auto & section: m_sections) {
+			section.second->Reset();
+		}
+		m_status.cursection = nullptr;
+
+		
+		// Execute pass 2
+		CodeLine codeline;
+		codeline.includefile = 0;
+		codeline.file = 0;
+		codeline.as = this;
+		PrepareListing(codeline, msg);
+		AssembleIncludedFilePassTwo(file, codeline, msg);
+		
+		// Close the listing file if finished main source
+		if (m_listingfile) {
+			
+			// list sections
+			if (m_sections.size()) {
+				std::string s = "\nSections:\n------------------------------------------------------------------------------------\n";
+				fprintf(m_listingfile, "%s", s.c_str());
+				if (m_status.trace) printf("%s", s.c_str());
+				for (auto section: m_sections) {
+					s = string("\t") + section.first + ":";
+					if (section.second->m_ranges.size() == 0) {
+						s += "<empty>";
+					} else {
+						// sort ranges by starting addresses
+						std::sort(section.second->m_ranges.begin(), section.second->m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
+							return a.start < b.start;
+						});
+						for (auto range: section.second->m_ranges) {
+							s += " [" + address_to_base(range.start, 16, 4) + "-" + address_to_base(range.end, 16, 4) + "]";
+						}
+					}
+					fprintf(m_listingfile, "%s\n", s.c_str());
+				}
+			}
+			
+			// list DEFINEs
+			if (m_defsymbols.size()) {
+				std::string s = "\nDefines:\n------------------------------------------------------------------------------------\n";
+				fprintf(m_listingfile, "%s", s.c_str());
+				if (m_status.trace) printf("%s", s.c_str());
+				std::map<string,DefSymbol*> sortedSymbols;
+				for (auto symbol: m_defsymbols) {
+					sortedSymbols[symbol.first] = symbol.second;
+				}
+				for (auto defsymbol: sortedSymbols) {
+					string sleft;
+					sleft = defsymbol.first.substr(0,29);
+					sleft += spaces(30 - (int)sleft.length());
+					sleft += " :" + defsymbol.second->value;
+					s = string("\t") + sleft + "\n";
+					fprintf(m_listingfile, "%s", s.c_str());
+					if (m_status.trace) printf("%s", s.c_str());
+				}
+			}
+
+			// build sorted map of equate and labels
+			std::map<string,Label*> sortedEquates;		// map, ordered by name
+			std::map<string,ADDRESSTYPE> nameSortedLabels;	//map ordered by name
+			std::map<ADDRESSTYPE, string> addressSortedLabels;	// map ordered by address
+			for (auto label: labels) {
+				if ( ! label.second->equate) {
+					nameSortedLabels[label.first] = label.second->addresses[0];
+					addressSortedLabels[label.second->addresses[0]] = label.first;
+				} else {
+					sortedEquates[label.first] = label.second;
+				}
+			}
+
+			// list equates
+			if (sortedEquates.size()) {
+				std::string s = "\nEquates:\n------------------------------------------------------------------------------------\n";
+				fprintf(m_listingfile, "%s", s.c_str());
+				if (m_status.trace) printf("%s", s.c_str());
+				for (auto equate: sortedEquates) {
+					string sleft;
+					sleft = equate.first.substr(0,29);
+					sleft += spaces(30 - (int)sleft.length());
+					sleft += " :" + address_to_base(equate.second->addresses[0], 16, 4);
+					s = string("\t") + sleft + "\n";
+					fprintf(m_listingfile, "%s", s.c_str());
+					if (m_status.trace) printf("%s", s.c_str());
+				}
+			}
+			
+			// list global labels sorted by value then name
+			if (nameSortedLabels.size() || addressSortedLabels.size()) {
+				std::string s = "\nGlobal labels:\n--- By Name -------------------------------|---By Address --------------------------\n";
+				fprintf(m_listingfile, "%s", s.c_str());
+				if (m_status.trace) printf("%s", s.c_str());
+				bool nameFinished = false, addressFinished = false;
+				auto iterName = nameSortedLabels.begin();
+				auto iterAddress = addressSortedLabels.begin();
+				if (iterName == nameSortedLabels.end()) nameFinished = true;
+				if (iterAddress == addressSortedLabels.end()) addressFinished = true;
+				do {
+					string sleft, sright;
+					if (nameFinished) {
+						sleft = spaces(30) + "  " + spaces(4);
+					} else {
+						sleft = iterName->first.substr(0,29);
+						sleft += spaces(30 - (int)sleft.length());
+						sleft += " :" + address_to_base(iterName->second, 16, 4);
+						iterName++;
+						if (iterName == nameSortedLabels.end()) nameFinished = true;
+					}
+					if (!addressFinished) {
+						sright = address_to_base(iterAddress->first, 16, 4) + ": ";
+						sright += iterAddress->second.substr(0,30);
+						iterAddress++;
+						if (iterAddress == addressSortedLabels.end()) addressFinished = true;
+					}
+					s = string("\t") + sleft + spaces(3) + "|" + spaces(3) + sright + "\n";
+					fprintf(m_listingfile, "%s", s.c_str());
+					if (m_status.trace) printf("%s", s.c_str());
+					
+				} while (!nameFinished || !addressFinished);
+			}
+			fclose(m_listingfile);
+			m_listingfile = nullptr;
+		}
+		return true;
+	}
+	
+	bool Assembler::AssembleIncludedFilePassOne(string file, CodeLine& codeline, ErrorList& msg)
+	{
+		// basic security
+		if (file.size() < 2) return false;
+		if (codeline.file >= (int)m_files.size()) return false;
+		
+		// Prepare the path and name for file
+		SourceFile* sourcefile = new SourceFile;
+		if (sourcefile == nullptr) throw MUZ::OutOfMemoryException();
+		if (!sourcefile->Set(file, (codeline.file >= 0) ? m_files[codeline.file] : nullptr)) return false;
+		
+		// try to open the source file
+		file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
+		FILE* f = fopen(file.c_str(), "r");
+		if (!f) {
+			msg.Fatal(errorOpeningSource, codeline, file);
+			throw MUZ::NoFileException();
+		}
+		
+		// Store this file definition
+		size_t filenum = m_files.size();
+		m_files.push_back(sourcefile);
+		m_status.curfile = (int)filenum;
+		
+		sourcefile->parentfile = codeline.file;
+		sourcefile->parentline = codeline.line;
+		sourcefile->included = (sourcefile->parentfile >= 0);
 		
 		// now explore the file line by line
 		BYTE* buffer = nullptr;
@@ -831,207 +1081,6 @@ namespace MUZ {
 			sourcefile->lines.push_back(cl);
 			// update current address and file position
 			//offset = ftell(f);
-			AdvanceAddress(cl.code.size());
-		}
-		
-		// close main source and release IO buffer
-		fclose(f);
-		free(buffer);
-
-		return true;
-	}
-
-	bool Assembler::AssembleMainFilePassTwo(string file, ErrorList& msg)
-	{
-		// initialize listing
-		PrepareListing(msg);
-		
-		// reset sections
-		for (auto & section: m_sections) {
-			section.second->Reset();
-		}
-		m_status.cursection = nullptr;
-
-		
-		// Execute pass 2
-		CodeLine codeline;
-		codeline.includefile = 0;
-		codeline.file = 0;
-		AssembleIncludedFilePassTwo(file, codeline, msg);
-		
-		// Close the listing file if finished main source
-		if (m_listingfile) {
-			
-			// list sections
-			if (m_sections.size()) {
-				std::string s = "\nSections:\n------------------------------------------------------------------------------------\n";
-				fprintf(m_listingfile, "%s", s.c_str());
-				if (m_status.trace) printf("%s", s.c_str());
-				for (auto section: m_sections) {
-					s = string("\t") + section.first + ":";
-					if (section.second->m_ranges.size() == 0) {
-						s += "<empty>";
-					} else {
-						// sort ranges by starting addresses
-						std::sort(section.second->m_ranges.begin(), section.second->m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
-							return a.start < b.start;
-						});
-						for (auto range: section.second->m_ranges) {
-							s += " [" + address_to_hex(range.start) + "-" + address_to_hex(range.end) + "]";
-						}
-					}
-					fprintf(m_listingfile, "%s\n", s.c_str());
-				}
-			}
-			
-			// list DEFINEs
-			if (m_defsymbols.size()) {
-				std::string s = "\nDefines:\n------------------------------------------------------------------------------------\n";
-				fprintf(m_listingfile, "%s", s.c_str());
-				if (m_status.trace) printf("%s", s.c_str());
-				std::map<string,DefSymbol*> sortedSymbols;
-				for (auto symbol: m_defsymbols) {
-					sortedSymbols[symbol.first] = symbol.second;
-				}
-				for (auto defsymbol: sortedSymbols) {
-					string sleft;
-					sleft = defsymbol.first.substr(0,29);
-					sleft += spaces(30 - (int)sleft.length());
-					sleft += " :" + defsymbol.second->value;
-					s = string("\t") + sleft + "\n";
-					fprintf(m_listingfile, "%s", s.c_str());
-					if (m_status.trace) printf("%s", s.c_str());
-				}
-			}
-			
-			// build sorted map of equate and labels
-			std::map<string,Label*> sortedEquates;		// map, ordered by name
-			std::map<string,ADDRESSTYPE> nameSortedLabels;	//map ordered by name
-			std::map<ADDRESSTYPE, string> addressSortedLabels;	// map ordered by address
-			for (auto label: labels) {
-				if ( ! label.second->equate) {
-					nameSortedLabels[label.first] = label.second->addresses[0];
-					addressSortedLabels[label.second->addresses[0]] = label.first;
-				} else {
-					sortedEquates[label.first] = label.second;
-				}
-			}
-			
-			// list equates
-			if (sortedEquates.size()) {
-				std::string s = "\nEquates:\n------------------------------------------------------------------------------------\n";
-				fprintf(m_listingfile, "%s", s.c_str());
-				if (m_status.trace) printf("%s", s.c_str());
-				for (auto equate: sortedEquates) {
-					string sleft;
-					sleft = equate.first.substr(0,29);
-					sleft += spaces(30 - (int)sleft.length());
-					sleft += " :" + address_to_hex(equate.second->addresses[0]);
-					s = string("\t") + sleft + "\n";
-					fprintf(m_listingfile, "%s", s.c_str());
-					if (m_status.trace) printf("%s", s.c_str());
-				}
-			}
-			
-			// list global labels sorted by value then name
-			if (nameSortedLabels.size() || addressSortedLabels.size()) {
-				std::string s = "\nGlobal labels:\n--- By Name -------------------------------|---By Address --------------------------\n";
-				fprintf(m_listingfile, "%s", s.c_str());
-				if (m_status.trace) printf("%s", s.c_str());
-				bool nameFinished = false, addressFinished = false;
-				auto iterName = nameSortedLabels.begin();
-				auto iterAddress = addressSortedLabels.begin();
-				if (iterName == nameSortedLabels.end()) nameFinished = true;
-				if (iterAddress == addressSortedLabels.end()) addressFinished = true;
-				do {
-					string sleft, sright;
-					if (nameFinished) {
-						sleft = spaces(30) + "  " + spaces(4);
-					} else {
-						sleft = iterName->first.substr(0,29);
-						sleft += spaces(30 - (int)sleft.length());
-						sleft += " :" + address_to_hex(iterName->second);
-						iterName++;
-						if (iterName == nameSortedLabels.end()) nameFinished = true;
-					}
-					if (!addressFinished) {
-						sright = address_to_hex(iterAddress->first) + ": ";
-						sright += iterAddress->second.substr(0,30);
-						iterAddress++;
-						if (iterAddress == addressSortedLabels.end()) addressFinished = true;
-					}
-					s = string("\t") + sleft + spaces(3) + "|" + spaces(3) + sright + "\n";
-					fprintf(m_listingfile, "%s", s.c_str());
-					if (m_status.trace) printf("%s", s.c_str());
-					
-				} while (!nameFinished || !addressFinished);
-			}
-			fclose(m_listingfile);
-			m_listingfile = nullptr;
-		}
-		return true;
-	}
-	
-	bool Assembler::AssembleIncludedFilePassOne(string file, CodeLine& codeline, ErrorList& msg)
-	{
-		// basic security
-		if (file.size() < 2) return false;
-		if (codeline.file >= (int)m_files.size()) return false;
-		
-		// Prepare the path and name for file
-		SourceFile* sourcefile = new SourceFile;
-		if (sourcefile == nullptr) throw MUZ::OutOfMemoryException();
-		if (!sourcefile->Set(file, (codeline.file >= 0) ? m_files[codeline.file] : nullptr)) return false;
-		
-		// try to open the source file
-		file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
-		FILE* f = fopen(file.c_str(), "r");
-		if (!f) {
-			msg.push_back({errorTypeFATAL, errorOpeningSource, &codeline, file});
-			throw MUZ::NoFileException();
-		}
-		
-		// Store this file definition
-		size_t filenum = m_files.size();
-		m_files.push_back(sourcefile);
-		m_status.curfile = (int)filenum;
-		
-		sourcefile->parentfile = codeline.file;
-		sourcefile->parentline = codeline.line;
-		sourcefile->included = (sourcefile->parentfile >= 0);
-		
-		// now explore the file line by line
-		BYTE* buffer = nullptr;
-		int linesize = 0;
-		long offset = ftell(f);
-		Label* lastLabel = nullptr;
-		while (fgetline(&buffer, &linesize, f)) {
-			
-			// debug
-			if (m_status.trace) printf("%04X: [%4d] %s\n", GetAddress(),(int)sourcefile->lines.size()  + 1, buffer);
-			
-			// prepare the codeline to assemble
-			CodeLine cl;
-			cl.address = GetAddress();
-			cl.section = GetSection();
-			cl.assembled = false;
-			cl.file = (int)filenum;
-			//cl.offset = offset;
-			//cl.size = linesize;
-			cl.source = string((char*)buffer);
-			cl.line = (int)sourcefile->lines.size()  + 1;
-			cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
-			// Assemble this line, will include another file if #INCLUDE is met
-			cl.assembled = AssembleCodeLine(cl, msg);
-			if (cl.assembled) {
-				cl.address = GetAddress();// useless?
-				cl.section = GetSection();
-				lastLabel = cl.label;
-			}
-			// Store assembly result
-			sourcefile->lines.push_back(cl);
-			// update current address and file position
-			offset = ftell(f);
 			AdvanceAddress(cl.code.size());
 		}
 		
@@ -1109,7 +1158,7 @@ namespace MUZ {
 			file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
 			FILE* f = fopen(file.c_str(), "r");
 			if (!f) {
-				msg.push_back({errorTypeFATAL, errorOpeningSource, &codeline, file});
+				msg.Fatal(errorOpeningSource, codeline, file);
 				throw MUZ::NoFileException();
 			}
 			
@@ -1124,7 +1173,7 @@ namespace MUZ {
 			// now explore the file line by line
 			BYTE* buffer = nullptr;
 			int linesize = 0;
-			long offset = ftell(f);
+			//long offset = ftell(f);
 			Label* lastLabel = nullptr;
 			BYTE* binbuffer = (BYTE*)calloc(1024,1);// should be suffficient, lines can only store 256 bytes definitions
 			while (fgetline(&buffer, &linesize, f)) {
@@ -1162,7 +1211,7 @@ namespace MUZ {
 					// Store assembly result
 					sourcefile->lines.push_back(cl);
 					// update current address and file position
-					offset = ftell(f);
+					//offset = ftell(f);
 					AdvanceAddress(cl.code.size());
 				}
 			}
@@ -1197,7 +1246,7 @@ namespace MUZ {
 			file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
 			FILE* f = fopen(file.c_str(), "r");
 			if (!f) {
-				msg.push_back({errorTypeFATAL, errorOpeningSource, &codeline, file});
+				msg.Fatal(errorOpeningSource, codeline, file);
 				throw MUZ::NoFileException();
 			}
 			
@@ -1456,6 +1505,12 @@ namespace MUZ {
 		m_symbolsfilename = filename;
 	}
 
+	/** Sets the erros/warnings log filename. */
+	void Assembler::SetLogFilename(std::string filename)
+	{
+		m_logfilename = filename;
+	}
+
 	//MARK: - Sections and current address management
 	
 	/** Sets current section to code section.*/
@@ -1545,7 +1600,6 @@ namespace MUZ {
 	 */
 	CodeLine Assembler::AssembleLine(std::string sourceline, ErrorList& msg)
 	{
-		//TODO: get the source line from its file
 		CodeLine codeline;
 		codeline.address = 0;
 		codeline.assembled = false;
@@ -1567,14 +1621,13 @@ namespace MUZ {
 	bool Assembler::AssembleFile(string file, ErrorList& msg)
 	{
 		SetFirstPass(true);
+		msg.Clear();							// clear warnings
 		CodeLine codeline;
 		if (m_status.trace)	printf("Pass 1: %s\n", file.c_str());
 		if (AssembleMainFilePassOne(file, msg)) {
 			SetFirstPass(false);
 			if (m_status.trace) printf("Pass 2: %s\n", file.c_str());
 			if (AssembleMainFilePassTwo(file, msg)) {
-				
-				// All ok, now output memory listing
 
 				// first build memory image and a section with all the written address ranges
 				DATATYPE* memory = (DATATYPE*)calloc(MEMMAXSIZE, 1);
@@ -1582,21 +1635,31 @@ namespace MUZ {
 				ErrorList mergingMsg;
 				FillFromFile(0, memory, section, mergingMsg); // this handles recursive calls for included files
 				
-				// sort ranges by starting addresses
-				std::sort(section.m_ranges.begin(), section.m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
-					return a.start < b.start;
-				});
-				
+
 				// dump in memory listing
 				GenerateMemoryListing(memory, section, mergingMsg);
 				
 				// Output Intel Hex format
 				GenerateIntelHex(memory, section, mergingMsg);
+
+				// clean memory work image
+				free(memory);
+
+				// Output errors and warnings
+				GenerateLog(msg);
+
 			}
 		}
 		return false;
 	}
 
+	/** Get the name of a file from its index. */
+	std::string Assembler::GetFileName(int index)
+	{
+		if (index < 0 || index >= m_files.size()) return "";
+		return m_files[index]->filepath + "/" + m_files[index]->filename;
+	}
+	
 	//MARK: - Interface to instructions, labels, directives, symbols
 	
 	/** Try to find a directive in the # and . directives array. */

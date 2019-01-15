@@ -14,6 +14,8 @@
 namespace MUZ {
 	
 	namespace Z80 {
+		
+		MUZ::Z80::OperandTools optools;
 	
 		/** Assemble instruction at current token, returns false if error.
 		 tok index 0   1   2   3
@@ -31,94 +33,104 @@ namespace MUZ {
 			// save current position
 			int curtoken = codeline.curtoken;
 			// ADC A, 8 bit
-			if (GetReg8(codeline, dest,REGFLAGS::A)) {
+			OperandError operr = optools.GetReg8(codeline, dest,REGFLAGS::A);
+			if (operr == operrOK) {
 				if (!GetComma(codeline)) {
 					// ADC A
-					codeline.AddCode(0x88 + getsubcode(regA));
+					codeline.AddCode(0x88 + optools.GetSubCode(regA));
 					codeline.SetCycles(4);
 					return true;
 				}
 				// ADC A,r
-				if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-					codeline.AddCode(0x88 + getsubcode(src));
+				operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+				if (operr == operrOK) {
+					codeline.AddCode(0x88 + optools.GetSubCode(src));
 					codeline.SetCycles(4);
 					return true;
 				}
-				if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-					codeline.AddCode(getprefix(src), 0x88 + getsubcode(src));
+				operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+				if (operr == operrOK) {
+					codeline.AddCode(optools.GetPrefix(src), 0x88 + optools.GetSubCode(src));
 					codeline.SetCycles(8);
 					return true;
 				}
 				// ADC  A,(HL)
-				if (GetIndHL(codeline)) {
+				operr = optools.GetIndHL(codeline);
+				if (operr == operrOK) {
 					codeline.AddCode(0x8E);
 					codeline.SetCycles(7);
 					return true;
 				}
 				// ADC A,(X+d)
-				if (GetIndX(codeline, src, d)) {
-					codeline.AddCode(getprefix(src), 0x8E, d);
+				operr = optools.GetIndX(codeline, src, d);
+				if (operr == operrOK) {
+					codeline.AddCode(optools.GetPrefix(src), 0x8E, d);
 					codeline.SetCycles(19);
 					return true;
 				}
 				// ADC A,n
-				if (GetNum8(codeline, d)) {
+				operr = optools.GetNum8(codeline, d);
+				if (operr == operrOK) {
 					codeline.AddCode(0xCE, d);
 					codeline.SetCycles(7);
 					return true;
 				}
-				// TODO: ADC A,IXL IXH IYL IYH
-				return false;
+				return msg.Error(errorWrongOperand2, codeline);
 			}
 			// ADC 16 bits
-			if (GetReg16(codeline, dest,REGFLAGS::HL)) {
-				if (!GetComma(codeline)) {
-					return false;//TODO: syntax after ADC HL
-				}
+			operr = optools.GetReg16(codeline, dest,REGFLAGS::HL);
+			if (operr == operrOK) {
+				if (!GetComma(codeline)) return msg.Error(errorMissingComma, codeline);
 				// ADC HL, BC DE HL SP
-				if (GetReg16(codeline, src,REGFLAGS::BCDESP | REGFLAGS::HL)) {
-					codeline.AddCode(0xED, 0x4A + getsubcode(src));
+				operr = optools.GetReg16(codeline, src,REGFLAGS::BCDESP | REGFLAGS::HL);
+				if (operr == operrOK) {
+					codeline.AddCode(0xED, 0x4A + optools.GetSubCode(src));
 					codeline.SetCycles(15);
 					return true;
 				}
-				return false;
+				return msg.Error(errorWrongOperand2, codeline);
 			}
 			// restore initial position
-			codeline.curtoken = curtoken; //TODO:: not needed?
+			codeline.curtoken = curtoken; //not needed?
 			// ADC r
-			if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
-				codeline.AddCode(0x88 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				if (GetComma(codeline)) return msg.Error(errorWrongComma, codeline);
+				codeline.AddCode(0x88 + optools.GetSubCode(src));
 				codeline.SetCycles(4);
 				return true;
 			}
-			if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(src), 0x88 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0x88 + optools.GetSubCode(src));
 				codeline.SetCycles(8);
 				return true;
 			}
 			// ADC  (HL)
-			if (GetIndHL(codeline)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
+				if (GetComma(codeline)) return msg.Error(errorWrongComma, codeline);
 				codeline.AddCode(0x8E);
 				codeline.SetCycles(7);
 				return true;
 			}
 			// ADC (X+d)
-			if (GetIndX(codeline, src, d)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
-				codeline.AddCode(getprefix(src), 0x8E, d);
+			operr = optools.GetIndX(codeline, src, d);
+			if (operr == operrOK) {
+				if (GetComma(codeline)) return msg.Error(errorWrongComma, codeline);
+				codeline.AddCode(optools.GetPrefix(src), 0x8E, d);
 				codeline.SetCycles(19);
 				return true;
 			}
 			// ADC n
-			if (GetNum8(codeline, d)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
+			operr = optools.GetNum8(codeline, d);
+			if (operr == operrOK) {
+				if (GetComma(codeline)) return msg.Error(errorWrongComma, codeline);
 				codeline.AddCode(0xCE, d);
 				codeline.SetCycles(7);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -141,7 +153,8 @@ namespace MUZ {
 			// save current position
 			int curtoken = codeline.curtoken;
 			// ADD A,8bit
-			if (GetReg8(codeline, dest,REGFLAGS::A)) {
+			OperandError operr = optools.GetReg8(codeline, dest,REGFLAGS::A);
+			if (operr == operrOK) {
 				if (!GetComma(codeline)) {
 					// ADD A
 					codeline.AddCode(0x87);
@@ -149,105 +162,112 @@ namespace MUZ {
 					return true;
 				}
 				// ADD A,r
-				if (GetReg8(codeline, src,REGFLAGS::ABCDEHL)) {
-					codeline.AddCode(0x80 + getsubcode(src));
+				operr = optools.GetReg8(codeline, src,REGFLAGS::ABCDEHL);
+				if (operr == operrOK) {
+					codeline.AddCode(0x80 + optools.GetSubCode(src));
 					codeline.SetCycles(4);
 					return true;
 				}
 				// ADD r,undoc
-				if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-					codeline.AddCode(getprefix(src), 0x80 + getsubcode(src));
+				operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+				if (operr == operrOK) {
+					codeline.AddCode(optools.GetPrefix(src), 0x80 + optools.GetSubCode(src));
 					codeline.SetCycles(8);
 					return true;
 				}
 				// ADD A,(HL)
-				if (GetIndHL(codeline)) {
+				operr = optools.GetIndHL(codeline);
+				if (operr == operrOK) {
 					codeline.AddCode(0x86);
 					codeline.SetCycles(7);
 					return true;
 				}
 				// ADD A,(X+d)
-				if (GetIndX(codeline, src, d)) {
-					codeline.AddCode(getprefix(src), 0x86, d);
+				operr = optools.GetIndX(codeline, src, d);
+				if (operr == operrOK) {
+					codeline.AddCode(optools.GetPrefix(src), 0x86, d);
 					codeline.SetCycles(19);
 					return true;
 				}
 				// ADD A,n
-				if (GetNum8(codeline, d)) {
+				operr = optools.GetNum8(codeline, d);
+				if (operr == operrOK) {
 					codeline.AddCode(0xC6, d);
 					codeline.SetCycles(7);
 					return true;
 				}
-				// TODO: error after ADD A,
-				return false;
+				return msg.Error(errorWrongOperand2, codeline);;
 			}
 			// ADD 16 bits
-			if (GetReg16(codeline, dest,REGFLAGS::HLXY)) {
-				if (!GetComma(codeline)) {
-					return false;//TODO: syntax after ADD rp
-				}
+			operr = optools.GetReg16(codeline, dest,REGFLAGS::HLXY);
+			if (operr == operrOK) {
+				if (!GetComma(codeline))return msg.Error(errorMissingComma, codeline);
 				// ADD HL, BC DE HL SP
 				// ADD IX, BC DE IX SP
 				// ADD IY, BC DE IY SP
-				if (GetReg16(codeline, src,REGFLAGS::BCDESP | REGFLAGS::HLXY)) {
+				operr = optools.GetReg16(codeline, src,REGFLAGS::BCDESP | REGFLAGS::HLXY);
+				if (operr == operrOK) {
 					int cycles = 11;
 					// HL/IX/IY as source: only accept HL,HL - IX,IX - IY,IY
-					if ( RegAccept(REGFLAGS::HLXY, src)) {
-						if (src != dest) return false;
+					if (optools.RegAccept(REGFLAGS::HLXY, src)) {
+						if (src != dest) {
+							return msg.Error(errorWrongRegister, codeline);
+						}
 						src = regHL; // mimic ADD HL opcode
 					}
 					// indexed prefix?
-					if ( RegAccept(REGFLAGS::XY, dest)) {
-						codeline.AddCode(getprefix(dest));
+					if ( optools.RegAccept(REGFLAGS::XY, dest)) {
+						codeline.AddCode(optools.GetPrefix(dest));
 						cycles = 15;
 					}
 					// ADD HL opcode
-					codeline.AddCode(0x09 + getsubcode(src));
+					codeline.AddCode(0x09 + optools.GetSubCode(src));
 					codeline.SetCycles(cycles);
 					return true;
 				}
-				return false;
+				return msg.Error(errorWrongOperand2, codeline);
 			}
 			// all checked, maybe shortcut form ADD A / ADD B etc
 			// error if there is a comma after next operand
 			// restore initial position
-			codeline.curtoken = curtoken;//TODO: normaly not needed?
+			codeline.curtoken = curtoken;// normaly not needed?
 
 			// ADD r
-			if (GetReg8(codeline, src,REGFLAGS::ABCDEHL)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
-				codeline.AddCode(0x80 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0x80 + optools.GetSubCode(src));
 				codeline.SetCycles(4);
 				return true;
 			}
 			// ADD undoc
-			if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(src), 0x80 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0x80 + optools.GetSubCode(src));
 				codeline.SetCycles(8);
 				return true;
 			}
 			// ADD (HL)
-			if (GetIndHL(codeline)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0x86);
 				codeline.SetCycles(7);
 				return true;
 			}
 			// ADD (X+d)
-			if (GetIndX(codeline, src, d)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
-				codeline.AddCode(getprefix(src), 0x86, d);
+			operr = optools.GetIndX(codeline, src, d);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0x86, d);
 				codeline.SetCycles(19);
 				return true;
 			}
 			// ADD n
-			if (GetNum8(codeline, d)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
+			operr = optools.GetNum8(codeline, d);
+			if (operr == operrOK) {
 				codeline.AddCode(0xC6, d);
 				codeline.SetCycles(7);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 
 		/** Assemble instruction at current token, returns false if error
@@ -263,72 +283,83 @@ namespace MUZ {
 			int d;
 			// save current position
 			int curtoken = codeline.curtoken;
-			if (GetReg8(codeline, src, REGFLAGS::A)) {
+			OperandError operr = optools.GetReg8(codeline, src, REGFLAGS::A);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// AND A,r
-					if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(0xA0 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(0xA0 + optools.GetSubCode(src));
 						codeline.SetCycles(4);
 						return true;
 					}
-					if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-						codeline.AddCode(getprefix(src), 0xA0 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0xA0 + optools.GetSubCode(src));
 						codeline.SetCycles(8);
 						return true;
 					}
 					// AND A,(HL)
-					if (GetIndHL(codeline)) {
+					operr = optools.GetIndHL(codeline);
+					if (operr == operrOK) {
 						codeline.AddCode(0xA6);
 						codeline.SetCycles(7);
 						return true;
 					}
 					// AND A,(X+d)
-					if (GetIndX(codeline, src, d)) {
-						codeline.AddCode(getprefix(src), 0xA6, d);
+					operr = optools.GetIndX(codeline, src, d);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0xA6, d);
 						codeline.SetCycles(19);
 						return true;
 					}
 					// AND A,n
-					if (GetNum8(codeline, d)) {
+					operr = optools.GetNum8(codeline, d);
+					if (operr == operrOK) {
 						codeline.AddCode(0xE6, d);
 						codeline.SetCycles(7);
 						return true;
 					}
-					return false;
+					return msg.Error(errorWrongOperand2, codeline);
 				}
 				// restore initial position
 				codeline.curtoken = curtoken;
 			}
 			// AND r
-			if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xA0 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xA0 + optools.GetSubCode(src));
 				codeline.SetCycles(4);
 				return true;
 			}
-			if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(src), 0xA0 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0xA0 + optools.GetSubCode(src));
 				codeline.SetCycles(8);
 				return true;
 			}
 			// AND (HL)
-			if (GetIndHL(codeline)) {
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xA6);
 				codeline.SetCycles(7);
 				return true;
 			}
 			// AND (X+d)
-			if (GetIndX(codeline, src, d)) {
-				codeline.AddCode(getprefix(src), 0xA6, d);
+			operr = optools.GetIndX(codeline, src, d);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0xA6, d);
 				codeline.SetCycles(19);
 				return true;
 			}
 			// AND n
-			if (GetNum8(codeline, d)) {
+			operr = optools.GetNum8(codeline, d);
+			if (operr == operrOK) {
 				codeline.AddCode(0xE6, d);
 				codeline.SetCycles(7);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -342,21 +373,28 @@ namespace MUZ {
 		{
 			int d=0;
 			OperandType src, bit;
-			if (!GetBitNumber(codeline, bit)) return false;
-			if (!GetComma(codeline)) return false;
-			if (GetReg8(codeline, src,REGFLAGS::ABCDEHL)) {
+			OperandError operr = optools.GetBitNumber(codeline, bit);
+			if (operr != operrOK) {
+				if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+				return msg.Error(errorTooBigBit, codeline, 2);
+			}
+			if (!GetComma(codeline)) return msg.Error(errorMissingComma, codeline);
+			operr = optools.GetReg8(codeline, src,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
 				codeline.SetCycles(8);
-			} else if (GetIndHL(codeline)) {
+			} else if (operrOK == optools.GetIndHL(codeline)) {
 				codeline.SetCycles(12);
 				src = indHL;
-			} else if (GetIndX(codeline, src, d)) {
+			} else if (operrOK == optools.GetIndX(codeline, src, d)) {
 				codeline.SetCycles(20);
-			} else return false;
-			// (IX+d) and (IY+d) are prefixed then use (HL) encoding
-			if (RegAccept(REGFLAGS::XY, src)) {
-				codeline.AddCode(getprefix(src), 0xCB, d, 0x40 + getsubcode(bit) + getsubcode(indHL));
 			} else {
-				codeline.AddCode(0xCB, 0x40 + getsubcode(bit) + getsubcode(src));
+				return msg.Error(errorWrongOperand2, codeline);
+			}
+			// (IX+d) and (IY+d) are prefixed then use (HL) encoding
+			if (optools.RegAccept(REGFLAGS::XY, src)) {
+				codeline.AddCode(optools.GetPrefix(src), 0xCB, d, 0x40 + optools.GetSubCode(bit) + optools.GetSubCode(indHL));
+			} else {
+				codeline.AddCode(0xCB, 0x40 + optools.GetSubCode(bit) + optools.GetSubCode(src));
 			}
 			return true;
 		}
@@ -378,22 +416,28 @@ namespace MUZ {
 		{
 			OperandType cond;
 			int addr;
-			if (GetCond(codeline, cond)) {
+			OperandError operr = optools.GetCond(codeline, cond);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetNum16(codeline, addr)) {
-						codeline.AddCode(0xC4 + getsubcode(cond), (addr & 0xFF), (addr >> 8));
+					operr = optools.GetNum16(codeline, addr);
+					if (operr == operrOK) {
+						codeline.AddCode(0xC4 + optools.GetSubCode(cond), (addr & 0xFF), (addr >> 8));
 						codeline.SetCycles(10,17);
 						return true;
 					}
+					if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
-			if (GetNum16(codeline, addr)) {
+			operr = optools.GetNum16(codeline, addr);
+			if (operr == operrOK) {
 				codeline.AddCode(0xCD, (addr & 0xFF), (addr >> 8));
 				codeline.SetCycles(17);
 				return true;
 			}
-			return false;
+			if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -419,75 +463,86 @@ namespace MUZ {
 		{
 			OperandType src;
 			int d ;
-			if (GetReg8(codeline, src,REGFLAGS::A)) {
+			OperandError operr = optools.GetReg8(codeline, src,REGFLAGS::A);
+			if (operr == operrOK) {
 				if (!GetComma(codeline)) {
 					// CP A
-					codeline.AddCode(0xB8 + getsubcode(src));
+					codeline.AddCode(0xB8 + optools.GetSubCode(src));
 					codeline.SetCycles(4);
 					return true;
 				}
 
 				// CP A,r
-				if (GetReg8(codeline, src,REGFLAGS::ABCDEHL)) {
-					codeline.AddCode(0xB8 + getsubcode(src));
+				operr = optools.GetReg8(codeline, src,REGFLAGS::ABCDEHL);
+				if (operr == operrOK) {
+					codeline.AddCode(0xB8 + optools.GetSubCode(src));
 					codeline.SetCycles(4);
 					return true;
 				}
-				if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-					codeline.AddCode(getprefix(src), 0xB8 + getsubcode(src));
+				operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+				if (operr == operrOK) {
+					codeline.AddCode(optools.GetPrefix(src), 0xB8 + optools.GetSubCode(src));
 					codeline.SetCycles(8);
 					return true;
 				}
 				// CP A,(HL)
-				if (GetIndHL(codeline)) {
+				operr = optools.GetIndHL(codeline);
+				if (operr == operrOK) {
 					codeline.AddCode(0xBE);
 					codeline.SetCycles(7);
 					return true;
 				}
 				// CP A,(X+d)
-				if (GetIndX(codeline, src, d)) {
-					codeline.AddCode(getprefix(src), 0xBE, d);
+				operr = optools.GetIndX(codeline, src, d);
+				if (operr == operrOK) {
+					codeline.AddCode(optools.GetPrefix(src), 0xBE, d);
 					codeline.SetCycles(19);
 					return true;
 				}
 				// CP A,n
-				if (GetNum8(codeline, d)) {
+				operr = optools.GetNum8(codeline, d);
+				if (operr == operrOK) {
 					codeline.AddCode(0xFE, d);
 					codeline.SetCycles(7);
 					return true;
 				}
-				return false;
+				return msg.Error(errorWrongOperand2, codeline);
 			}
 			// CP r
-			if (GetReg8(codeline, src,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xB8 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xB8 + optools.GetSubCode(src));
 				codeline.SetCycles(4);
 				return true;
 			}
-			if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(src), 0xB8 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0xB8 + optools.GetSubCode(src));
 				codeline.SetCycles(8);
 				return true;
 			}
 			// CP (HL)
-			if (GetIndHL(codeline)) {
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xBE);
 				codeline.SetCycles(7);
 				return true;
 			}
 			// CP (X+d)
-			if (GetIndX(codeline, src, d)) {
-				codeline.AddCode(getprefix(src), 0xBE, d);
+			operr = optools.GetIndX(codeline, src, d);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0xBE, d);
 				codeline.SetCycles(19);
 				return true;
 			}
 			// CP n
-			if (GetNum8(codeline, d)) {
+			operr = optools.GetNum8(codeline, d);
+			if (operr == operrOK) {
 				codeline.AddCode(0xFE, d);
 				codeline.SetCycles(7);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 
 		/** Assemble instruction at current token, returns false if error
@@ -580,39 +635,52 @@ namespace MUZ {
 		{
 			OperandType dest;
 			int d;
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0x05 + 8 * getsubcode(dest));
+			// DEC r
+			OperandError operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0x05 + 8 * optools.GetSubCode(dest));
 				codeline.SetCycles(4);
 				return true;
 			}
-			if (GetReg8(codeline, dest, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(dest), 0x05 + 8 * getsubcode(dest));
+			// DEC undoc
+			operr = optools.GetReg8(codeline, dest, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(dest), 0x05 + 8 * optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			if (GetReg16(codeline, dest)) {
-				if (RegAccept(REGFLAGS::BCDEHLSP, dest)) {
-					codeline.AddCode(0x0B + getsubcode(dest));
+			// DEC rp
+			operr = optools.GetReg16(codeline, dest);
+			if (operr == operrOK) {
+				// DEC BC DE HL SP
+				if (optools.RegAccept(REGFLAGS::BCDEHLSP, dest)) {
+					codeline.AddCode(0x0B + optools.GetSubCode(dest));
 					codeline.SetCycles(6);
 					return true;
 				}
-				if (RegAccept(REGFLAGS::XY, dest)) {
-					codeline.AddCode(getprefix(dest), 0x0B + getsubcode(regHL));
+				// DEC IX IY
+				if (optools.RegAccept(REGFLAGS::XY, dest)) {
+					codeline.AddCode(optools.GetPrefix(dest), 0x0B + optools.GetSubCode(regHL));
 					codeline.SetCycles(10);
 					return true;
 				}
+				return msg.Error(errorWrongOperand2, codeline);
 			}
-			if (GetIndHL(codeline)) {
+			// DEC (HL)
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0x35);
 				codeline.SetCycles(11);
 				return true;
 			}
-			if (GetIndX(codeline, dest, d)) {
-				codeline.AddCode(getprefix(dest), 0x35, d);
+			// DEC (X+d)
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(dest), 0x35, d);
 				codeline.SetCycles(23);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 
 		/** Assemble instruction at current token, returns false if error
@@ -633,17 +701,19 @@ namespace MUZ {
 		bool InstructionDJNZ::Assemble(CodeLine& codeline, ErrorList& msg)
 		{
 			int d;
-			if (GetNum16(codeline, d)) {
+			OperandError operr = optools.GetNum16(codeline, d);
+			if (operr == operrOK) {
 				int depl = codeline.as->GetAddress() + 2 - d;
-				if ( depl < -126 || depl > +129) {
-					// TODO: issue warning for target too far
+				if (depl < -126 || depl > +129) {
+					msg.Warning(warningTooFar, codeline, 2);
 				}
 				depl = 0x100 - depl;
 				codeline.AddCode(0x10, depl);
-				codeline.SetCycles(8,13); // 3 when looping, 2 when finished
+				codeline.SetCycles(8,13);
 				return true;
 			}
-			return false;
+			if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -670,9 +740,11 @@ namespace MUZ {
 		bool InstructionEX::Assemble(CodeLine& codeline, ErrorList& msg)
 		{
 			OperandType dest, src;
-			if (GetReg16(codeline, dest,REGFLAGS::AF | REGFLAGS::DE)) {
+			OperandError operr = optools.GetReg16(codeline, dest,REGFLAGS::AF | REGFLAGS::DE);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetReg16(codeline, src, REGFLAGS::AFp | REGFLAGS::HL)) {
+					operr = optools.GetReg16(codeline, src, REGFLAGS::AFp | REGFLAGS::HL);
+					if (operr == operrOK) {
 						if (src == regAFp && dest == regAF) {
 							codeline.AddCode(0x08);
 							codeline.SetCycles(4);
@@ -683,26 +755,33 @@ namespace MUZ {
 							codeline.SetCycles(4);
 							return true;
 						}
+						// wrong syntax,  EX AF,HL or EX DE,AF'
+						return msg.Error(errorWrongRegister, codeline); // useless
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
-			if (GetIndSP(codeline)) {
+			operr = optools.GetIndSP(codeline);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetReg16(codeline, src, REGFLAGS::HLXY)) {
+					operr = optools.GetReg16(codeline, src, REGFLAGS::HLXY);
+					if (operr == operrOK) {
 						if (src == regHL) {
 							codeline.AddCode(0xE3);
 							codeline.SetCycles(19);
 							return true;
 						}
 						// EX (SP),IX/IY
-						codeline.AddCode(getprefix(src), 0xE3);
+						codeline.AddCode(optools.GetPrefix(src), 0xE3);
 						codeline.SetCycles(23);
 						return true;
 					}
-				}
+					return msg.Error(errorWrongOperand2, codeline);
+					}
+				return msg.Error(errorMissingComma, codeline);
 			}
-			return true;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -738,15 +817,17 @@ namespace MUZ {
 		bool InstructionIM::Assemble(CodeLine& codeline, ErrorList& msg)
 		{
 			int m;
-			if (GetNum8(codeline, m)) {
+			OperandError operr = optools.GetNum8(codeline, m);
+			if (operr == operrOK) {
 				if (m >= 0 && m <= 2) {
 					const int code[3] = { 0x46, 0x56, 0x5E };
 					codeline.AddCode(0xED, code[m]);
 					codeline.SetCycles(8);
 					return true;
 				}
+				return msg.Error(errorTooBigValue, codeline, 2);
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -760,21 +841,48 @@ namespace MUZ {
 		{
 			OperandType dest;
 			int n;
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL|REGFLAGS::F)) {
+			// IN r,(C) or IN A,(num8)
+			OperandError operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL|REGFLAGS::F);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetIndC(codeline)) {
-						codeline.AddCode(0xED, 0x40 + getsubcode(dest) * 8);
+					// IN r,(C)
+					operr = optools.GetIndC(codeline);
+					if (operr == operrOK) {
+						codeline.AddCode(0xED, 0x40 + optools.GetSubCode(dest) * 8);
 						codeline.SetCycles(12);
 						return true;
 					}
-					if (dest == regA && GetInd16(codeline, n)) {
+					// IN A,(num8)
+					if (dest == regA && optools.GetInd16(codeline, n) == operrOK) {
+						if (n > 255) {
+							if (! codeline.as->IsFirstPass()) msg.ForceWarning(warningTooBig8, codeline);
+						}
 						codeline.AddCode(0xDB, n);
 						codeline.SetCycles(11);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
+				return msg.Error(errorMissingComma, codeline);
 			}
-			return false;
+			// IN (C)
+			operr = optools.GetIndC(codeline);
+			if (operr == operrOK) {
+				codeline.AddCode(0xED, 0x40 + optools.GetSubCode(regA) * 8);
+				codeline.SetCycles(12);
+				return true;
+			}
+			// IN (num8)
+			operr = optools.GetInd16(codeline, n);
+			if (operr == operrOK) {
+				if (n > 255) {
+					msg.Warning(warningTooBig8, codeline); // pass 1 only
+				}
+				codeline.AddCode(0xDB, n);
+				codeline.SetCycles(11);
+				return true;
+			}
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -801,37 +909,47 @@ namespace MUZ {
 		{
 			OperandType dest;
 			int d;
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0x04 + 8 * getsubcode(dest));
+			// INC r
+			OperandError operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0x04 + 8 * optools.GetSubCode(dest));
 				codeline.SetCycles(4);
 				return true;
 			}
-			if (GetReg8(codeline, dest, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(dest), 0x04 + 8 * getsubcode(dest));
+			// INC undoc
+			operr = optools.GetReg8(codeline, dest, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(dest), 0x04 + 8 * optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			if (GetReg16(codeline, dest,REGFLAGS::BCDEHLSP | REGFLAGS::XY)) {
-				if (RegAccept(REGFLAGS::XY, dest)) {
-					codeline.AddCode(getprefix(dest), 0x03 + getsubcode(regHL));
+			// INC rp
+			operr = optools.GetReg16(codeline, dest,REGFLAGS::BCDEHLSP | REGFLAGS::XY);
+			if (operr == operrOK) {
+				if (optools.RegAccept(REGFLAGS::XY, dest)) {
+					codeline.AddCode(optools.GetPrefix(dest), 0x03 + optools.GetSubCode(regHL));
 					codeline.SetCycles(10);
 					return true;
 				}
-				codeline.AddCode(0x03 + getsubcode(dest));
+				codeline.AddCode(0x03 + optools.GetSubCode(dest));
 				codeline.SetCycles(6);
 				return true;
 			}
-			if (GetIndHL(codeline)) {
+			// INC (HL)
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0x34);
 				codeline.SetCycles(11);
 				return true;
 			}
-			if (GetIndX(codeline, dest, d)) {
-				codeline.AddCode(getprefix(dest), 0x34, d);
+			// INC (X+d)
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(dest), 0x34, d);
 				codeline.SetCycles(23);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -894,45 +1012,60 @@ namespace MUZ {
 		{
 			OperandType cond, reg;
 			int addr;
-			if (GetCond(codeline, cond)) {
+			// JP cond,nn
+			OperandError operr = optools.GetCond(codeline, cond);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetNum16(codeline, addr)) {
-						codeline.AddCode(0xC2 + getsubcode(cond), (addr & 0xFF), (addr >> 8));
+					operr = optools.GetNum16(codeline, addr);
+					if (operr == operrOK) {
+						codeline.AddCode(0xC2 + optools.GetSubCode(cond), (addr & 0xFF), (addr >> 8));
 						codeline.SetCycles(10);
 						return true;
 					}
+					if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+					msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
-			if (GetIndHL(codeline)) {
+			// JP (HL)
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xE9);
 				codeline.SetCycles(4);
 				return true;
 			}
-			if (GetIndX(codeline, reg, addr)) {
-				codeline.AddCode(getprefix(reg), 0xE9);
+			// JP (X+d)
+			operr = optools.GetIndX(codeline, reg, addr);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(reg), 0xE9);
 				codeline.SetCycles(8);
 				return true;
 			}
 			// JP (IX) or (IY)
 			if (codeline.tokens[codeline.curtoken].type == tokenTypePAROPEN) {
 				codeline.curtoken += 1;
-				if (GetReg16(codeline, reg, REGFLAGS::XY)) {
+				operr = optools.GetReg16(codeline, reg, REGFLAGS::XY);
+				if (operr == operrOK) {
 					if (codeline.curtoken < codeline.tokens.size()) {
 						if (codeline.tokens[codeline.curtoken].type == tokenTypePARCLOSE) {
-							codeline.AddCode(getprefix(reg), 0xE9);
+							codeline.AddCode(optools.GetPrefix(reg), 0xE9);
 							codeline.SetCycles(8);
 							return true;
 						}
 					}
+					return msg.Error(errorMissingParenthesisClose, codeline);
 				}
+				return msg.Error(errorWrongOperand1, codeline);
 			}
-			if (GetNum16(codeline, addr)) {
+			// JP nn
+			operr = optools.GetNum16(codeline, addr);
+			if (operr == operrOK) {
 				codeline.AddCode(0xC3, (addr & 0xFF), (addr >> 8));
 				codeline.SetCycles(10);
 				return true;
 			}
-			return false;
+			if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -954,33 +1087,43 @@ namespace MUZ {
 		{
 			OperandType cond;
 			int d;
-			if (GetCond(codeline, cond)) {
+			// JR cond,nn
+			OperandError operr = optools.GetCond(codeline, cond);
+			if (operr == operrOK) {
 				if (cond == condZ || cond == condNZ || cond == condC || cond == condNC) {
 					if (GetComma(codeline)) {
-						if (GetNum16(codeline, d)) {
+						operr = optools.GetNum16(codeline, d);
+						if (operr == operrOK) {
 							int depl = codeline.as->GetAddress() + 2 - d;
 							if ( depl < -126 || depl > +129) {
-								// TODO: issue warning for target too far
+								msg.Warning(warningTooFar, codeline, 2);
 							}
 							depl = 0x100 - depl;
-							codeline.AddCode(0x20 + getsubcode(cond), depl);
+							codeline.AddCode(0x20 + optools.GetSubCode(cond), depl);
 							codeline.SetCycles(7,12);
 							return true;
 						}
+						if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+						return msg.Error(errorWrongOperand2, codeline);
 					}
+					return msg.Error(errorMissingComma, codeline);
 				}
+				return msg.Error(errorWrongCondition, codeline);
 			}
-			if (GetNum16(codeline, d)) {
+			// JR nn
+			operr = optools.GetNum16(codeline, d);
+			if (operr == operrOK) {
 				int depl = codeline.as->GetAddress() + 2 - d;
-				depl = 0x100 - depl; // 2-complement
 				if (depl < -126 || depl > +129) {
-					// TODO: issue warning for target too far
+					msg.Warning(warningTooFar, codeline, 2);
 				}
+				depl = 0x100 - depl; // 2-complement
 				codeline.AddCode(0x18, depl);
 				codeline.SetCycles(12);
 				return true;
 			}
-			return false;
+			if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 
 		/** Assemble LD instruction at current token, returns false if error
@@ -1034,24 +1177,30 @@ namespace MUZ {
 			OperandType src, dest;
 			int d;
 			// LD I/R,A
-			if (GetReg8(codeline, dest, REGFLAGS::I | REGFLAGS::R)) {
+			OperandError operr = optools.GetReg8(codeline, dest, REGFLAGS::I | REGFLAGS::R);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetReg8(codeline, src, REGFLAGS::A)) {
-						codeline.AddCode(0xED, 0x40 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::A);
+					if (operr == operrOK) {
+						codeline.AddCode(0xED, 0x40 + optools.GetSubCode(src));
 						codeline.SetCycles(9);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
+			
 			// LD SP,(nn) HL IX IY nn
-			if (GetReg16(codeline, dest, REGFLAGS::SP)) {
+			operr = optools.GetReg16(codeline, dest, REGFLAGS::SP);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// LD SP, HL IX IY
-					if (GetReg16(codeline, src, REGFLAGS::HLXY)) {
+					operr = optools.GetReg16(codeline, src, REGFLAGS::HLXY);
+					if (operr == operrOK) {
 						int cycles = 6;
 						if (src != regHL) {
-							codeline.AddCode(getprefix(src));
+							codeline.AddCode(optools.GetPrefix(src));
 							cycles = 10;
 						}
 						codeline.AddCode(0xF9);
@@ -1059,24 +1208,30 @@ namespace MUZ {
 						return true;
 					}
 					// LD SP,(nn)
-					if (GetInd16(codeline, d)) {
+					operr = optools.GetInd16(codeline, d);
+					if (operr == operrOK) {
 						codeline.AddCode(0xED, 0x7B, d & 0xFF, d >> 8);
 						codeline.SetCycles(20);
 						return true;
 					}
 					// LD SP,nn
-					if (GetNum16(codeline, d)) {
+					operr = optools.GetNum16(codeline, d);
+					if (operr == operrOK) {
 						codeline.AddCode(0x31, d & 0xFF, d >> 8);
 						codeline.SetCycles(10);
 						return true;
 					}
+					if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
 			// LD BC DE HL IX IY, (nn) nn
-			if (GetReg16(codeline, dest, REGFLAGS::BC | REGFLAGS::DE | REGFLAGS::HLXY)) {
+			operr = optools.GetReg16(codeline, dest, REGFLAGS::BC | REGFLAGS::DE | REGFLAGS::HLXY);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetInd16(codeline, d)) {
+					operr = optools.GetInd16(codeline, d);
+					if (operr == operrOK) {
 						// LD BC,(nn)  ED 4B nn nn
 						// LD DE,(nn)  ED 5B nn nn 
 						// LD HL,(nn)  2A nn nn
@@ -1093,14 +1248,15 @@ namespace MUZ {
 						}
 						int cycles  = 16;
 						if (dest != regHL) {
-							codeline.AddCode(getprefix(dest));
+							codeline.AddCode(optools.GetPrefix(dest));
 							cycles = 20;
 						}
 						codeline.AddCode(0x2A, d & 0xFF, d >> 8);
 						codeline.SetCycles(cycles);
 						return true;
 					}
-					if (GetNum16(codeline, d)) {
+					operr = optools.GetNum16(codeline, d);
+					if (operr == operrOK) {
 						// LD BC,nn  01 nn nn
 						// LD DE,nn  11 nn nn
 						// LD HL,nn  21 nn nn
@@ -1117,79 +1273,98 @@ namespace MUZ {
 						}
 						int cycles  = 10;
 						if (dest != regHL) {
-							codeline.AddCode(getprefix(dest));
+							codeline.AddCode(optools.GetPrefix(dest));
 							cycles = 14;
 						}
 						codeline.AddCode(0x21, d & 0xFF, d >> 8);
 						codeline.SetCycles(cycles);
 						return true;
 					}
+					if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
-			}
+				return msg.Error(errorMissingComma, codeline);
+				}
 			// LD (HL) , n r
-			if (GetIndHL(codeline)) {
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(0x70 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(0x70 + optools.GetSubCode(src));
 						codeline.SetCycles(7);
 						return true;
 					}
-					if (GetNum8(codeline, d)) {
+					operr = optools.GetNum8(codeline, d);
+					if (operr == operrOK) {
 						codeline.AddCode(0x36, d);
 						codeline.SetCycles(10);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
 			// LD (IX+d) (IY+d), n r
-			if (GetIndX(codeline, dest, d)) {
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(getprefix(dest), 0x70 + getsubcode(src), d);
+					operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0x70 + optools.GetSubCode(src), d);
 						codeline.SetCycles(7);
 						return true;
 					}
-					if (GetNum8(codeline, d)) {
-						codeline.AddCode(getprefix(dest), 0x36, d);
+					operr = optools.GetNum8(codeline, d);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0x36, d);
 						codeline.SetCycles(10);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
 			// LD (BC),A
-			if (GetIndBC(codeline)) {
+			operr = optools.GetIndBC(codeline);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetReg8(codeline, src, REGFLAGS::A)) {
+					operr = optools.GetReg8(codeline, src, REGFLAGS::A);
+					if (operr == operrOK) {
 						codeline.AddCode(0x02);
 						codeline.SetCycles(7);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
 			// LD (DE),A
-			if (GetIndDE(codeline)) {
+			operr = optools.GetIndDE(codeline);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetReg8(codeline, src, REGFLAGS::A)) {
+					operr = optools.GetReg8(codeline, src, REGFLAGS::A);
+					if (operr == operrOK) {
 						codeline.AddCode(0x12);
 						codeline.SetCycles(7);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
 			// LD (nn), A BC DE HL IX IY SP
-			if (GetInd16(codeline, d)) {
+			operr = optools.GetInd16(codeline, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetReg8(codeline, src, REGFLAGS::A)) {
+					operr = optools.GetReg8(codeline, src, REGFLAGS::A);
+					if (operr == operrOK) {
 						codeline.AddCode(0x32, d & 0xFF, d >> 8);
 						codeline.SetCycles(13);
 						return true;
 					}
-					if (GetReg16(codeline, src, REGFLAGS::BCDEHLSP | REGFLAGS::XY)) {
+					operr = optools.GetReg16(codeline, src, REGFLAGS::BCDEHLSP | REGFLAGS::XY);
+					if (operr == operrOK) {
 						if (src == regBC) {
 							codeline.AddCode(0xED, 0x43, d & 0xFF, d >> 8);
 							codeline.SetCycles(20);
@@ -1208,138 +1383,161 @@ namespace MUZ {
 						// HL, IX, IY
 						int cycles = 16;
 						if (src == regIX || src == regIY) {
-							codeline.AddCode(getprefix(src));
+							codeline.AddCode(optools.GetPrefix(src));
 							cycles = 20;
 						}
 						codeline.AddCode(0x22, d & 0xFF, d >> 8);
 						codeline.SetCycles(cycles);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
 			// LD A, (BC) (DE) (HL) (IX+d) (IY+d) n A B C D E H L I R
-			if (GetReg8(codeline, dest, REGFLAGS::A)) {
+			operr = optools.GetReg8(codeline, dest, REGFLAGS::A);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// LD A,I R
-					if (GetReg8(codeline, src, REGFLAGS::I | REGFLAGS::R)) {
-						codeline.AddCode(0xED, 0x50 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::I | REGFLAGS::R);
+					if (operr == operrOK) {
+						codeline.AddCode(0xED, 0x50 + optools.GetSubCode(src));
 						codeline.SetCycles(9);
 						return true;
 					}
 					// LD A, r
-					if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(0x78 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(0x78 + optools.GetSubCode(src));
 						codeline.SetCycles(4);
 						return true;
 					}
 					// LD A,undoc
-					if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-						codeline.AddCode(getprefix(src), 0x78 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0x78 + optools.GetSubCode(src));
 						codeline.SetCycles(8);
 						return true;
 					}
 					// LD A,(HL)
-					if (GetIndHL(codeline)) {
+					operr = optools.GetIndHL(codeline);
+					if (operr == operrOK) {
 						codeline.AddCode(0x7E);
 						codeline.SetCycles(7);
 						return true;
 					}
 					// LD A,(BC)
-					if (GetIndBC(codeline)) {
+					operr = optools.GetIndBC(codeline);
+					if (operr == operrOK) {
 						codeline.AddCode(0x0A);
 						codeline.SetCycles(7);
 						return true;
 					}
 					// LD A,(DE)
-					if (GetIndDE(codeline)) {
+					operr = optools.GetIndDE(codeline);
+					if (operr == operrOK) {
 						codeline.AddCode(0x1A);
 						codeline.SetCycles(7);
 						return true;
 					}
 					// LD A,(X+d)
-					if (GetIndX(codeline, src, d)) {
-						codeline.AddCode(getprefix(src), 0x7E, d);
+					operr = optools.GetIndX(codeline, src, d);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0x7E, d);
 						codeline.SetCycles(19);
 						return true;
 					}
 					// LD A,(nn)
-					if (GetInd16(codeline, d)) {
+					operr = optools.GetInd16(codeline, d);
+					if (operr == operrOK) {
 						codeline.AddCode(0x3A, d & 0xFF, d >> 8);
 						codeline.SetCycles(13);
 						return true;
 					}
 					// LD A,n
-					if (GetNum8(codeline, d)) {
+					operr = optools.GetNum8(codeline, d);
+					if (operr == operrOK) {
 						codeline.AddCode(0x3E, d);
 						codeline.SetCycles(7);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
 			// LD r,r (HL) (X+d) n
-			if (GetReg8(codeline, dest, REGFLAGS::ABCDEHL)) {
+			operr = optools.GetReg8(codeline, dest, REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// LD r,r
-					if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(0x40 + 8 * getsubcode(dest) + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(0x40 + 8 * optools.GetSubCode(dest) + optools.GetSubCode(src));
 						codeline.SetCycles(4);
 						return true;
 					}
 					// LD r,undoc
-					if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-						codeline.AddCode(getprefix(src), 0x40 + 8 * getsubcode(dest) + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0x40 + 8 * optools.GetSubCode(dest) + optools.GetSubCode(src));
 						codeline.SetCycles(8);
 						return true;
 					}
 					// LD r,(HL)
-					if (GetIndHL(codeline)) {
-						codeline.AddCode(0x46 + 8 * getsubcode(dest));
+					operr = optools.GetIndHL(codeline);
+					if (operr == operrOK) {
+						codeline.AddCode(0x46 + 8 * optools.GetSubCode(dest));
 						codeline.SetCycles(7);
 						return true;
 					}
 					// LD r,(x+d)
-					if (GetIndX(codeline, src, d)) {
-						codeline.AddCode(getprefix(src), 0x46 + 8 * getsubcode(dest), d );
+					operr = optools.GetIndX(codeline, src, d);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0x46 + 8 * optools.GetSubCode(dest), d );
 						codeline.SetCycles(19);
 						return true;
 					}
 					// LD r,n
-					if (GetNum8(codeline, d)) {
-						codeline.AddCode(0x06 + 8 * getsubcode(dest), d);
+					operr = optools.GetNum8(codeline, d);
+					if (operr == operrOK) {
+						codeline.AddCode(0x06 + 8 * optools.GetSubCode(dest), d);
 						codeline.SetCycles(7);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
 			// LD undoc,r n
-			if (GetReg8(codeline, dest, REGFLAGS::UNDOC)) {
+			operr = optools.GetReg8(codeline, dest, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// LD undoc,r
-					if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(getprefix(dest), 0x40 + 8 * getsubcode(dest) + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0x40 + 8 * optools.GetSubCode(dest) + optools.GetSubCode(src));
 						codeline.SetCycles(8);
 						return true;
 					}
 					// LD undoc,undoc
-					if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-						codeline.AddCode(getprefix(dest), 0x40 + 8 * getsubcode(dest) + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0x40 + 8 * optools.GetSubCode(dest) + optools.GetSubCode(src));
 						codeline.SetCycles(8);
 						return true;
 					}
 					// LD undoc,n
-					if (GetNum8(codeline, d)) {
-						codeline.AddCode(getprefix(dest), 0x06 + 8 * getsubcode(dest), d);
+					operr = optools.GetNum8(codeline, d);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0x06 + 8 * optools.GetSubCode(dest), d);
 						codeline.SetCycles(11);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
-
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 
 		/** Assemble instruction at current token, returns false if error
@@ -1421,74 +1619,85 @@ namespace MUZ {
 			int d;
 			// save current position
 			int curtoken = codeline.curtoken;
-			if (GetReg8(codeline, src, REGFLAGS::A)) {
+			OperandError operr = optools.GetReg8(codeline, src, REGFLAGS::A);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// OR A,r
-					if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(0xB0 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(0xB0 + optools.GetSubCode(src));
 						codeline.SetCycles(4);
 						return true;
 					}
 					// OR A,undoc
-					if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-						codeline.AddCode(getprefix(src), 0xB0 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0xB0 + optools.GetSubCode(src));
 						codeline.SetCycles(8);
 						return true;
 					}
 					// OR A,(HL)
-					if (GetIndHL(codeline)) {
+					operr = optools.GetIndHL(codeline);
+					if (operr == operrOK) {
 						codeline.AddCode(0xB6);
 						codeline.SetCycles(7);
 						return true;
 					}
 					// OR A,(X+d)
-					if (GetIndX(codeline, src, d)) {
-						codeline.AddCode(getprefix(src), 0xB6, d);
+					operr = optools.GetIndX(codeline, src, d);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0xB6, d);
 						codeline.SetCycles(19);
 						return true;
 					}
 					// OR A,n
-					if (GetNum8(codeline, d)) {
+					operr = optools.GetNum8(codeline, d);
+					if (operr == operrOK) {
 						codeline.AddCode(0xF6, d);
 						codeline.SetCycles(7);
 						return true;
 					}
-					return false;
+					return msg.Error(errorWrongOperand2, codeline);
 				}
 				// restore initial position
 				codeline.curtoken = curtoken;
 			}
 			// OR r
-			if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xB0 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xB0 + optools.GetSubCode(src));
 				codeline.SetCycles(4);
 				return true;
 			}
 			// OR undoc
-			if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(src), 0xB0 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0xB0 + optools.GetSubCode(src));
 				codeline.SetCycles(8);
 				return true;
 			}
 			// OR (HL)
-			if (GetIndHL(codeline)) {
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xB6);
 				codeline.SetCycles(7);
 				return true;
 			}
 			// OR (X+d)
-			if (GetIndX(codeline, src, d)) {
-				codeline.AddCode(getprefix(src), 0xB6, d);
+			operr = optools.GetIndX(codeline, src, d);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0xB6, d);
 				codeline.SetCycles(19);
 				return true;
 			}
 			// OR n
-			if (GetNum8(codeline, d)) {
+			operr = optools.GetNum8(codeline, d);
+			if (operr == operrOK) {
 				codeline.AddCode(0xF6, d);
 				codeline.SetCycles(7);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -1524,34 +1733,42 @@ namespace MUZ {
 		{
 			OperandType src;
 			int n;
-			if (GetIndC(codeline)) {
+			OperandError operr = optools.GetIndC(codeline);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// OUT (C),r
-					if (GetReg8(codeline, src,REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(0xED, 0x41 + getsubcode(src) * 8);
+					operr = optools.GetReg8(codeline, src,REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(0xED, 0x41 + optools.GetSubCode(src) * 8);
 						codeline.SetCycles(12);
 						return true;
 					}
 					// OUT (C),0 (undoc)
-					if (GetNum8(codeline, n)) {
+					operr = optools.GetNum8(codeline, n);
+					if (operr == operrOK)  {
 						if (n == 0) {
 							codeline.AddCode(0xED, 0x71);
 							codeline.SetCycles(12);
 						}
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				return false;
+				return msg.Error(errorMissingComma, codeline);
 			}
-			if (GetInd16(codeline, n)) {
+			operr = optools.GetInd16(codeline, n);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
-					if (GetReg8(codeline, src,REGFLAGS::A)) {
+					operr = optools.GetReg8(codeline, src,REGFLAGS::A);
+					if (operr == operrOK) {
 						codeline.AddCode(0xD3, n);
 						codeline.SetCycles(11);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
+				return msg.Error(errorMissingComma, codeline);
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -1583,17 +1800,18 @@ namespace MUZ {
 		bool InstructionPOP::Assemble(CodeLine& codeline, ErrorList& msg)
 		{
 			OperandType dest;
-			if (GetReg16(codeline, dest,REGFLAGS::AF|REGFLAGS::BC|REGFLAGS::DE|REGFLAGS::HLXY)) {
+			OperandError operr = optools.GetReg16(codeline, dest,REGFLAGS::AF|REGFLAGS::BC|REGFLAGS::DE|REGFLAGS::HLXY);
+			if (operr == operrOK) {
 				codeline.SetCycles(10);
 				if (dest == regIX || dest == regIY) {
-					codeline.AddCode(getprefix(dest));
+					codeline.AddCode(optools.GetPrefix(dest));
 					dest = regHL;
 					codeline.SetCycles(14);
 				}
-				codeline.AddCode(0xC1 + getsubcode(dest));
+				codeline.AddCode(0xC1 + optools.GetSubCode(dest));
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -1603,17 +1821,18 @@ namespace MUZ {
 		bool InstructionPUSH::Assemble(CodeLine& codeline, ErrorList& msg)
 		{
 			OperandType dest;
-			if (GetReg16(codeline, dest,REGFLAGS::AF|REGFLAGS::BC|REGFLAGS::DE|REGFLAGS::HLXY)) {
+			OperandError operr = optools.GetReg16(codeline, dest,REGFLAGS::AF|REGFLAGS::BC|REGFLAGS::DE|REGFLAGS::HLXY);
+			if (operr == operrOK) {
 				codeline.SetCycles(11);
 				if (dest == regIX || dest == regIY) {
-					codeline.AddCode(getprefix(dest));
+					codeline.AddCode(optools.GetPrefix(dest));
 					dest = regHL;
 					codeline.SetCycles(15);
 				}
-				codeline.AddCode(0xC5 + getsubcode(dest));
+				codeline.AddCode(0xC5 + optools.GetSubCode(dest));
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 
 		/** Assemble instruction at current token, returns false if error
@@ -1624,28 +1843,38 @@ namespace MUZ {
 		{
 			int d=0;
 			OperandType src, bit, reg;
-			if (!GetBitNumber(codeline, bit)) return false;
-			if (!GetComma(codeline)) return false;
-			if (GetReg8(codeline, src,REGFLAGS::ABCDEHL)) {
+			OperandError operr = optools.GetBitNumber(codeline, bit);
+			if (operr != operrOK) {
+				if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+				return msg.Error(errorTooBigBit, codeline, 2);
+			}
+			if (!GetComma(codeline))return msg.Error(errorMissingComma, codeline);
+			operr = optools.GetReg8(codeline, src,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
 				codeline.SetCycles(8);
-			} else if (GetIndHL(codeline)) {
+			} else if (operrOK == optools.GetIndHL(codeline)) {
 				codeline.SetCycles(15);
 				src = indHL;
-			} else if (GetIndX(codeline, src, d)) {
+			} else if (operrOK == optools.GetIndX(codeline, src, d)) {
 				codeline.SetCycles(23);
 				if (GetComma(codeline)) {
 					// RES bit,(X+d),reg  (undoc)
-					if (GetReg8(codeline, reg, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(getprefix(src), 0xCB, d, 0x80 + getsubcode(bit) + getsubcode(reg));
+					operr = optools.GetReg8(codeline, reg, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0xCB, d, 0x80 + optools.GetSubCode(bit) + optools.GetSubCode(reg));
 						return true;
 					}
+					return msg.Error(errorWrongOperand3, codeline);
 				}
-			} else return false;
-			// (IX+d) and (IY+d) are prefixed then use (HL) encoding
-			if (RegAccept(REGFLAGS::XY, src)) {
-				codeline.AddCode(getprefix(src), 0xCB, d, 0x80 + getsubcode(bit) + getsubcode(indHL));
+				return msg.Error(errorMissingComma, codeline);
 			} else {
-				codeline.AddCode(0xCB, 0x80 + getsubcode(bit) + getsubcode(src));
+				return msg.Error(errorWrongOperand2, codeline);
+			}
+			// (IX+d) and (IY+d) are prefixed then use (HL) encoding
+			if (optools.RegAccept(REGFLAGS::XY, src)) {
+				codeline.AddCode(optools.GetPrefix(src), 0xCB, d, 0x80 + optools.GetSubCode(bit) + optools.GetSubCode(indHL));
+			} else {
+				codeline.AddCode(0xCB, 0x80 + optools.GetSubCode(bit) + optools.GetSubCode(src));
 			}
 			return true;
 		}
@@ -1657,8 +1886,9 @@ namespace MUZ {
 		bool InstructionRET::Assemble(CodeLine& codeline, ErrorList& msg)
 		{
 			OperandType cond;
-			if (GetCond(codeline, cond)) {
-				codeline.AddCode(0xC0 + getsubcode(cond));
+			OperandError operr = optools.GetCond(codeline, cond);
+			if (operr == operrOK) {
+				codeline.AddCode(0xC0 + optools.GetSubCode(cond));
 				codeline.SetCycles(5,11);
 				return true;
 			}
@@ -1699,30 +1929,35 @@ namespace MUZ {
 		{
 			OperandType src,dest;
 			int d;
-			if (GetIndHL(codeline)) {
+			OperandError operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xCB, 0x16);
 				codeline.SetCycles(15);
 				return true;
 			}
-			if (GetIndX(codeline, dest, d)) {
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// RL (X+d),r (undoc)
-					if (GetReg8(codeline, src)) {
-						codeline.AddCode(getprefix(dest), 0xCB, d, 0x10 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x10 + optools.GetSubCode(src));
 						codeline.SetCycles(23);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				codeline.AddCode(getprefix(dest), 0xCB, d, 0x16);
+				codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x16);
 				codeline.SetCycles(23);
 				return true;
 			}
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xCB, 0x10 + getsubcode(dest));
+			operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xCB, 0x10 + optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -1745,30 +1980,35 @@ namespace MUZ {
 		{
 			OperandType src,dest;
 			int d;
-			if (GetIndHL(codeline)) {
+			OperandError operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xCB, 0x06);
 				codeline.SetCycles(15);
 				return true;
 			}
-			if (GetIndX(codeline, dest, d)) {
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// RLC (X+d),r (undoc)
-					if (GetReg8(codeline, src)) {
-						codeline.AddCode(getprefix(dest), 0xCB, d, 0x00 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x00 + optools.GetSubCode(src));
 						codeline.SetCycles(23);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				codeline.AddCode(getprefix(dest), 0xCB, d, 0x06);
+				codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x06);
 				codeline.SetCycles(23);
 				return true;
 			}
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xCB, 0x00 + getsubcode(dest));
+			operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xCB, 0x00 + optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -1801,30 +2041,35 @@ namespace MUZ {
 		{
 			OperandType src,dest;
 			int d;
-			if (GetIndHL(codeline)) {
+			OperandError operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xCB, 0x1E);
 				codeline.SetCycles(15);
 				return true;
 			}
-			if (GetIndX(codeline, dest, d)) {
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// RR (X+d),r (undoc)
-					if (GetReg8(codeline, src)) {
-						codeline.AddCode(getprefix(dest), 0xCB, d, 0x18 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x18 + optools.GetSubCode(src));
 						codeline.SetCycles(23);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				codeline.AddCode(getprefix(dest), 0xCB, d, 0x1E);
+				codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x1E);
 				codeline.SetCycles(23);
 				return true;
 			}
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xCB, 0x18 + getsubcode(dest));
+			operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xCB, 0x18 + optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -1846,30 +2091,34 @@ namespace MUZ {
 		{
 			OperandType src, dest;
 			int d;
-			if (GetIndHL(codeline)) {
+			OperandError operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xCB, 0x0E);
 				codeline.SetCycles(15);
 				return true;
 			}
-			if (GetIndX(codeline, dest, d)) {
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// RRC (X+d),r (undoc)
-					if (GetReg8(codeline, src)) {
-						codeline.AddCode(getprefix(dest), 0xCB, d, 0x08 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x08 + optools.GetSubCode(src));
 						codeline.SetCycles(23);
 						return true;
 					}
 				}
-				codeline.AddCode(getprefix(dest), 0xCB, d, 0x0E);
+				codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x0E);
 				codeline.SetCycles(23);
 				return true;
 			}
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xCB, 0x08 + getsubcode(dest));
+			operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xCB, 0x08 + optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -1901,14 +2150,15 @@ namespace MUZ {
 		bool InstructionRST::Assemble(CodeLine& codeline, ErrorList& msg)
 		{
 			int addr;
-			if (GetNum8(codeline, addr)) {
+			OperandError operr = optools.GetNum8(codeline, addr);
+			if (operr == operrOK) {
 				if (addr <= 0x38 && addr % 8 == 0) {
 					codeline.AddCode(0xC7 + addr);
 					codeline.SetCycles(11);
 					return true;
 				}
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -1926,96 +2176,102 @@ namespace MUZ {
 			// save current position
 			int curtoken = codeline.curtoken;
 			// SBC A, 8 bit
-			if (GetReg8(codeline, dest,REGFLAGS::A)) {
+			OperandError operr = optools.GetReg8(codeline, dest,REGFLAGS::A);
+			if (operr == operrOK) {
 				if (!GetComma(codeline)) {
 					// SBC A
-					codeline.AddCode(0x98 + getsubcode(regA));
+					codeline.AddCode(0x98 + optools.GetSubCode(regA));
 					codeline.SetCycles(4);
 					return true;
 				}
 				// SBC A,r
-				if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-					codeline.AddCode(0x98 + getsubcode(src));
+				operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+				if (operr == operrOK) {
+					codeline.AddCode(0x98 + optools.GetSubCode(src));
 					codeline.SetCycles(4);
 					return true;
 				}
 				// SBC A,undoc
-				if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-					codeline.AddCode(getprefix(src), 0x98 + getsubcode(src));
+				operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+				if (operr == operrOK) {
+					codeline.AddCode(optools.GetPrefix(src), 0x98 + optools.GetSubCode(src));
 					codeline.SetCycles(8);
 					return true;
 				}
 				// SBC A,(HL)
-				if (GetIndHL(codeline)) {
+				operr = optools.GetIndHL(codeline);
+				if (operr == operrOK) {
 					codeline.AddCode(0x9E);
 					codeline.SetCycles(7);
 					return true;
 				}
 				// SBC A,(X+d)
-				if (GetIndX(codeline, src, d)) {
-					codeline.AddCode(getprefix(src), 0x9E, d);
+				operr = optools.GetIndX(codeline, src, d);
+				if (operr == operrOK) {
+					codeline.AddCode(optools.GetPrefix(src), 0x9E, d);
 					codeline.SetCycles(19);
 					return true;
 				}
 				// SBC A,n
-				if (GetNum8(codeline, d)) {
+				operr = optools.GetNum8(codeline, d);
+				if (operr == operrOK) {
 					codeline.AddCode(0xDE, d);
 					codeline.SetCycles(7);
 					return true;
 				}
-				// TODO: ADD A,IXL IXH IYL IYH
-				return false;
+				return msg.Error(errorWrongOperand2, codeline);
 			}
 			// SBC 16 bits
-			if (GetReg16(codeline, dest,REGFLAGS::HL)) {
-				if (!GetComma(codeline)) {
-					return false;//TODO: syntax after SBC HL
-				}
+			operr = optools.GetReg16(codeline, dest,REGFLAGS::HL);
+			if (operr == operrOK) {
+				if (!GetComma(codeline)) return msg.Error(errorMissingComma, codeline);
 				// SBC HL, BC DE HL SP
-				if (GetReg16(codeline, src,REGFLAGS::BCDESP | REGFLAGS::HL)) {
-					codeline.AddCode(0xED, 0x42 + getsubcode(src));
+				operr = optools.GetReg16(codeline, src,REGFLAGS::BCDESP | REGFLAGS::HL);
+				if (operr == operrOK) {
+					codeline.AddCode(0xED, 0x42 + optools.GetSubCode(src));
 					codeline.SetCycles(15);
 					return true;
 				}
-				return false;
+				return msg.Error(errorWrongOperand2, codeline);
 			}
 			// restore initial position
-			codeline.curtoken = curtoken;//TODO: not needed?
+			codeline.curtoken = curtoken;// not needed?
 			// SBC r
-			if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
-				codeline.AddCode(0x98 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0x98 + optools.GetSubCode(src));
 				codeline.SetCycles(4);
 				return true;
 			}
 			// SBC undoc
-			if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(src), 0x98 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0x98 + optools.GetSubCode(src));
 				codeline.SetCycles(8);
 				return true;
 			}
 			// SBC (HL)
-			if (GetIndHL(codeline)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0x9E);
 				codeline.SetCycles(7);
 				return true;
 			}
 			// SBC (X+d)
-			if (GetIndX(codeline, src, d)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
-				codeline.AddCode(getprefix(src), 0x9E, d);
+			operr = optools.GetIndX(codeline, src, d);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0x9E, d);
 				codeline.SetCycles(19);
 				return true;
 			}
 			// SBC n
-			if (GetNum8(codeline, d)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
+			operr = optools.GetNum8(codeline, d);
+			if (operr == operrOK) {
 				codeline.AddCode(0xDE, d);
 				codeline.SetCycles(7);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -2040,28 +2296,37 @@ namespace MUZ {
 		{
 			int d=0;
 			OperandType src, bit, reg;
-			if (!GetBitNumber(codeline, bit)) return false;
-			if (!GetComma(codeline)) return false;
-			if (GetReg8(codeline, src,REGFLAGS::ABCDEHL)) {
+			OperandError operr = optools.GetBitNumber(codeline, bit);
+			if (operr != operrOK) {
+				if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
+				return msg.Error(errorTooBigBit, codeline, 2);
+			}
+			if (!GetComma(codeline))return msg.Error(errorMissingComma, codeline);
+			if (operrOK == optools.GetReg8(codeline, src,REGFLAGS::ABCDEHL)) {
 				codeline.SetCycles(8);
-			} else if (GetIndHL(codeline)) {
+			} else if (operrOK == optools.GetIndHL(codeline)) {
 				codeline.SetCycles(15);
 				src = indHL;
-			} else if (GetIndX(codeline, src, d)) {
+			} else if (operrOK == optools.GetIndX(codeline, src, d)) {
 				codeline.SetCycles(23);
 				if (GetComma(codeline)) {
 					// SET bit,(X+d),reg  (undoc)
-					if (GetReg8(codeline, reg, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(getprefix(src), 0xCB, d, 0xC0 + getsubcode(bit) + getsubcode(reg));
+					operr = optools.GetReg8(codeline, reg, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0xCB, d, 0xC0 + optools.GetSubCode(bit) + optools.GetSubCode(reg));
 						return true;
 					}
+					return msg.Error(errorWrongOperand3, codeline);
 				}
-			} else return false;
-			// (IX+d) and (IY+d) are prefixed then use (HL) encoding
-			if (RegAccept(REGFLAGS::XY, src)) {
-				codeline.AddCode(getprefix(src), 0xCB, d, 0xC0 + getsubcode(bit) + getsubcode(indHL));
+				return msg.Error(errorMissingComma, codeline);
 			} else {
-				codeline.AddCode(0xCB, 0xC0 + getsubcode(bit) + getsubcode(src));
+				return msg.Error(errorWrongOperand2, codeline);
+			}
+			// (IX+d) and (IY+d) are prefixed then use (HL) encoding
+			if (optools.RegAccept(REGFLAGS::XY, src)) {
+				codeline.AddCode(optools.GetPrefix(src), 0xCB, d, 0xC0 + optools.GetSubCode(bit) + optools.GetSubCode(indHL));
+			} else {
+				codeline.AddCode(0xCB, 0xC0 + optools.GetSubCode(bit) + optools.GetSubCode(src));
 			}
 			return true;
 		}
@@ -2077,31 +2342,36 @@ namespace MUZ {
 			OperandType src, dest;
 			int d;
 			// SLA (HL)
-			if (GetIndHL(codeline)) {
+			OperandError operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xCB, 0x26);
 				codeline.SetCycles(15);
 				return true;
 			}
 			// SLA (X+d)
-			if (GetIndX(codeline, dest, d)) {
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// SLA (X+d),r (undoc)
-					if (GetReg8(codeline, src)) {
-						codeline.AddCode(getprefix(dest), 0xCB, d, 0x20 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x20 + optools.GetSubCode(src));
 						codeline.SetCycles(23);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				codeline.AddCode(getprefix(dest), 0xCB, d, 0x26);
+				codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x26);
 				codeline.SetCycles(23);
 				return true;
 			}
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xCB, 0x20 + getsubcode(dest));
+			operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xCB, 0x20 + optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 
 		/** Assemble instruction at current token, returns false if error
@@ -2115,31 +2385,36 @@ namespace MUZ {
 			OperandType src, dest;
 			int d;
 			// SLL(HL)
-			if (GetIndHL(codeline)) {
+			OperandError operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xCB, 0x36);
 				codeline.SetCycles(15);
 				return true;
 			}
 			// SLL (X+d)
-			if (GetIndX(codeline, dest, d)) {
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// SLL (X+d),r (undoc)
-					if (GetReg8(codeline, src)) {
-						codeline.AddCode(getprefix(dest), 0xCB, d, 0x30 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x30 + optools.GetSubCode(src));
 						codeline.SetCycles(23);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				codeline.AddCode(getprefix(dest), 0xCB, d, 0x36);
+				codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x36);
 				codeline.SetCycles(23);
 				return true;
 			}
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xCB, 0x30 + getsubcode(dest));
+			operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xCB, 0x30 + optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		/** Assemble instruction at current token, returns false if error
 		 SRA r
@@ -2151,30 +2426,35 @@ namespace MUZ {
 		{
 			OperandType src,dest;
 			int d;
-			if (GetIndHL(codeline)) {
+			OperandError operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xCB, 0x2E);
 				codeline.SetCycles(15);
 				return true;
 			}
-			if (GetIndX(codeline, dest, d)) {
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// SRA (X+d),r (undoc)
-					if (GetReg8(codeline, src)) {
-						codeline.AddCode(getprefix(dest), 0xCB, d, 0x28 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x28 + optools.GetSubCode(src));
 						codeline.SetCycles(23);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				codeline.AddCode(getprefix(dest), 0xCB, d, 0x2E);
+				codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x2E);
 				codeline.SetCycles(23);
 				return true;
 			}
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xCB, 0x28 + getsubcode(dest));
+			operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xCB, 0x28 + optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -2188,32 +2468,37 @@ namespace MUZ {
 			OperandType src,dest;
 			int d;
 			// SRL (HL)
-			if (GetIndHL(codeline)) {
+			OperandError operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xCB, 0x3E);
 				codeline.SetCycles(15);
 				return true;
 			}
 			// SRL (X+d)
-			if (GetIndX(codeline, dest, d)) {
+			operr = optools.GetIndX(codeline, dest, d);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// SRL (X+d),r (undoc)
-					if (GetReg8(codeline, src)) {
-						codeline.AddCode(getprefix(dest), 0xCB, d, 0x38 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x38 + optools.GetSubCode(src));
 						codeline.SetCycles(23);
 						return true;
 					}
+					return msg.Error(errorWrongOperand2, codeline);
 				}
-				codeline.AddCode(getprefix(dest), 0xCB, d, 0x3E);
+				codeline.AddCode(optools.GetPrefix(dest), 0xCB, d, 0x3E);
 				codeline.SetCycles(23);
 				return true;
 			}
 			// SRL r
-			if (GetReg8(codeline, dest,REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xCB, 0x38 + getsubcode(dest));
+			operr = optools.GetReg8(codeline, dest,REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xCB, 0x38 + optools.GetSubCode(dest));
 				codeline.SetCycles(8);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 		/** Assemble instruction at current token, returns false if error
@@ -2225,80 +2510,88 @@ namespace MUZ {
 			OperandType src;
 			int d;
 			// SUB (HL)
-			if (GetIndHL(codeline)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
+			OperandError operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0x96);
 				codeline.SetCycles(7);
 				return true;
 			}
 			// SUB (X+d)
-			if (GetIndX(codeline, src, d)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
-				codeline.AddCode(getprefix(src), 0x96, d);
+			operr = optools.GetIndX(codeline, src, d);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0x96, d);
 				codeline.SetCycles(19);
 				return true;
 			}
 			// save current position
 			int curtoken = codeline.curtoken;
 			// SUB A, ...
-			if (GetReg8(codeline, src,REGFLAGS::A)) {
+			operr = optools.GetReg8(codeline, src,REGFLAGS::A);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// SUB A,r
-					if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(0x90 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(0x90 + optools.GetSubCode(src));
 						codeline.SetCycles(4);
 						return true;
 					}
 					// SUB A,undoc
-					if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-						codeline.AddCode(getprefix(src), 0x90 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0x90 + optools.GetSubCode(src));
 						codeline.SetCycles(8);
 						return true;
 					}
 					// SUB A,(HL)
-					if (GetIndHL(codeline)) {
+					operr = optools.GetIndHL(codeline);
+					if (operr == operrOK) {
 						codeline.AddCode(0x96);
 						codeline.SetCycles(7);
 						return true;
 					}
 					// SUB A, (X+d)
-					if (GetIndX(codeline, src, d)) {
-						codeline.AddCode(getprefix(src), 0x96, d);
+					operr = optools.GetIndX(codeline, src, d);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0x96, d);
 						codeline.SetCycles(19);
 						return true;
 					}
 					// SUB A, n
-					if (GetNum8(codeline, d)) {
-						if (GetComma(codeline)) return false;//TODO: return an error
+					operr = optools.GetNum8(codeline, d);
+					if (operr == operrOK) {
+						if (GetComma(codeline)) return msg.Error(errorWrongComma, codeline);
 						codeline.AddCode(0xD6, d);
 						codeline.SetCycles(7);
 						return true;
 					}
-					return false;
+					return msg.Error(errorWrongOperand2, codeline);
 				}
 				// restore initial position
 				codeline.curtoken = curtoken;
 			}
 			// SUB r
-			if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0x90 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0x90 + optools.GetSubCode(src));
 				codeline.SetCycles(4);
 				return true;
 			}
 			// SUB undoc
-			if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(src), 0x90 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0x90 + optools.GetSubCode(src));
 				codeline.SetCycles(8);
 				return true;
 			}
 			// SUB n
-			if (GetNum8(codeline, d)) {
-				if (GetComma(codeline)) return false;//TODO: return an error
+			operr = optools.GetNum8(codeline, d);
+			if (operr == operrOK)  {
 				codeline.AddCode(0xD6, d);
 				codeline.SetCycles(7);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 		
 
@@ -2312,74 +2605,85 @@ namespace MUZ {
 			int d;
 			// save current position
 			int curtoken = codeline.curtoken;
-			if (GetReg8(codeline, src,REGFLAGS::A)) {
+			OperandError operr = optools.GetReg8(codeline, src,REGFLAGS::A);
+			if (operr == operrOK) {
 				if (GetComma(codeline)) {
 					// XOR A,r
-					if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-						codeline.AddCode(0xA8 + getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+					if (operr == operrOK) {
+						codeline.AddCode(0xA8 + optools.GetSubCode(src));
 						codeline.SetCycles(4);
 						return true;
 					}
 					// XOR A,undoc
-					if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-						codeline.AddCode(getprefix(src), 0xA8+ getsubcode(src));
+					operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0xA8+ optools.GetSubCode(src));
 						codeline.SetCycles(8);
 						return true;
 					}
 					// XOR A,(HL)
-					if (GetIndHL(codeline)) {
+					operr = optools.GetIndHL(codeline);
+					if (operr == operrOK) {
 						codeline.AddCode(0xAE);
 						codeline.SetCycles(7);
 						return true;
 					}
 					// XOR A,(X+d)
-					if (GetIndX(codeline, src, d)) {
-						codeline.AddCode(getprefix(src), 0xAE, d);
+					operr = optools.GetIndX(codeline, src, d);
+					if (operr == operrOK) {
+						codeline.AddCode(optools.GetPrefix(src), 0xAE, d);
 						codeline.SetCycles(19);
 						return true;
 					}
 					// XOR A,n
-					if (GetNum8(codeline, d)) {
+					operr = optools.GetNum8(codeline, d);
+					if (operr == operrOK) {
 						codeline.AddCode(0xEE, d);
 						codeline.SetCycles(7);
 						return true;
 					}
-					return false;
+					return msg.Error(errorWrongOperand2, codeline);
 				}
 				// restore initial position
 				codeline.curtoken = curtoken;
 			}
 			// XOR r
-			if (GetReg8(codeline, src, REGFLAGS::ABCDEHL)) {
-				codeline.AddCode(0xA8 + getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::ABCDEHL);
+			if (operr == operrOK) {
+				codeline.AddCode(0xA8 + optools.GetSubCode(src));
 				codeline.SetCycles(4);
 				return true;
 			}
 			// XOR undoc
-			if (GetReg8(codeline, src, REGFLAGS::UNDOC)) {
-				codeline.AddCode(getprefix(src), 0xA8+ getsubcode(src));
+			operr = optools.GetReg8(codeline, src, REGFLAGS::UNDOC);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0xA8+ optools.GetSubCode(src));
 				codeline.SetCycles(8);
 				return true;
 			}
-			// XOR A,(HL)
-			if (GetIndHL(codeline)) {
+			// XOR (HL)
+			operr = optools.GetIndHL(codeline);
+			if (operr == operrOK) {
 				codeline.AddCode(0xAE);
 				codeline.SetCycles(7);
 				return true;
 			}
-			// XOR A,(X+d)
-			if (GetIndX(codeline, src, d)) {
-				codeline.AddCode(getprefix(src), 0xAE, d);
+			// XOR (X+d)
+			operr = optools.GetIndX(codeline, src, d);
+			if (operr == operrOK) {
+				codeline.AddCode(optools.GetPrefix(src), 0xAE, d);
 				codeline.SetCycles(19);
 				return true;
 			}
-			// XOR A,n
-			if (GetNum8(codeline, d)) {
+			// XOR n
+			operr = optools.GetNum8(codeline, d);
+			if (operr == operrOK) {
 				codeline.AddCode(0xEE, d);
 				codeline.SetCycles(7);
 				return true;
 			}
-			return false;
+			return msg.Error(errorWrongOperand1, codeline);
 		}
 	} // namespace Z80
 } // namespace MUZ

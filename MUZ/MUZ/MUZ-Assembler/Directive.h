@@ -34,8 +34,7 @@ namespace MUZ {
 						   class CodeLine& codeline,
 						   class Label* label,				// nullptr or label found in line
 						   ErrorList& msg) {
-			ErrorMessage m = { errorTypeERROR, errorNonDerivedDirective, &codeline};
-			msg.push_back(m);
+			msg.Error(errorNonDerivedDirective, codeline);
 			return true;
 		}
 	};

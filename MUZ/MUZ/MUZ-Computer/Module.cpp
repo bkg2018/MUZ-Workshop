@@ -9,13 +9,10 @@
 
 namespace MUZ {
 
-Module::Module() {
-	// TODO Auto-generated constructor stub
+	Module::Module() {
+	}
 
-}
-
-Module::~Module() {
-	// TODO Auto-generated destructor stub
-}
+	Module::~Module() {
+	}
 
 }

@@ -9,13 +9,10 @@
 
 namespace MUZ {
 
-ROMPagingPort::ROMPagingPort() {
-	// TODO Auto-generated constructor stub
+	ROMPagingPort::ROMPagingPort() {
+	}
 
-}
-
-ROMPagingPort::~ROMPagingPort() {
-	// TODO Auto-generated destructor stub
-}
+	ROMPagingPort::~ROMPagingPort() {
+	}
 
 } /* namespace MUZ */

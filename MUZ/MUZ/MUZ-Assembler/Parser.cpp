@@ -180,9 +180,6 @@ namespace MUZ {
 	 */
 	void Parser::StoreToken() {
 		if (status != inSpace) {
-			// unspecified digits sequence must be decimal
-			if (type==tokenTypeDIGITS)
-				type = tokenTypeDECNUMBER;
 			// some types don't go with empty content
 			if (word.empty()) {
 				if (type==tokenTypeUNKNOWN) return;
@@ -201,11 +198,6 @@ namespace MUZ {
 				string filepath, filename;
 				splitpath(word, filepath, filename);
 				word = (!filepath.empty() ? filepath + NORMAL_DIR_SEPARATOR : "") + filename;
-			}
-			
-			// Convert hexa, binary and octal numbers
-			if (type == tokenTypeBINNUMBER) {
-				
 			}
 			
 			// Store the token, use upper case for directives
@@ -229,7 +221,7 @@ namespace MUZ {
 			ParseToken token;
 			token.source = word;
 			token.type = type;
-			result->push_back(token);// store current value
+			tokens->push_back(token);// store current value
 			
 			// set result flags for some directives and handle special #INCLUDE case
 			if (token.type == tokenTypeDIRECTIVE) {
@@ -268,16 +260,56 @@ namespace MUZ {
 	
 	// publics
 	
-	/** Resolve symbol, equates and labels starting in a given token.
+	Parser::Parser(class Assembler& assembler) {
+		// references to (CodeLine) elements
+		tokens = nullptr;
+		curtoken = nullptr;
+		as = &assembler;
+		
+		//internal allocated objects
+		evalString = new ExpressionEvaluator;
+		evalString->SetDefaultConversion(tokenTypeSTRING);
+//		evalString->SetConversion(tokenTypeLETTERS, tokenTypeSTRING);
+//		evalString->SetConversion(tokenTypeDECNUMBER, tokenTypeSTRING);
+//		evalString->SetConversion(tokenTypeBINNUMBER, tokenTypeSTRING);
+//		evalString->SetConversion(tokenTypeOCTNUMBER, tokenTypeSTRING);
+//		evalString->SetConversion(tokenTypeHEXNUMBER, tokenTypeSTRING);
+
+		evalBool = new ExpressionEvaluator;
+//		evalBool->SetDefaultConversion(tokenTypeBOOL);
+//		evalBool->SetConversion(tokenTypeLETTERS, tokenTypeBOOL);
+//		evalBool->SetConversion(tokenTypeDECNUMBER, tokenTypeBOOL);
+//		evalBool->SetConversion(tokenTypeBINNUMBER, tokenTypeBOOL);
+//		evalBool->SetConversion(tokenTypeOCTNUMBER, tokenTypeBOOL);
+//		evalBool->SetConversion(tokenTypeHEXNUMBER, tokenTypeBOOL);
+
+		evalNumber = new ExpressionEvaluator;
+		evalNumber->SetDefaultConversion(tokenTypeDECNUMBER);
+//		evalNumber->SetConversion(tokenTypeLETTERS, tokenTypeDECNUMBER);
+//		evalNumber->SetConversion(tokenTypeDECNUMBER, tokenTypeDECNUMBER);
+//		evalNumber->SetConversion(tokenTypeBINNUMBER, tokenTypeDECNUMBER);
+//		evalNumber->SetConversion(tokenTypeOCTNUMBER, tokenTypeDECNUMBER);
+//		evalNumber->SetConversion(tokenTypeHEXNUMBER, tokenTypeDECNUMBER);
+
+	}
+
+	Parser::~Parser()
+	{
+		delete evalNumber;
+		delete evalBool;
+		delete evalString;
+	}
+	
+	/** Resolves symbol, equates and labels starting in a given token.
 	 	If a symbol cannot be replaced by a value, the function returns false.
 	 */
 	bool Parser::ResolveSymbolAt(int index, bool joker)
 	{
 #ifdef DEBUG
-		if (!curtoken || !result) throw PARSERNotInitialized();
-		if (index < 0 || index > result->size()) throw PARSERInvalidTokenIndex();
+		if (!curtoken || !tokens) throw PARSERNotInitialized();
+		if (index < 0 || index > tokens->size()) throw PARSERInvalidTokenIndex();
 #endif
-		auto &token = result->at(index);
+		auto &token = tokens->at(index);
 		if (token.type == tokenTypeCOMMENT)
 			return true;
 		if (token.type == tokenTypeDECNUMBER)
@@ -348,7 +380,7 @@ namespace MUZ {
 		// replace existing symbols, EQU values, labels by their value
 		
 		std::vector<int> unsolved;
-		for (int i = start ; i < result->size() ; i++) {
+		for (int i = start ; i < tokens->size() ; i++) {
 			if (!ResolveSymbolAt(i, joker)) {
 				unsolved.push_back(i);
 			}
@@ -362,17 +394,23 @@ namespace MUZ {
 	 Spaces and tabs are not stored in tokens.
 	 A vector of warnings and errors is returned.
 	 */
-	void Parser::Split(std::string s, ErrorList& msg)
+	void Parser::Split(CodeLine& codeline, ErrorList& msg)
 	{
-		source = &s;
+		// Init target on codeline
+		tokens = &codeline.tokens;
+		curtoken = &codeline.curtoken;
+		source = &codeline.source;
+		
+		// split initialisation
+		*curtoken = 0;
+		tokens->clear();
+		resultFlag = hasNOTHING;
 		pos = -1;								// current parsing position in string
-		const int len = (int)s.length();		// explicitely signed because unsigned would fail the test (pos < len)
+		const int len = (int)source->length();		// explicitely signed because unsigned would fail the test (pos < len)
 		word.empty();							// current parsed word
 		type = tokenTypeUNKNOWN;				// current token type
-		
-		msg.clear();							// clear warnings
-		
-		result->clear();						// clear results
+				
+		tokens->clear();						// clear results
 		*curtoken = 0;
 		
 		// Parse the string, concatenating characters in 'word' until a token can be stored.
@@ -380,7 +418,7 @@ namespace MUZ {
 			
 			// Get next character and keep an upper-case equivalent for letters.
 			pos += 1;
-			c = s[pos];
+			c = (*source)[pos];
 			upperc = upperchar(c);
 			
 			// NOTICE: each of the following tests ends either with a break if the string parsing is finished,
@@ -495,7 +533,7 @@ namespace MUZ {
 			// comment?
 			if (c == ';') {
 				StoreToken();
-				word = s.substr(pos); // add the rest of line as a comment
+				word = source->substr(pos); // add the rest of line as a comment
 				type = tokenTypeCOMMENT;
 				StoreToken();
 				break; // finished!
@@ -526,7 +564,7 @@ namespace MUZ {
 				// we're not supposed to reach here: would mean a '.' or '#' contained in a word
 				// so just keep going and emit a warning
 				word += c;
-				//TODO: warnings.push_back(std::string("A dubious '") + c + "' was found in a sequence of characters");
+				msg.Warning(warningMisplacedChar, codeline); // pass 1 only
 				continue;
 			}
 			
@@ -547,13 +585,13 @@ namespace MUZ {
 				continue;
 			}
 			
-			hasNext = (pos + 1 < s.length());
-			nextc = hasNext ? s[pos + 1] : '\0';
+			hasNext = (pos + 1 < source->length());
+			nextc = hasNext ? (*source)[pos + 1] : '\0';
 			uppernextc = upperchar(nextc);
 			// "//" comments?
 			if ((c == '/') && hasNext && (nextc == '/')) {
 				StoreToken();
-				word = s.substr(pos); // add the rest of line as a comment
+				word = source->substr(pos); // add the rest of line as a comment
 				type = tokenTypeCOMMENT;
 				StoreToken();
 				break; // finished!
@@ -632,13 +670,13 @@ namespace MUZ {
 					type = tokenTypeHEXNUMBER;
 					continue;
 				}
-				// $ not followed by hex = current assembling address, store a dollar token
+				// $ followed by non-hex = store a current assembling address  token
 				word.clear();
 				type = tokenTypeDOLLAR;
 				StoreToken();
-				//TODO: what happens to the current character after the "$" ?
-				word = c;
-				type = tokenTypeLETTERS; // default type
+				
+				// and let parsing start again on current character
+				pos = pos - 1; // back
 				continue;
 			}
 			
@@ -752,8 +790,8 @@ namespace MUZ {
 		if (!lastDirective) return false;
 		// set curtoken on the directive token so the directive have access to its arguments
 		*curtoken = 0;
-		while (*curtoken < result->size()) {
-			if ((*result)[*curtoken].type == tokenTypeDIRECTIVE)
+		while (*curtoken < tokens->size()) {
+			if ((*tokens)[*curtoken].type == tokenTypeDIRECTIVE)
 				break;
 			*curtoken += 1;
 		};
@@ -762,18 +800,19 @@ namespace MUZ {
 	}
 	
 	/** Evaluate next tokens to produce a boolean result. */
-	bool Parser::EvaluateBoolean()
+	bool Parser::EvaluateBoolean(bool & result)
 	{
-		ExpressionEvaluator eval;
 		int lasttoken = -1;
-		ParseToken evaluated = eval.Evaluate(*result, *curtoken, lasttoken);
+		ParseToken evaluated = evalBool->Evaluate(*tokens, *curtoken, lasttoken);
 		if (evaluated.type == tokenTypeDECNUMBER) {
 			*curtoken = lasttoken;
-			return evaluated.asNumber() != 0;
+			result = evaluated.asNumber() != 0;
+			return true;
 		}
 		if ((evaluated.type == tokenTypeBOOL) || (evaluated.type == tokenTypeSTRING)) {
 			*curtoken = lasttoken;
-			return !evaluated.source.empty();
+			result = !evaluated.source.empty();
+			return true;
 		}
 		return false;
 	}
@@ -781,41 +820,44 @@ namespace MUZ {
 	/** Evaluate next tokens to produce a string result. Operands must be strings, but automatic conversion will happen on
 	 decimal numbers and booleans.
 	 */
-	std::string Parser::EvaluateString()
+	bool Parser::EvaluateString(string & result)
 	{
-		ExpressionEvaluator eval;
+		// convert tokens
 		int lasttoken = -1;
-		ParseToken evaluated = eval.Evaluate(*result, *curtoken, lasttoken);
+		ParseToken evaluated = evalString->Evaluate(*tokens, *curtoken, lasttoken);
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER) || (evaluated.type == tokenTypeLETTERS)) {
 			*curtoken = lasttoken;
-			return evaluated.source;
+			result = evaluated.source;
+			return true;
 		}
 		if (evaluated.type == tokenTypeBOOL) {
 			*curtoken = lasttoken;
-			return evaluated.source.empty() ? "" : "t";
+			result = evaluated.source.empty() ? "" : "t";
+			return true;
 		}
-		return "";
+		return false;
 	}
 	
 	/** Evaluate next tokens to produce an integer number masked by the address size.
 	 */
-	ADDRESSTYPE Parser::EvaluateAddress()
+	bool Parser::EvaluateAddress(ADDRESSTYPE & result)
 	{
-		ExpressionEvaluator eval;
 		int lasttoken = -1;
-		ParseToken evaluated = eval.Evaluate(*result, *curtoken, lasttoken);
+		ParseToken evaluated;
+		evaluated = evalNumber->Evaluate(*tokens, *curtoken, lasttoken);
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
 			*curtoken = lasttoken;
 			// special case with one character: return character code
 			if (evaluated.type == tokenTypeSTRING) {
 				if (evaluated.source.length() == 1) {
-					return evaluated.source.at(0);
+					result = evaluated.source.at(0);
+					return true;
 				}
 			}
 			// else, interpret as a number or return 0
-			return evaluated.asNumber();
+			result = evaluated.asNumber();
+			return true;
 		}
-		//TODO: generate an error when EvaluateAddress() doesn't get a string or number
-		return 0;
+		return false;
 	}
 } // namespace MUZ

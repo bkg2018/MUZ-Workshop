@@ -552,31 +552,35 @@ namespace MUZ {
 	 Some token type are used by the parser but not linked to actual operators: they're assigned  the "nop" operator which does nothing. */
 	OperatorDef allOps[tokenTypeLAST] = {
 		{9999, &nop, tokenTypeUNKNOWN },		// No token of this type can be stored
-		{9999, &nop, tokenTypeLETTERS},			// during parsing of a characters string but not knowing what king of token it will be
-		{9999, &nop, tokenTypeDIGITS},			// during parsing of a character string containing digits
-		{9999, &nop, tokenTypeHEXNUMBER},		// a "0x" prefixed, "$" prefixed or "h" suffixed number (- )before decimal translation)
-		{9999, &nop, tokenTypeBINNUMBER},		// a "b" suffixed binary number (- )before decimal translation)
-		{9999, &nop, tokenTypeOCTNUMBER},		// a "0" prefixed octal number - followed by at least one 0-7 digit (before decimal translation)
-		{9999, &nop, tokenTypeFILENAME},		// a "0" prefixed octal number - followed by at least one 0-7 digit (before decimal translation)
+		
+		{9999, &nop, tokenTypeFIRSTCONVERTIBLE},// the following tokens (-> tokenTypeLASTCONVERTIBLE) can be converted by ExpressionEvaluator
+		  {9999, &nop, tokenTypeFIRSTNUMERIC},	// the following tokens (-> tokenTypeLASTNUMERIC) contain numeric values
+		    {9999, &nop, tokenTypeHEXNUMBER},	// a "0x" prefixed, "$" prefixed or "h" suffixed number (- )before decimal translation)
+		    {9999, &nop, tokenTypeBINNUMBER},	// a "b" suffixed binary number (- )before decimal translation)
+		    {9999, &nop, tokenTypeOCTNUMBER},	// a "0" prefixed octal number - followed by at least one 0-7 digit (before decimal translation)
+		    {9999, &nop, tokenTypeDECNUMBER},	// a non prefixed and non suffixed decimal number
+		  {9999, &nop, tokenTypeLASTNUMERIC},	// the following tokens (-> tokenTypeLASTNUMERIC) contain numeric values
+		  {9999, &nop, tokenTypeLETTERS},		// during parsing of a characters string but not knowing what king of token it will be
+		  {9999, &nop, tokenTypeSTRING},        // a " delimited string
+		  {9999, &nop, tokenTypeBOOL},			// for boolean values - this can only be written by expression evaluator
+		  {9999, &nop, tokenTypeCHAR},			// a ' delimited character
+		{9999, &nop, tokenTypeLASTCONVERTIBLE},
 
 		// final stored tokens
+		{9999, &nop, tokenTypeFILENAME},		// a "0" prefixed octal number - followed by at least one 0-7 digit (before decimal translation)
 		{9999, &nop, tokenTypeCOMMENT},			// ';' and all that follows on line
 		{9999, &nop, tokenTypeDIRECTIVE},		// a '.' or '#' directive
-		{9999, &nop, tokenTypeSTRING},			// a " delimited string
-		{9999, &nop, tokenTypeCHAR},			// a ' delimited character
-		{9999, &nop, tokenTypeDECNUMBER},		// a non prefixed and non suffixed decimal number
 		{9999, &nop, tokenTypeCOMMA},			// a ','
 		{9999, &nop, tokenTypePAROPEN},			// (
 		{9999, &nop, tokenTypePARCLOSE},		// )
 		{9999, &nop, tokenTypeDOLLAR},			// $ alone (not an hex number prefix)
 		{9999, &nop, tokenTypeCOLON},			// ':' ending a label definition
-		{9999, &nop, tokenTypeBOOL},			// for boolean values - this can only be written by expression evaluator
 		
 		// set individual priorities			// char		args		args type			result type
 		{3, &opLSHIFT, tokenTypeOP_LSHIFT},		// <<			2			number				- as arg -
 		{3, &opRSHIFT, tokenTypeOP_RSHIFT},		// >>			2			number				- as arg -
 		{5, &opDIFF, tokenTypeOP_DIFF},			// <> and !=	2			number, string		boolean
-		{5, &opEQUAL, tokenTypeOP_EQUAL},		// 	= and ==		2			number, string		boolean
+		{5, &opEQUAL, tokenTypeOP_EQUAL},		// 	= and ==	2			number, string		boolean
 		{4, &opLT, tokenTypeOP_LT},				// <			2			number, string		boolean
 		{4, &opGT, tokenTypeOP_GT},				// >			2			number, string		boolean
 		{4, &opLTE, tokenTypeOP_LTE},			// <=			2			number, string		boolean

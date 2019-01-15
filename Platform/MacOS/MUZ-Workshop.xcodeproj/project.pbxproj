@@ -15,6 +15,7 @@
 		866786CB21CFDAE10027E67F /* Z80-Operands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866786CA21CFDAE10027E67F /* Z80-Operands.cpp */; };
 		866786D321D64D060027E67F /* CodeLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866786D221D64D060027E67F /* CodeLine.cpp */; };
 		866786D621D670A40027E67F /* FileUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866786D421D670A40027E67F /* FileUtils.cpp */; };
+		866B481A21ECFB20009AD407 /* Errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 866B481921ECFB20009AD407 /* Errors.cpp */; };
 		86892BC521B6BF4700EC24EF /* StrUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86892BC421B6BF4700EC24EF /* StrUtils.cpp */; };
 		868A32E521E0DDD800A6466A /* MUZ_WorkshopTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C5D21AD8B3F00E65FE7 /* MUZ_WorkshopTests.mm */; };
 		8694B72421B2E653006EF947 /* Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8694B72221B2E652006EF947 /* Assembler.cpp */; };
@@ -175,6 +176,7 @@
 		866786D221D64D060027E67F /* CodeLine.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CodeLine.cpp; sourceTree = "<group>"; };
 		866786D421D670A40027E67F /* FileUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FileUtils.cpp; sourceTree = "<group>"; };
 		866786D521D670A40027E67F /* FileUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileUtils.h; sourceTree = "<group>"; };
+		866B481921ECFB20009AD407 /* Errors.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Errors.cpp; sourceTree = "<group>"; };
 		86892BBE21B590C600EC24EF /* Name.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Name.h; sourceTree = "<group>"; };
 		86892BC321B6BC1600EC24EF /* StrUtils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StrUtils.h; sourceTree = "<group>"; };
 		86892BC421B6BF4700EC24EF /* StrUtils.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = StrUtils.cpp; sourceTree = "<group>"; };
@@ -545,19 +547,18 @@
 		8694B71C21B193C4006EF947 /* MUZ-Assembler */ = {
 			isa = PBXGroup;
 			children = (
-				866786D221D64D060027E67F /* CodeLine.cpp */,
-				8642232E21C862490053E02F /* CodeLine.h */,
 				8694B73321B4A390006EF947 /* All-Directives.cpp */,
 				8694B73421B4A390006EF947 /* All-Directives.h */,
-				86554A6E21C13DBA0071447E /* Operator.cpp */,
-				86554A6F21C13DBA0071447E /* Operator.h */,
 				86554A7221C23B220071447E /* All-Operators.cpp */,
 				86554A7321C23B220071447E /* All-Operators.h */,
 				86554A7521C24C9E0071447E /* Asm-Exceptions.h */,
 				8694B72221B2E652006EF947 /* Assembler.cpp */,
 				8694B72321B2E652006EF947 /* Assembler.h */,
+				866786D221D64D060027E67F /* CodeLine.cpp */,
+				8642232E21C862490053E02F /* CodeLine.h */,
 				8694B72621B2E802006EF947 /* DefSymbol.h */,
 				8694B73121B4A293006EF947 /* Directive.h */,
+				866B481921ECFB20009AD407 /* Errors.cpp */,
 				86892BC621B703B500EC24EF /* Errors.h */,
 				86554A6421C01D110071447E /* Expression.cpp */,
 				86554A6521C01D110071447E /* Expression.h */,
@@ -566,6 +567,8 @@
 				8694B72B21B47E88006EF947 /* Instruction.h */,
 				8694B72121B2E59F006EF947 /* Label.h */,
 				86892BBE21B590C600EC24EF /* Name.h */,
+				86554A6E21C13DBA0071447E /* Operator.cpp */,
+				86554A6F21C13DBA0071447E /* Operator.h */,
 				8694B72721B43873006EF947 /* Parser.cpp */,
 				8694B72821B43873006EF947 /* Parser.h */,
 				86554A6821C024900071447E /* ParseToken.h */,
@@ -573,8 +576,8 @@
 				86554A6721C022A30071447E /* TokenType.h */,
 				8694B72D21B47FAE006EF947 /* Z80-Instructions.cpp */,
 				8694B72E21B47FAE006EF947 /* Z80-Instructions.h */,
-				866786C921CFD6600027E67F /* Z80-Operands.h */,
 				866786CA21CFDAE10027E67F /* Z80-Operands.cpp */,
+				866786C921CFD6600027E67F /* Z80-Operands.h */,
 			);
 			path = "MUZ-Assembler";
 			sourceTree = "<group>";
@@ -799,6 +802,7 @@
 				869B4C5021AC4FB300E65FE7 /* dummy_yaze.cpp in Sources */,
 				8694B72921B43873006EF947 /* Parser.cpp in Sources */,
 				869B4C4D21AC4FB300E65FE7 /* CPU.cpp in Sources */,
+				866B481A21ECFB20009AD407 /* Errors.cpp in Sources */,
 				866786D621D670A40027E67F /* FileUtils.cpp in Sources */,
 				86554A7021C13DBA0071447E /* Operator.cpp in Sources */,
 				869B4C5121AC4FB300E65FE7 /* simz80.cpp in Sources */,
@@ -853,6 +857,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_ASSIGN_ENUM = NO;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
@@ -861,7 +866,7 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = NO;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
@@ -919,6 +924,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_ASSIGN_ENUM = NO;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
@@ -927,7 +933,7 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = NO;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;

@@ -27,23 +27,23 @@ bool isDecimal(std::string s);
 /** Checks if a string contains only binary characters. */
 bool isBinary(std::string s);
 
-/** Convert a base N number to unsigned int, */
+/** Converts a base N number to unsigned int, */
 unsigned int base_to_unsigned(std::string s, int base);
 
-/** Convert an hexadecimal number to unsigned int, */
+/** Converts an hexadecimal number to unsigned int, */
 unsigned int hex_to_unsigned(std::string s);
 
-/** Convert a binary number to unsigned int, */
+/** Converts a binary number to unsigned int, */
 unsigned int bin_to_unsigned(std::string s);
 
-/** Convert an octal number to unsigned int, */
+/** Converts an octal number to unsigned int, */
 unsigned int oct_to_unsigned(std::string s);
 
-/** Convert a decimal number string to unsigned int, */
+/** Converts a decimal number string to unsigned int, */
 unsigned int dec_to_unsigned(std::string s);
 
-/** Convert an address to an hexa string. */
-std::string address_to_hex(MUZ::ADDRESSTYPE address);
+/** Converts an address to an hexa, octal or binary string. */
+std::string address_to_base(MUZ::ADDRESSTYPE address, int base, int nbdigits);
 
 /** Converts a byte to an hexa string. */
 std::string data_to_hex(MUZ::DATATYPE data);

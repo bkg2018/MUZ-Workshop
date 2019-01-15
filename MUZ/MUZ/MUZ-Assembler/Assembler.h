@@ -92,6 +92,8 @@ namespace MUZ {
 		std::string					m_memoryfilename;
 		/// file name for the symbols output
 		std::string					m_symbolsfilename;
+		/// file name for errors/warnings log
+		std::string					m_logfilename;
 		/// current opened listing file
 		FILE*						m_listingfile = nullptr;
 
@@ -99,7 +101,7 @@ namespace MUZ {
 		/** Assembles a prepared code line. */
 		bool AssembleCodeLine(CodeLine& codeline, ErrorList& msg);
 		/** Initializes listing file, closes previous if any. */
-		void PrepareListing(ErrorList& msg);
+		void PrepareListing(CodeLine& codeline, ErrorList& msg);
 		/** Generates a listing line for an assembled codeline. */
 		void GenerateListing(CodeLine& codeline, ErrorList& msg);
 		/** Initializes memory listing file, close previous if any. */
@@ -108,6 +110,8 @@ namespace MUZ {
 		void GenerateIntelHex(DATATYPE* memory, Section& section, ErrorList& msg);
 		/** Fill a memory image and list of sections from an assembled source file. */
 		void FillFromFile(int file, DATATYPE* memory, Section& section, ErrorList& msg);
+		/** Generate warning/error file. */
+		void GenerateLog(ErrorList& msg);
 		
 		//MARK: - Private Sections management
 		/** Gets or create a named section. */
@@ -119,7 +123,7 @@ namespace MUZ {
 		/** Scans a code line for a global or local label, creating it if needed. */
 		Label* ScanLabel(CodeLine& codeline, ErrorList& msg);
 		/** Creates a label at current address. */
-		Label* CreateLabel(std::string name, CodeLine* codeline);
+		Label* CreateLabel(std::string name, CodeLine& codeline, ErrorList& msg);
 		/** Sets the last global label name. */
 		void SetLastLabelName(std::string name);
 		/** Returns the last global label name. */
@@ -183,6 +187,8 @@ namespace MUZ {
 		void SetMemoryFilename(std::string filename);
 		/** Sets the Symbols filename. */
 		void SetSymbolsFilename(std::string filename);
+		/** Sets the erros/warnings log filename. */
+		void SetLogFilename(std::string filename);
 		
 		//MARK: - Sections and current address management
 		/** sets current section to code .*/
@@ -212,6 +218,8 @@ namespace MUZ {
 		CodeLine AssembleLine(std::string sourceline, ErrorList& msg);
 		/** Assembles a main source file. */
 		bool AssembleFile(std::string file, ErrorList& msg);
+		/** Get the name of a file from its index. */
+		std::string GetFileName(int index);
 
 		//MARK: - Interface to instructions, labels, directives, symbols
 		

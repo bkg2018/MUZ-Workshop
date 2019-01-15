@@ -9,13 +9,10 @@
 
 namespace MUZ {
 
-PortMgr::PortMgr() {
-	// TODO Auto-generated constructor stub
+	PortMgr::PortMgr() {
+	}
 
-}
-
-PortMgr::~PortMgr() {
-	// TODO Auto-generated destructor stub
-}
+	PortMgr::~PortMgr() {
+	}
 
 } /* namespace MUZ */

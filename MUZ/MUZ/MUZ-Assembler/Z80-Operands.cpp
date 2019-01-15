@@ -135,27 +135,8 @@ namespace MUZ {
 		
 		//MARK: - Low level tokens analysis for operand types
 		
-		/** Returns the subcode for a register code. Used for instructions accepting a reg8 spec or a reg16 spec.
-			Returns a 0 for any invalid register or addressing code.
-		 */
-		int getsubcode( OperandType reg )
-		{
-			if (regsubcode.count(reg))
-				return regsubcode[reg];
-			return 0;
-		}
-		/** Returns the prefix for a register code. Used for instructions accepting IX, IY and undocumented forms.
-		 Returns a 0 for any invalid register or addressing code.
-		 */
-		int getprefix( OperandType reg )
-		{
-			if (regprefix.count(reg))
-				return regprefix[reg];
-			return 0;
-		}
-
 		/** Parses current token and return the code for a 8-bit register regA to regH, regI or regR and undocumented. */
-		bool reg8( ExpVector* tokens, int& curtoken, OperandType& reg8)
+		bool OperandTools::reg8( ExpVector* tokens, int& curtoken, OperandType& reg8)
 		{
 			ParseToken& token =tokens->at(curtoken);
 			if (token.type != tokenTypeLETTERS) return false;
@@ -169,7 +150,7 @@ namespace MUZ {
 		}
 
 		/** Parses current token and return the code for a 16-bit register regAF, regAFp regBC regDE regHL regSP IX or regIY. */
-		bool reg16( ExpVector* tokens, int& curtoken, OperandType& reg16 )
+		bool OperandTools::reg16( ExpVector* tokens, int& curtoken, OperandType& reg16 )
 		{
 			ParseToken& token =tokens->at(curtoken);
 			if (token.type != tokenTypeLETTERS) return false;
@@ -183,7 +164,7 @@ namespace MUZ {
 		}
 
 		/** Parses current token and return the code for an indirect access via(C): indC. */
-		bool indirectC( ExpVector* tokens, int& curtoken, OperandType& reg )
+		bool OperandTools::indirectC( ExpVector* tokens, int& curtoken, OperandType& reg )
 		{
 			if (curtoken + 2 >= tokens->size() ) return false;
 			ParseToken* token = &tokens->at(curtoken);
@@ -199,7 +180,7 @@ namespace MUZ {
 		}
 
 		/** Parses current token and return the code for an indirect access via (HL): indHL. */
-		bool indirectHL( ExpVector* tokens, int& curtoken, OperandType& reg )
+		bool OperandTools::indirectHL( ExpVector* tokens, int& curtoken, OperandType& reg )
 		{
 			if (curtoken + 2 >= tokens->size() ) return false;
 			ParseToken* token = &tokens->at(curtoken);
@@ -215,7 +196,7 @@ namespace MUZ {
 		}
 		
 		/** Parses current token and return the code for an indirect access via (BC): indBC. */
-		bool indirectBC( ExpVector* tokens, int& curtoken, OperandType& reg )
+		bool OperandTools::indirectBC( ExpVector* tokens, int& curtoken, OperandType& reg )
 		{
 			if (curtoken + 2 >= tokens->size() ) return false;
 			ParseToken* token = &tokens->at(curtoken);
@@ -231,7 +212,7 @@ namespace MUZ {
 		}
 		
 		/** Parses current token and return the code for an indirect access via (DE): indDE. */
-		bool indirectDE( ExpVector* tokens, int& curtoken, OperandType& reg )
+		bool OperandTools::indirectDE( ExpVector* tokens, int& curtoken, OperandType& reg )
 		{
 			if (curtoken + 2 >= tokens->size() ) return false;
 			ParseToken* token = &tokens->at(curtoken);
@@ -247,7 +228,7 @@ namespace MUZ {
 		}
 
 		/** Parses current token and return the code for an indirect access via (SP): indSP. */
-		bool indirectSP( ExpVector* tokens, int& curtoken, OperandType& reg )
+		bool OperandTools::indirectSP( ExpVector* tokens, int& curtoken, OperandType& reg )
 		{
 			if (curtoken + 2 >= tokens->size() ) return false;
 			ParseToken* token = &tokens->at(curtoken);
@@ -262,15 +243,25 @@ namespace MUZ {
 			return true;
 		}
 
-		/** Parses current token and return the code for an indirect access via (IX+d) and (IY+d): indIX, indIY. */
-		OperandError indirectX( ExpVector* tokens, int& curtoken, OperandType& regX, int& value )
+		/** Parses current token and returns the code for an indirect access via (IX+d) and (IY+d): indIX, indIY.
+		 	Sends back the 'd' in parameter value.
+		 	Does not change current token if returning:
+		 		operrTOKENNUMBER		Not enough tokens
+		 		operrMISSINGPAROPEN		Missing opening parenthesis
+		 		operrREGISTERNAME		Wrong register name
+		 		operrWRONGOP			Not a '+' operator
+		 	Changes current token if returning:
+		 		operrUNSOLVED			Unsolved symbol in 'd' expression, value is 0
+		 		operrOK					value is 'd' expression result
+		 */
+		OperandError OperandTools::indirectX( ExpVector* tokens, int& curtoken, OperandType& regX, int& value )
 		{
 			if (curtoken + 4 >= tokens->size() ) return operrTOKENNUMBER;
 			ParseToken* token = &tokens->at(curtoken);
 			if (token->type != tokenTypePAROPEN) return operrMISSINGPAROPEN;
 			int indextoken = curtoken + 1;
 			if (! reg16(tokens, indextoken, regX )) return operrREGISTERNAME;
-			if (regX != regIX && regX != regIY) return operrWRONGREGISTER;
+			if (regX != regIX && regX != regIY) return operrREGISTERNAME;
 			token = &tokens->at(curtoken + 2);
 			if (token->type != tokenTypeOP_PLUS) return operrWRONGOP;
 			// find closing parenthesis
@@ -285,33 +276,39 @@ namespace MUZ {
 					if (parlevel == 0) break;
 				}
 			}
-			
 			// evaluate the value after "+" and before closing parenthesis
 			indextoken = indextoken - 1;
-			ExpressionEvaluator eval;
-			ParseToken evaluated = eval.Evaluate(*tokens, curtoken + 3, indextoken);
+			ParseToken evaluated = evalNumber.Evaluate(*tokens, curtoken + 3, indextoken);
+			// skip closing parenthesis
+			curtoken = indextoken + 1;
 			if (evaluated.unsolved) {
+				// could be pass 1, signal unsolved expression
 				value = 0;
+				return operrUNSOLVED;
 			}
 			value = evaluated.asNumber();
-			curtoken = indextoken + 1;// skips after closing parenthesis
 			return operrOK;
 		}
 
-		/** Parses current token and return the code for a bit nunmber: bit0 to bit7. */
-		bool bitnumber( ExpVector* tokens, int& curtoken, OperandType& bit )
+		/** Parses current token and returns the code for a bit nunmber: bit0 to bit7.
+		 	Changes current token if returning:
+		 		operrUNSOLVED			Unsolved symbol in 'd' expression, value is 0
+		 		operrOK					value is 'd' expression result
+		 	Doesn't update current token if returning:
+		 		operrNOTBIT				Number is too big for a bit number, or not a number
+		 */
+		OperandError OperandTools::bitnumber( ExpVector* tokens, int& curtoken, OperandType& bit )
 		{
-			ExpressionEvaluator eval;
 			int lasttoken = -1;
-			ParseToken evaluated = eval.Evaluate(*tokens, curtoken, lasttoken);
+			ParseToken evaluated = evalNumber.Evaluate(*tokens, curtoken, lasttoken);
 			if (evaluated.unsolved) {
 				bit = bit0;
-				curtoken = lasttoken;
-				return true;
+				curtoken = lasttoken ;
+				return operrUNSOLVED;
 			}
 			if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
 				int value = evaluated.asNumber();
-				if (value < 0 || value > 7) return false;
+				if (value < 0 || value > 7) return operrNOTBIT;
 				if (value == 0) bit = bit0;
 				else if (value == 1) bit = bit1;
 				else if (value == 2) bit = bit2;
@@ -321,68 +318,73 @@ namespace MUZ {
 				else if (value == 6) bit = bit6;
 				else bit = bit7;
 				curtoken = lasttoken ;
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrNOTBIT;
 		}
 
 		/** Parses current token and return the code for a condition name: condNZ to condM. */
-		bool condition( ExpVector* tokens, int& curtoken, OperandType& cond )
+		OperandError OperandTools::condition( ExpVector* tokens, int& curtoken, OperandType& cond )
 		{
 			ParseToken& token =tokens->at(curtoken);
-			if (token.type != tokenTypeLETTERS) return false;
+			if (token.type != tokenTypeLETTERS) return operrNOTSTRING;
 			if (conditions.count(token.source)) {
 				cond = conditions[token.source];
 				curtoken += 1;
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrNOTCONDITION;
 		}
 
-		/** Parses current token and return the value for an 8-bit number. */
-		bool number8( ExpVector* tokens, int& curtoken, int& value )
+		/** Parses current token and return the value for an 8-bit number.
+		 Changes current token if returning:
+			 operrUNSOLVED			Unsolved symbol in expression, value is 0
+			 operrOK				value is expression result
+		 Doesn't update current token if returning:
+			 operrTOOBIG			Number is too big for a 8-bit number
+			 operrNOTNUMBER			Not a number
+		 */
+		OperandError OperandTools::number8( ExpVector* tokens, int& curtoken, int& value )
 		{
-			ExpressionEvaluator eval;
 			int lasttoken = -1;
-			ParseToken evaluated = eval.Evaluate(*tokens, curtoken, lasttoken);
+			ParseToken evaluated = evalNumber.Evaluate(*tokens, curtoken, lasttoken);
 			if (evaluated.unsolved) {
 				value = 0;
 				curtoken = lasttoken + 1;
-				return true;
+				return operrUNSOLVED;
 			}
 			if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
 				value = evaluated.asNumber();
-				if (value > 255) return false;
+				if (value > 255) return operrTOOBIG;
 				curtoken = lasttoken + 1;
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrNOTNUMBER;
 		}
 
 		/** Parses current token and return the value for a 16-bit number. */
-		bool number16( ExpVector* tokens, int& curtoken, int& value )
+		OperandError OperandTools::number16( ExpVector* tokens, int& curtoken, int& value )
 		{
-			ExpressionEvaluator eval;
 			int lasttoken = -1;
-			ParseToken evaluated = eval.Evaluate(*tokens, curtoken, lasttoken);
+			ParseToken evaluated = evalNumber.Evaluate(*tokens, curtoken, lasttoken);
 			if (evaluated.unsolved) {
 				value = 0;
 				curtoken = lasttoken + 1;
-				return true;
+				return operrUNSOLVED;
 			}
 			if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
 				value = evaluated.asNumber();
-				if (value > 65535) return false;
+				if (value > 65535) return operrTOOBIG;
 				curtoken = lasttoken + 1;
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrNOTNUMBER;
 		}
 
 		/** Compute a 16-bit value from a numeric expression between parenthesis. If parenthesis or a value cannot be found,
 		 returns an error code. The last used token index is returned even if the expression doesn't compute a number but
 		 have correct parenthesis. */
-		OperandError indirect16( ExpVector* tokens, int curtoken, int& value, int& lasttoken )
+		OperandError OperandTools::indirect16( ExpVector* tokens, int curtoken, int& value, int& lasttoken )
 		{
 			if (curtoken + 2 >= tokens->size() ) return operrTOKENNUMBER;
 			ParseToken* token = &tokens->at(curtoken);
@@ -402,199 +404,260 @@ namespace MUZ {
 			}
 			if (token->type != tokenTypePARCLOSE) return operrMISSINGPARCLOSE;
 			// evaluate the tokens between parenthesis
-			ExpressionEvaluator eval;
-			lasttoken -= 1; // back from parenthesis close
-			ParseToken evaluated = eval.Evaluate(*tokens, curtoken + 1, lasttoken );
+			lasttoken = lasttoken - 1; // back from parenthesis close
+			ParseToken evaluated = evalNumber.Evaluate(*tokens, curtoken + 1, lasttoken );
+			lasttoken = lasttoken + 1;// skips  closing parenthesis
 			if (evaluated.unsolved) {
 				value = 0;
-				lasttoken = lasttoken + 1;
-				return operrOK;
+				return operrUNSOLVED;
 			}
 			if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
 				value = evaluated.asNumber();
-				lasttoken = lasttoken + 1;// skips  closing parenthesis
 				return operrOK;
 			}
-			lasttoken = lasttoken + 1;// skips  closing parenthesis
 			return operrNOTNUMBER;
 		}
 		
 		//MARK: - High level functions for CodeLine operands analysis
 
+		OperandTools::OperandTools()
+		{
+			evalString.SetDefaultConversion(tokenTypeSTRING);
+//			evalString.SetConversion(tokenTypeLETTERS, tokenTypeSTRING);
+//			evalString.SetConversion(tokenTypeDECNUMBER, tokenTypeSTRING);
+//			evalString.SetConversion(tokenTypeBINNUMBER, tokenTypeSTRING);
+//			evalString.SetConversion(tokenTypeOCTNUMBER, tokenTypeSTRING);
+//			evalString.SetConversion(tokenTypeHEXNUMBER, tokenTypeSTRING);
+			
+			evalBool.SetDefaultConversion(tokenTypeBOOL);
+//			evalBool.SetConversion(tokenTypeLETTERS, tokenTypeBOOL);
+//			evalBool.SetConversion(tokenTypeDECNUMBER, tokenTypeBOOL);
+//			evalBool.SetConversion(tokenTypeBINNUMBER, tokenTypeBOOL);
+//			evalBool.SetConversion(tokenTypeOCTNUMBER, tokenTypeBOOL);
+//			evalBool.SetConversion(tokenTypeHEXNUMBER, tokenTypeBOOL);
+			
+			evalNumber.SetDefaultConversion(tokenTypeDECNUMBER);
+//			evalNumber.SetConversion(tokenTypeLETTERS, tokenTypeDECNUMBER);
+//			evalNumber.SetConversion(tokenTypeDECNUMBER, tokenTypeDECNUMBER);
+//			evalNumber.SetConversion(tokenTypeBINNUMBER, tokenTypeDECNUMBER);
+//			evalNumber.SetConversion(tokenTypeOCTNUMBER, tokenTypeDECNUMBER);
+//			evalNumber.SetConversion(tokenTypeHEXNUMBER, tokenTypeDECNUMBER);
+		}
+		
+		OperandTools::~OperandTools()
+		{
+		}
+		
 		// helpers for instruction assembling
-		bool RegAccept(int flags, OperandType reg) {
+		bool OperandTools::RegAccept(int flags, OperandType reg)
+		{
 			int f = 1 << (int)reg;
 			return ((f & flags) == f);
 		}
 		
+		/** Returns the subcode for a register code. Used for instructions accepting a reg8 spec or a reg16 spec.
+		 Returns a 0 for any invalid register or addressing code.
+		 */
+		int OperandTools::GetSubCode( OperandType reg )
+		{
+			if (regsubcode.count(reg))
+				return regsubcode[reg];
+			return 0;
+		}
+		/** Returns the prefix for a register code. Used for instructions accepting IX, IY and undocumented forms.
+		 Returns a 0 for any invalid register or addressing code.
+		 */
+		int OperandTools::GetPrefix( OperandType reg )
+		{
+			if (regprefix.count(reg))
+				return regprefix[reg];
+			return 0;
+		}
+		
 		/** Returns true if current token is recognized as an 8-bit register, and go next token. */
-		bool GetReg8(CodeLine& codeline, OperandType& reg, unsigned int regs ) {
-			if (!EnoughTokensLeft(codeline, 1)) return false;
+		OperandError OperandTools::GetReg8(CodeLine& codeline, OperandType& reg, unsigned int regs ) {
+			if (!EnoughTokensLeft(codeline, 1)) return operrTOKENNUMBER;
 			int worktoken = codeline.curtoken;
 			if (reg8(&codeline.tokens, worktoken, reg)) {
 				if (RegAccept(regs, reg)) {
 					codeline.curtoken = worktoken;
-					return true;
+					return operrOK;
 				}
+				return operrWRONGREGISTER;
 			}
-			return false;
+			return operrNOTREGISTER;
 		}
 		/** Returns true if current token is recognized as an 16-bit register, and go next token. */
-		bool GetReg16(CodeLine& codeline, OperandType& reg, unsigned int regs  ) {
-			if (!EnoughTokensLeft(codeline, 1)) return false;
+		OperandError OperandTools::GetReg16(CodeLine& codeline, OperandType& reg, unsigned int regs  ) {
+			if (!EnoughTokensLeft(codeline, 1)) return operrTOKENNUMBER;
 			int worktoken = codeline.curtoken;
 			if (reg16(&codeline.tokens, worktoken, reg)) {
 				if (RegAccept(regs, reg)) {
 					codeline.curtoken = worktoken;
-					return true;
+					return operrOK;
 				}
-				
+				return operrWRONGREGISTER;
 			}
-			return false;
+			return operrNOTREGISTER;
 		}
 		/** Returns true if current token is recognized as (C), and go next token. */
-		bool GetIndC( CodeLine& codeline ) {
-			if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandError OperandTools::GetIndC( CodeLine& codeline ) {
+			if (!EnoughTokensLeft(codeline, 3)) return operrTOKENNUMBER;
 			OperandType regC;
 			if (indirectC(&codeline.tokens, codeline.curtoken, regC)) {
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrWRONGREGISTER;
 		}
 		/** Returns true if current token is recognized as (HL), and go next token. */
-		bool GetIndHL( CodeLine& codeline ) {
-			if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandError OperandTools::GetIndHL( CodeLine& codeline ) {
+			if (!EnoughTokensLeft(codeline, 3)) return operrTOKENNUMBER;
 			OperandType regHL;
 			if (indirectHL(&codeline.tokens, codeline.curtoken, regHL)) {
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrWRONGREGISTER;
 		}
 		/** Returns true if current token is recognized as (HL), and go next token. */
-		bool GetIndBC( CodeLine& codeline ) {
-			if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandError OperandTools::GetIndBC( CodeLine& codeline ) {
+			if (!EnoughTokensLeft(codeline, 3)) return operrTOKENNUMBER;
 			OperandType regBC;
 			if (indirectBC(&codeline.tokens, codeline.curtoken, regBC)) {
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrWRONGREGISTER;
 		}
 		/** Returns true if current token is recognized as (HL), and go next token. */
-		bool GetIndDE( CodeLine& codeline ) {
-			if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandError OperandTools::GetIndDE( CodeLine& codeline ) {
+			if (!EnoughTokensLeft(codeline, 3)) return operrTOKENNUMBER;
 			OperandType regDE;
 			if (indirectDE(&codeline.tokens, codeline.curtoken, regDE)) {
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrWRONGREGISTER;
 		}
 		/** Returns true if current token is recognized as (SP), and go next token. */
-		bool GetIndSP( CodeLine& codeline ) {
-			if (!EnoughTokensLeft(codeline, 3)) return false;
+		OperandError OperandTools::GetIndSP( CodeLine& codeline ) {
+			if (!EnoughTokensLeft(codeline, 3)) return operrTOKENNUMBER;
 			OperandType regSP;
 			if (indirectSP(&codeline.tokens, codeline.curtoken, regSP)) {
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrWRONGREGISTER;
 		}
 		
 		/** Returns true if current token is recognized as (IX+d) or (IY+d), and go next token. */
-		bool GetIndX(CodeLine& codeline, OperandType& regX, int& value ) {
-			if (!EnoughTokensLeft(codeline,5)) return false;
+		OperandError OperandTools::GetIndX(CodeLine& codeline, OperandType& regX, int& value ) {
+			if (!EnoughTokensLeft(codeline,5)) return operrTOKENNUMBER;
 			OperandError operr = indirectX(&codeline.tokens, codeline.curtoken, regX, value);
 			if (operr == operrOK) {
-				return true;
+				return operrOK;
 			}
-			if (codeline.as->IsFirstPass() && operr == operrNOTNUMBER) {
+			if (codeline.as->IsFirstPass() && (operr == operrUNSOLVED)) {
 				// probably unresolved label, simulate success with neutral value
 				value = 0;
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrWRONGREGISTER;
 		}
 		
 		/** Returns true if current token is recognized as a bit number (0-7), and go next token. */
-		bool GetBitNumber(CodeLine& codeline, OperandType& bit ) {
-			if (!EnoughTokensLeft(codeline,1)) return false;
+		OperandError OperandTools::GetBitNumber(CodeLine& codeline, OperandType& bit ) {
+			if (!EnoughTokensLeft(codeline,1)) return operrTOKENNUMBER;
 			int worktoken = codeline.curtoken;
-			if (reg8(&codeline.tokens, worktoken, bit)) return false;//TODO: return explicit error (register name for 8-bit value)
-			if (reg16(&codeline.tokens, worktoken, bit)) return false;//TODO: return explicit error (register name for 8-bit value)
-			if (bitnumber(&codeline.tokens, codeline.curtoken, bit)) {
-				return true;
+			if (reg8(&codeline.tokens, worktoken, bit)) return operrWRONGREGISTER;//TODO: return explicit error (register name for 8-bit value)
+			if (reg16(&codeline.tokens, worktoken, bit)) return operrWRONGREGISTER;//TODO: return explicit error (register name for 8-bit value)
+			OperandError operr = bitnumber(&codeline.tokens, codeline.curtoken, bit);
+			if (operr == operrOK) {
+				return operrOK;
 			}
-			if (codeline.as->IsFirstPass()) {
+			if (codeline.as->IsFirstPass() && operr == operrUNSOLVED) {
 				// not number: probably unresolved label, simulate success with neutral value
 				bit = bit0;
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operr;
 		}
 		
 		/** Returns true if current token is recognized as a condition, and go next token. */
-		bool GetCond( CodeLine& codeline, OperandType& cond ) {
-			if (!EnoughTokensLeft(codeline, 1)) return false;
-			if (condition(&codeline.tokens, codeline.curtoken, cond)) {
-				return true;
+		OperandError OperandTools::GetCond( CodeLine& codeline, OperandType& cond ) {
+			if (!EnoughTokensLeft(codeline, 1)) return operrTOKENNUMBER;
+			if (condition(&codeline.tokens, codeline.curtoken, cond) == operrOK) {
+				return operrOK;
 			}
-			return false;
+			return operrNOTCONDITION;
 		}
 		
-		/** Returns true if current token is recognized as an 8-bit number, and go next token. */
-		bool GetNum8(CodeLine& codeline, int& value ) {
-			if (!EnoughTokensLeft(codeline,1)) return false;
+		/** Tests if current token is recognized as an 8-bit number expression, and go next token.
+		 In case a number could not be found, the call will return:
+		 - operrTOKENNUMBER if there are not enough tokens left
+		 - operrWRONGREGISTER if a register name has been found
+		 - operrNOTNUMBER if the expression is not a number
+		 */
+		OperandError OperandTools::GetNum8(CodeLine& codeline, int& value ) {
+			if (!EnoughTokensLeft(codeline,1)) return operrTOKENNUMBER;
 			OperandType num8;
 			// forbid register names
 			int worktoken = codeline.curtoken;
-			if (reg8(&codeline.tokens, worktoken, num8)) return false;//TODO: return explicit error (register name for 8-bit value)
-			if (reg16(&codeline.tokens, worktoken, num8)) return false;//TODO: return explicit error (register name for 8-bit value)
+			if (reg8(&codeline.tokens, worktoken, num8)) return operrWRONGREGISTER;
+			if (reg16(&codeline.tokens, worktoken, num8)) return operrWRONGREGISTER;
 			// now only numbers or labels
-			if (number8(&codeline.tokens, codeline.curtoken, value)) {
-				return true;
+			OperandError operr = number8(&codeline.tokens, codeline.curtoken, value);
+			if (operr == operrOK) {
+				return operrOK;
 			}
-			if (codeline.as->IsFirstPass()) {
-				// not number: probably unresolved label, simulate success with neutral value
+			if (codeline.as->IsFirstPass() && operr == operrUNSOLVED) {
 				value = 0;
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrNOTNUMBER;
 		}
 		
-		/** Returns true if current token is recognized as an 8-bit number expression, and go next token. */
-		bool GetNum16(CodeLine& codeline, int& value ) {
-			if (!EnoughTokensLeft(codeline,1)) return false;
+		/** Tests if current token is recognized as a 16-bit number expression, and go next token.
+		 In case a number could not be found, the call will return:
+		 - operrTOKENNUMBER if there are not enough tokens left
+		 - operrWRONGREGISTER if a register name has been found
+		 - operrNOTNUMBER if the expression is not a number
+		 */
+		OperandError OperandTools::GetNum16(CodeLine& codeline, int& value ) {
+			if (!EnoughTokensLeft(codeline,1)) return operrTOKENNUMBER;
 			OperandType num16;
 			int worktoken = codeline.curtoken;
-			if (reg8(&codeline.tokens, worktoken, num16)) return false;//TODO: return explicit error (register name for 16-bit value)
-			if (reg16(&codeline.tokens, worktoken, num16)) return false;//TODO: return explicit error (register name for 16-bit value)
-			if (number16(&codeline.tokens, codeline.curtoken, value)) {
-				// value *= mutliplier;
-				return true;
+			if (reg8(&codeline.tokens, worktoken, num16)) return operrWRONGREGISTER;
+			if (reg16(&codeline.tokens, worktoken, num16)) return operrWRONGREGISTER;
+			OperandError operr = number16(&codeline.tokens, codeline.curtoken, value);
+			if (operr == operrOK) {
+				return operrOK;
 			}
-			if (codeline.as->IsFirstPass()) {
-				// not number: probably unresolved label, simulate success with neutral value
+			if (codeline.as->IsFirstPass() && operr == operrUNSOLVED) {
 				value = 0;
-				return true;
+				return operrOK;
 			}
-			return false;
+			return operrNOTNUMBER;
 		}
 		
-		/** Returns true if current token is recognized as an (16-bit) indirect addressing, and go next token. */
-		bool GetInd16(CodeLine& codeline, int& value ) {
-			if (!EnoughTokensLeft(codeline,3)) return false;
+		/** Returns true if current token is recognized as an (16-bit) indirect addressing, and go next token.
+		 In case a number could not be found, the call will return:
+		 - operrTOKENNUMBER if there are not enough tokens left
+		 - operrWRONGREGISTER if a register name has been found
+		 - operrNOTNUMBER if the expression is not a number
+		 */
+		OperandError OperandTools::GetInd16(CodeLine& codeline, int& value ) {
+			if (!EnoughTokensLeft(codeline,3)) return operrTOKENNUMBER;
 			int lasttoken;
 			OperandError operr = indirect16(&codeline.tokens, codeline.curtoken, value, lasttoken);
 			if (operr==operrOK) {
 				codeline.curtoken = lasttoken;
-				return true;
+				return operrOK;
 			}
-			if (operr==operrNOTNUMBER && codeline.as->IsFirstPass()) {
+			if (operr==operrUNSOLVED && codeline.as->IsFirstPass()) {
 				// not number: probably unresolved label, simulate success with neutral value
 				value = 0;
 				codeline.curtoken = lasttoken;
-				return true;
+				return operrOK;
 			}
 			// other errors do not update curtoken
-			return false;
+			return operrNOTNUMBER;
 		}
 
 	} // namespace Z80

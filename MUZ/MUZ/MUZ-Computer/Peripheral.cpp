@@ -9,13 +9,10 @@
 
 namespace MUZ {
 
-Peripheral::Peripheral() {
-	// TODO Auto-generated constructor stub
+	Peripheral::Peripheral() {
+	}
 
-}
-
-Peripheral::~Peripheral() {
-	// TODO Auto-generated destructor stub
-}
+	Peripheral::~Peripheral() {
+	}
 
 } /* namespace MUZ */

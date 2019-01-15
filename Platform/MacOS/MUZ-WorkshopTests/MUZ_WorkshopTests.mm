@@ -271,6 +271,7 @@ std::string Z80InstructionsSourcePath;
 	as.SetListingFilename("testAssembler.LST");
 	as.SetMemoryFilename("testAssemblerMemory.LST");
 	as.SetIntelHexFilename("testAssemblerIntelHex.HEX");
+	as.SetLogFilename("testAssembler.LOG");
 	as.EnableFullListing(false); // limit .DB/.DS/.DW sequences to 8 bytes
 	try {
 		as.AssembleFile(SourceFilePath, msg);
@@ -285,6 +286,12 @@ std::string Z80InstructionsSourcePath;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testConditionnalsAssembler.LST");
 	as.AssembleFile(ConditionnalsSourcePath, msg);
+	// dump warnings?
+	for (MUZ::ErrorMessage& m : msg) {
+		if (m.type == MUZ::errorTypeWARNING) {
+			printf("%s(%d): %s\n", as.GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
+		}
+	}
 }
 
 - (void)testExpressionsAssembler {
@@ -401,28 +408,24 @@ std::string Z80InstructionsSourcePath;
 	MUZ::Parser parser(as); // give reference of the assembler to the parser
 	MUZ::CodeLine codeline;
 	MUZ::ParseToken result;
-	MUZ::ExpVector& tokens = codeline.tokens;
-	int curtoken = 0;
 	int lasttoken = -1;
-	parser.Init(tokens, curtoken); // give references of this codeline array and index to the parser
-	
-	codeline.source = "! ( 1 + 2 * ( 3 + 4 )) + 5 * ( 6 + 7 )"; 
-	parser.Split(codeline.source, msg);
+	codeline.source = "! ( 1 + 2 * ( 3 + 4 )) + 5 * ( 6 + 7 )";
+	parser.Split(codeline, msg);
 	result = eval.Evaluate(codeline.tokens, 0, lasttoken);
 	XCTAssertEqual(result.source, "49");
 	
 	// check parenthesis errors
 	codeline.source = "0 ( 1 ( 2 ( 3 ) 2 ) 1 ) 0"; // ok
-	parser.Split(codeline.source, msg);
-	XCTAssertTrue( eval.CheckParenthesis(codeline.tokens ));
+	parser.Split(codeline, msg);
+	XCTAssertEqual( eval.CheckParenthesis(codeline.tokens ), 0);
 
 	codeline.source = "0 ( 1 ( 2 ( 3 ) 2 ) 1 "; // ok
-	parser.Split(codeline.source, msg);
-	XCTAssertFalse( eval.CheckParenthesis(codeline.tokens ));
+	parser.Split(codeline, msg);
+	XCTAssertEqual(eval.CheckParenthesis(codeline.tokens ), +1);
 
 	codeline.source = " 1 ( 2 ( 3 ) 2 ) 1 ) 0"; // ok
-	parser.Split(codeline.source, msg);
-	XCTAssertFalse( eval.CheckParenthesis(codeline.tokens ));
+	parser.Split(codeline, msg);
+	XCTAssertEqual(eval.CheckParenthesis(codeline.tokens ), -1);
 
 		
 
@@ -444,13 +447,16 @@ std::string Z80InstructionsSourcePath;
 /** Tests the operand types detection functions. */
 -(void) testOperandTypes {
 
+	MUZ::Assembler as;
+	MUZ::ErrorList msg;
+	MUZ::Parser parser(as); // give reference of the assembler to the parser
 	MUZ::ParseToken token = {"", MUZ::tokenTypeLETTERS};
 	MUZ::ParseToken tokPO ={"", MUZ::tokenTypePAROPEN};;
 	MUZ::ParseToken tokPC ={"", MUZ::tokenTypePARCLOSE};;
 	token.type = MUZ::tokenTypeLETTERS;
 	MUZ::Z80::OperandType optype;
 	int value;
-	
+	MUZ::Z80::OperandTools optools;
 	// 8 bit registers tests
 	{
 		std::vector<std::string> reg8ok = {"A", "B", "C", "D", "E", "H", "L", "I", "R" };
@@ -459,16 +465,22 @@ std::string Z80InstructionsSourcePath;
 			token.source = reg;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
-			int curtoken = 0;
-			bool result = reg8(&tokens, curtoken, optype);
+			MUZ::CodeLine codeline;
+			codeline.source = std::string("LD A,") + reg;
+			parser.Split(codeline, msg);
+			codeline.curtoken = 3;
+			bool result = optools.GetReg8(codeline, optype);
 			XCTAssertEqual(result, true);
 		}
 		for (auto & reg: reg8bad) {
 			token.source = reg;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
-			int curtoken = 0;
-			bool result = reg8(&tokens, curtoken, optype);
+			MUZ::CodeLine codeline;
+			codeline.source = std::string("LD A,") + reg;
+			parser.Split(codeline, msg);
+			codeline.curtoken = 3;
+			bool result = optools.GetReg8(codeline, optype);
 			XCTAssertEqual(result, false);
 		}
 	}
@@ -481,7 +493,7 @@ std::string Z80InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = reg16(&tokens, curtoken, optype);
+			bool result = optools.reg16(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		for (auto & reg: reg16bad) {
@@ -489,7 +501,7 @@ std::string Z80InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = reg16(&tokens, curtoken, optype);
+			bool result = optools.reg16(&tokens, curtoken, optype);
 			XCTAssertEqual(result, false);
 		}
 	}
@@ -502,7 +514,7 @@ std::string Z80InstructionsSourcePath;
 			tokens.push_back(token);
 			tokens.push_back(tokPC);
 			int curtoken = 0;
-			bool result = indirectC(&tokens, curtoken, optype);
+			bool result = optools.indirectC(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		{
@@ -512,7 +524,7 @@ std::string Z80InstructionsSourcePath;
 			tokens.push_back(token);
 			tokens.push_back(tokPC);
 			int curtoken = 0;
-			bool result = indirectHL(&tokens, curtoken, optype);
+			bool result = optools.indirectHL(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		{
@@ -522,7 +534,7 @@ std::string Z80InstructionsSourcePath;
 			tokens.push_back(token);
 			tokens.push_back(tokPC);
 			int curtoken = 0;
-			bool result = indirectSP(&tokens, curtoken, optype);
+			bool result = optools.indirectSP(&tokens, curtoken, optype);
 			XCTAssertEqual(result, true);
 		}
 		{
@@ -539,8 +551,8 @@ std::string Z80InstructionsSourcePath;
 			tokens.push_back(token);
 			tokens.push_back(tokPC);
 			int curtoken = 0;
-			MUZ::Z80::OperandError result = indirectX(&tokens, curtoken, optype, value);
-			XCTAssertEqual(result, MUZ::Z80::operrOK);
+			MUZ::OperandError result = optools.indirectX(&tokens, curtoken, optype, value);
+			XCTAssertEqual(result, MUZ::operrOK);
 			XCTAssertEqual(optype, MUZ::Z80::regIX);
 			XCTAssertEqual(value, 8);
 		}
@@ -552,8 +564,8 @@ std::string Z80InstructionsSourcePath;
 		token.type = MUZ::tokenTypeDECNUMBER;
 		tokens.push_back(token);
 		int curtoken = 0;
-		bool result = bitnumber( &tokens, curtoken, optype);
-		XCTAssertTrue(result);
+		MUZ::OperandError result = optools.bitnumber( &tokens, curtoken, optype);
+		XCTAssertEqual(result, MUZ::operrOK);
 		XCTAssertEqual(optype, MUZ::Z80::bit7);
 	}
 	// conditions
@@ -566,8 +578,8 @@ std::string Z80InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = condition(&tokens, curtoken, optype);
-			XCTAssertEqual(result, true);
+			MUZ::OperandError result = optools.condition(&tokens, curtoken, optype);
+			XCTAssertEqual(result, MUZ::operrOK);
 		}
 		for (auto & reg: condbad) {
 			token.source = reg;
@@ -575,8 +587,8 @@ std::string Z80InstructionsSourcePath;
 			MUZ::ExpVector tokens;
 			tokens.push_back(token);
 			int curtoken = 0;
-			bool result = condition(&tokens, curtoken, optype);
-			XCTAssertEqual(result, false);
+			MUZ::OperandError result = optools.condition(&tokens, curtoken, optype);
+			XCTAssertNotEqual(result, MUZ::operrOK);
 		}
 	}
 	// 8-bit direct data
@@ -586,8 +598,8 @@ std::string Z80InstructionsSourcePath;
 		token.type = MUZ::tokenTypeDECNUMBER;
 		tokens.push_back(token);
 		int curtoken = 0;
-		bool result = MUZ::Z80::number8( &tokens, curtoken, value);
-		XCTAssertTrue(result);
+		MUZ::OperandError result = optools.number8( &tokens, curtoken, value);
+		XCTAssertEqual(result, MUZ::operrOK);
 		XCTAssertEqual(value, 127);
 	}
 	// 16-bit direct data
@@ -597,8 +609,8 @@ std::string Z80InstructionsSourcePath;
 		token.type = MUZ::tokenTypeDECNUMBER;
 		tokens.push_back(token);
 		int curtoken = 0;
-		bool result = MUZ::Z80::number16( &tokens, curtoken, value);
-		XCTAssertTrue(result);
+		MUZ::OperandError result = optools.number16( &tokens, curtoken, value);
+		XCTAssertEqual(result, MUZ::operrOK);
 		XCTAssertEqual(value, 65535);
 	}
 	// indirect 16-bit address
@@ -615,7 +627,7 @@ std::string Z80InstructionsSourcePath;
 		tokens.push_back(token);
 		int curtoken = 0;
 		int lasttoken = 0;
-		bool result = (MUZ::Z80::operrOK==MUZ::Z80::indirect16( &tokens, curtoken, value, lasttoken));
+		bool result = (MUZ::operrOK==optools.indirect16( &tokens, curtoken, value, lasttoken));
 		XCTAssertTrue(result);
 		XCTAssertEqual(value, 65535);
 	}

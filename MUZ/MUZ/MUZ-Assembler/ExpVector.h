@@ -22,6 +22,7 @@ namespace MUZ {
 		ParseToken* prevBackToken = &dummyToken;
 		ParseToken* backToken = &dummyToken;
 		size_t		mysize = 0;		// shortcut
+		
 	public:
 		/** Returns the last token on stack or an UNKNOWN type token if nothing on stack. */
 		virtual ParseToken& back() { return *backToken; }

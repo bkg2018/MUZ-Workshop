@@ -7,6 +7,7 @@
 //
 
 #include "Expression.h"
+#include "Asm-Exceptions.h"
 #include <map>
 #include "StrUtils.h"
 #include "All-Operators.h"
@@ -134,6 +135,30 @@ namespace MUZ {
 		return result;
 	}
 	
+	/** Sets a default type conversion. Use tokenTypeUKNOWN to disable. */
+	void ExpressionEvaluator::SetDefaultConversion(TokenType dest)
+	{
+		defaultTypeConversion = dest;
+	}
+	
+	/** Sets a type conversion. Use tokenTypeUKNOWN for destination to disable a previous type conversion. */
+	void ExpressionEvaluator::SetConversion(TokenType src, TokenType dest)
+	{
+		if (typeConvert.count(src)) {
+			if (dest == tokenTypeUNKNOWN) {
+				typeConvert.erase(src);
+				return;
+			}
+		}
+		typeConvert[src] = dest;
+	}
+
+	/** Clears type conversions. */
+	void ExpressionEvaluator::ClearConversions()
+	{
+		typeConvert.clear();
+	}
+	
 	/** Evaluates a series of tokens as an expression
 	 @param tokens the vector holding all tokens from a line
 	 @param start the first token to use for evaluation
@@ -194,9 +219,59 @@ namespace MUZ {
 			
 		} while (!done && (curtoken <= end));
 		
+		// programmed inter-types conversion
+		for (auto & token : stack) {
+
+			// if not a convertible type, ignore this token (operators, commas ...)
+			if (token.type <= tokenTypeFIRSTCONVERTIBLE || token.type >= tokenTypeLASTCONVERTIBLE)
+				continue;
+			// check the default and then specific new type type
+			TokenType newType = defaultTypeConversion;
+			if (typeConvert.count(token.type)) {
+				newType = typeConvert[token.type];
+			}
+			// if no conversion, ignore this token
+			if (newType == tokenTypeUNKNOWN)
+				continue;
+			
+			// if new type is numeric, adjust
+			if (newType >= tokenTypeFIRSTNUMERIC && newType <= tokenTypeLASTNUMERIC) {
+				// smart conversion of current value to decimal number (handles prefixes and all kind of convertible token types)
+				ADDRESSTYPE number = token.asNumber();
+				// -> back convert to destination type
+				if (newType == tokenTypeDECNUMBER) {
+					token.source = std::to_string(number);
+				} else if (newType == tokenTypeOCTNUMBER) {
+					token.source = address_to_base(number, 8, number > 255 ? 6 : 3);
+				} else if (newType == tokenTypeHEXNUMBER) {
+					token.source = address_to_base(number, 16, number > 255 ? 4 : 2);
+				} else { // binary
+					token.source = address_to_base(number, 2, number > 255 ? 16 : 8);
+				}
+			}
+			// if new type is boolean, adjust
+			else if (newType == tokenTypeBOOL) {
+				bool newValue = false;
+				if (newType==tokenTypeDECNUMBER || newType==tokenTypeHEXNUMBER || newType==tokenTypeOCTNUMBER || newType==tokenTypeBINNUMBER) {
+					// non null numbers considered as "true" value
+					newValue = token.asNumber() == 0 ? "" : "t";
+				} else {
+					// non empty strings considered true
+					newValue = token.source.empty() ? "" : "t";
+				}
+			}
+			// value has been adjusted now take new type
+			token.type = newType;
+		}
 		
 		// 1) check parenthesiss levels
-		if (stack.size() > 0 && CheckParenthesis(stack)) {
+		if (stack.size() > 0) {
+			int parlevel = CheckParenthesis(stack);
+			if (parlevel < 0) {
+				throw EXPRESSIONCloseParenthesisTooMuch();
+			} else if (parlevel > 0) {
+				throw EXPRESSIONOpenParenthesisTooMuch();
+			}
 		
 			//2a) reduce parenthesis
 			int stackend = (int)stack.size() - 1;
@@ -215,8 +290,10 @@ namespace MUZ {
 		return nop;
 	}
 
-	/** Check parenthesis levels are paired. */
-	bool ExpressionEvaluator::CheckParenthesis(ExpVector& tokens)
+	/** Check parenthesis levels are paired.
+	 @return < 0 too much ')', 0 OK, > 0 too much '('
+	 */
+	int ExpressionEvaluator::CheckParenthesis(ExpVector& tokens)
 	{
 		int level = 0;
 		for (auto token : tokens) {
@@ -225,9 +302,9 @@ namespace MUZ {
 			} else if (token.type == tokenTypePARCLOSE) {
 				level -= 1;
 			}
-			if (level < 0) break;// checks if one ')' too much
+			if (level < 0) break;
 		}
-		return level == 0; // checks '(' or ')' too much
+		return level;
 	}
 	
 }// namespace

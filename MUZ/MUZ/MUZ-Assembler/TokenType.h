@@ -15,25 +15,30 @@ namespace MUZ {
 	enum TokenType {
 		// transitionnal parsing token types
 		tokenTypeUNKNOWN,	/// No token of this type can be stored
-		tokenTypeLETTERS,	/// during parsing of a characters string but not knowing what king of token it will be
-		tokenTypeDIGITS,	/// during parsing of a character string containing digits
-		tokenTypeHEXNUMBER,	/// a "0x" prefixed, "$" prefixed or "h" suffixed number (- )before decimal translation)
-		tokenTypeBINNUMBER,	/// a "b" suffixed binary number (- )before decimal translation)
-		tokenTypeOCTNUMBER,	/// a "0" prefixed octal number - followed by at least one 0-7 digit (before decimal translation)
-		tokenTypeFILENAME,	/// a filename after an #INCLUDE, #INSERTHEX, #INSERTBIN directive
+		
+		// convertible token types
+		tokenTypeFIRSTCONVERTIBLE,
+		  tokenTypeFIRSTNUMERIC,
+		    tokenTypeHEXNUMBER,	/// a "0x" prefixed, "$" prefixed or "h" suffixed number (- )before decimal translation)
+		    tokenTypeBINNUMBER,	/// a "b" suffixed binary number (- )before decimal translation)
+		    tokenTypeOCTNUMBER,	/// a "0" prefixed octal number - followed by at least one 0-7 digit (before decimal translation)
+		    tokenTypeDECNUMBER,	/// a non prefixed and non suffixed decimal number
+		  tokenTypeLASTNUMERIC,
+		  tokenTypeLETTERS,	/// during parsing of a characters string but not knowing what king of token it will be
+		  tokenTypeSTRING,	/// a " delimited string
+		  tokenTypeBOOL,		/// for boolean values - this can only be written by expression evaluator
+		  tokenTypeCHAR,		/// a ' delimited character
+		tokenTypeLASTCONVERTIBLE,
 
 		// final stored tokens
+		tokenTypeFILENAME,	/// a filename after an #INCLUDE, #INSERTHEX, #INSERTBIN directive
 		tokenTypeCOMMENT,	/// ';' and all that follows on line
 		tokenTypeDIRECTIVE,	/// a '.' or '#' directive
-		tokenTypeSTRING,	/// a " delimited string
-		tokenTypeCHAR,		/// a ' delimited character
-		tokenTypeDECNUMBER,	/// a non prefixed and non suffixed decimal number
 		tokenTypeCOMMA,		/// a ','
 		tokenTypePAROPEN,	/// (
 		tokenTypePARCLOSE,	/// )
 		tokenTypeDOLLAR,	/// $ alone (not an hex number prefix)
 		tokenTypeCOLON,		/// ':' ending a label definition
-		tokenTypeBOOL,		/// for boolean values - this can only be written by expression evaluator
 		
 		// stored operators
 		tokenTypeOP_LSHIFT,	/// <<

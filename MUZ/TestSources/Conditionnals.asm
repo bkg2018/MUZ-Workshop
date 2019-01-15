@@ -40,7 +40,7 @@ ok equ 0 ; no
 ok equ 1 ; yes
 #ELSE ; -> SKIPTOEND
 ok equ 0 ; no
-#ELSE ; ignored
+#ELSE ; WARNING ignored
 ok equ -1 ; no
 #ENDIF
 
@@ -48,7 +48,7 @@ ok equ -1 ; no
 ok equ 2 ; no
 #ELSE ; -> DOTOEND
 ok equ 3 ; yes
-#ELSE ; error
+#ELSE ; WARNING
 ok equ 4
 #ENDIF
 
