@@ -38,8 +38,10 @@ namespace MUZ {
 		{ errorWrongCondition, "A condition is invalid (e.g. JR PO,nn)"},
 		{ errorNotRegister, "expected register name was not found"},
 		{ errorWrongComma, "unexpected comma"},
+		{ errorLeftOperandMissing, "left operand missing in expression"},
 		{ errorDefine, "#DEFINE could not define a symbol"},
 		{ errorInvalidSymbol,	 "invalid symbol name after DEFINE"},
+		{ errorInvalidExpression, "invalid expression after symbol"},
 		{ errorFileSyntax, "invalid syntax for file name"},
 		{ errorProcessor, "unsupported processor in .PROC"},
 		{ warningUnsolvedExpression, "a symbol was unsolved in an expression"},
@@ -65,37 +67,55 @@ namespace MUZ {
 	}
 	void ErrorList::Info( ErrorKind kind, class CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
-			push_back({ errorTypeINFO, kind, codeline.file, codeline.line, ""});
+			push_back({ errorTypeINFO, kind, codeline.file, codeline.line, "", codeline.curtoken});
 	}
 	void ErrorList::Warning( ErrorKind kind, class CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
-			push_back({ errorTypeWARNING, kind, codeline.file, codeline.line, ""});
+			push_back({ errorTypeWARNING, kind, codeline.file, codeline.line, "", codeline.curtoken});
 	}
 	void ErrorList::ForceWarning( ErrorKind kind, class CodeLine& codeline) {
-		push_back({ errorTypeWARNING, kind, codeline.file, codeline.line, ""});
+		push_back({ errorTypeWARNING, kind, codeline.file, codeline.line, "", codeline.curtoken});
 	}
 	void ErrorList::AboutFile( ErrorKind kind, class CodeLine& codeline, std::string file, int pass) {
 		if (TestPass(codeline,pass))
-			push_back({ errorTypeABOUTFILE, kind, codeline.file, codeline.line, file});
+			push_back({ errorTypeABOUTFILE, kind, codeline.file, codeline.line, file, codeline.curtoken});
 	}
 	bool ErrorList::Error( ErrorKind kind, class CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
-			push_back({ errorTypeERROR, kind, codeline.file, codeline.line, ""});
+			push_back({ errorTypeERROR, kind, codeline.file, codeline.line, "", codeline.curtoken});
 		return false;
 	}
 	bool ErrorList::Error( ErrorKind kind, class CodeLine& codeline, std::string file, int pass) {
 		if (TestPass(codeline,pass))
-			push_back({ errorTypeERROR, kind, codeline.file, codeline.line, file});
+			push_back({ errorTypeERROR, kind, codeline.file, codeline.line, file, codeline.curtoken});
 		return false;
 	}
 	bool ErrorList::Fatal( ErrorKind kind, class CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
-			push_back({ errorTypeFATAL, kind, codeline.file, codeline.line, ""});
+			push_back({ errorTypeFATAL, kind, codeline.file, codeline.line, "", codeline.curtoken});
 		return false;
 	}
 	bool ErrorList::Fatal( ErrorKind kind, class CodeLine& codeline, std::string file, int pass) {
 		if (TestPass(codeline,pass))
-			push_back({ errorTypeFATAL, kind, codeline.file, codeline.line, file});
+			push_back({ errorTypeFATAL, kind, codeline.file, codeline.line, file, codeline.curtoken});
 		return false;
+	}
+
+	/** Close the list by sorting it and setting message references into codelines. */
+	void ErrorList::Close(Assembler& as)
+	{
+		std::sort(begin(), end(), []( ErrorMessage& m1, ErrorMessage& m2) {
+			if (m1.file < m2.file) return true;
+			if (m1.file > m2.file) return false;
+			return m1.line < m2.line;
+		});
+
+		for (int m = 0 ; m < size() ; m++) {
+			ErrorMessage& msg = at(m);
+			CodeLine* codeline = as.GetCodeLine(msg.file, msg.line);
+			if (codeline) {
+				codeline->message = m;
+			}
+		}
 	}
 } // namespace

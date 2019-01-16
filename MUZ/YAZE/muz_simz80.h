@@ -40,11 +40,11 @@ class YazeZ80 : public MUZ::Computer {
 public:
 	/* two sets of accumulator / flags */
 	WORD		af[2];
-	int			af_sel;
+	int			af_sel = 0;
 
 	/* two sets of 16-bit registers */
 	ddregs		regs[2];
-	int			regs_sel;
+	int			regs_sel = 0;
 	
 	WORD		ir;
 	WORD		ix;

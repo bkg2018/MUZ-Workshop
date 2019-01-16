@@ -799,7 +799,9 @@ namespace MUZ {
 		return lastDirective->Parse(*as, *this, codeline, nullptr, msg);
 	}
 	
-	/** Evaluate next tokens to produce a boolean result. */
+	/** Evaluate next tokens to produce a boolean result.
+	 @throw EXPRESSIONLeftOperandMissing
+	 */
 	bool Parser::EvaluateBoolean(bool & result)
 	{
 		int lasttoken = -1;
@@ -819,6 +821,7 @@ namespace MUZ {
 	
 	/** Evaluate next tokens to produce a string result. Operands must be strings, but automatic conversion will happen on
 	 decimal numbers and booleans.
+	 @throw EXPRESSIONLeftOperandMissing
 	 */
 	bool Parser::EvaluateString(string & result)
 	{
@@ -839,6 +842,7 @@ namespace MUZ {
 	}
 	
 	/** Evaluate next tokens to produce an integer number masked by the address size.
+	 @throw EXPRESSIONLeftOperandMissing
 	 */
 	bool Parser::EvaluateAddress(ADDRESSTYPE & result)
 	{

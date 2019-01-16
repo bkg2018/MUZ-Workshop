@@ -39,7 +39,7 @@
 		869B4C5421AC50F600E65FE7 /* MuzBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C5321AC50F600E65FE7 /* MuzBridge.mm */; };
 		86C121B321AEC742005A5C36 /* PortMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86C121B121AEC742005A5C36 /* PortMgr.cpp */; };
 		86C121B621AED01D005A5C36 /* ROMPagingPort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86C121B521AED01D005A5C36 /* ROMPagingPort.cpp */; };
-		86D4D26B21CBB50E0091B0E0 /* reÃÅduction expression.numbers in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26821CBB50E0091B0E0 /* reÃÅduction expression.numbers */; };
+		86D4D26B21CBB50E0091B0E0 /* reÃ?duction expression.numbers in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26821CBB50E0091B0E0 /* reÃ?duction expression.numbers */; };
 		86D4D26C21CBB50E0091B0E0 /* binary comparison.numbers in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */; };
 		86D4D26D21CBB50E0091B0E0 /* Evaluation expression.md in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */; };
 /* End PBXBuildFile section */
@@ -156,6 +156,7 @@
 		8642240721CB964E0053E02F /* !Main.asm.bak */ = {isa = PBXFileReference; lastKnownFileType = text; path = "!Main.asm.bak"; sourceTree = "<group>"; };
 		8642240821CB964E0053E02F /* Utilities.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Utilities.asm; sourceTree = "<group>"; };
 		8642240921CB964E0053E02F /* Assembler.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Assembler.asm; sourceTree = "<group>"; };
+		864A75EF21EF4FF3007B65D4 /* Errors.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; path = Errors.asm; sourceTree = "<group>"; };
 		86554A6421C01D110071447E /* Expression.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = Expression.cpp; sourceTree = "<group>"; };
 		86554A6521C01D110071447E /* Expression.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Expression.h; sourceTree = "<group>"; };
 		86554A6721C022A30071447E /* TokenType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TokenType.h; sourceTree = "<group>"; };
@@ -247,7 +248,7 @@
 		86C121B521AED01D005A5C36 /* ROMPagingPort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ROMPagingPort.cpp; sourceTree = "<group>"; };
 		86C121EE21B0344D005A5C36 /* muz_simz80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muz_simz80.h; sourceTree = "<group>"; };
 		86C121EF21B0344E005A5C36 /* muz_mmu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muz_mmu.h; sourceTree = "<group>"; };
-		86D4D26821CBB50E0091B0E0 /* reÃÅduction expression.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "reÃÅduction expression.numbers"; sourceTree = "<group>"; };
+		86D4D26821CBB50E0091B0E0 /* reÃ?duction expression.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "reÃ?duction expression.numbers"; sourceTree = "<group>"; };
 		86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "binary comparison.numbers"; sourceTree = "<group>"; };
 		86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = "Evaluation expression.md"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -515,6 +516,7 @@
 			isa = PBXGroup;
 			children = (
 				868F597721DEA279009C6222 /* Z80-Instructions.asm */,
+				864A75EF21EF4FF3007B65D4 /* Errors.asm */,
 				86892BCA21BA72F100EC24EF /* Conditionnals.asm */,
 				8642232C21C6442D0053E02F /* Expressions.asm */,
 				866786CC21D112060027E67F /* Instructions.asm */,
@@ -527,7 +529,7 @@
 			isa = PBXGroup;
 			children = (
 				86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */,
-				86D4D26821CBB50E0091B0E0 /* reÃÅduction expression.numbers */,
+				86D4D26821CBB50E0091B0E0 /* reÃ?duction expression.numbers */,
 				8694B71D21B19468006EF947 /* design.md */,
 				86892BC821B95B6700EC24EF /* conditionnal assembling.md */,
 				86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */,
@@ -763,7 +765,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				869B4C0E21AC4F8000E65FE7 /* Assets.xcassets in Resources */,
-				86D4D26B21CBB50E0091B0E0 /* reÃÅduction expression.numbers in Resources */,
+				86D4D26B21CBB50E0091B0E0 /* reÃ?duction expression.numbers in Resources */,
 				86D4D26D21CBB50E0091B0E0 /* Evaluation expression.md in Resources */,
 				869B4C1121AC4F8000E65FE7 /* Main.storyboard in Resources */,
 				86D4D26C21CBB50E0091B0E0 /* binary comparison.numbers in Resources */,

@@ -1023,7 +1023,7 @@ namespace MUZ {
 						return true;
 					}
 					if (operr == operrWRONGREGISTER) return msg.Error(errorWrongRegister, codeline);
-					msg.Error(errorWrongOperand2, codeline);
+					return msg.Error(errorWrongOperand2, codeline);
 				}
 				return msg.Error(errorMissingComma, codeline);
 			}
@@ -1726,6 +1726,7 @@ namespace MUZ {
 		/** Assemble instruction at current token, returns false if error
 		 OUT (num8),A
 		 OUT (C),r  ->  A B C D E   H L
+		 OUT (C), 0 (undoc)
 		 @param codeline the code line in which assembled codes will be stored
 		 @param msg the message list which will receive any warning or error information
 		 */
@@ -1749,6 +1750,7 @@ namespace MUZ {
 						if (n == 0) {
 							codeline.AddCode(0xED, 0x71);
 							codeline.SetCycles(12);
+							return true;
 						}
 					}
 					return msg.Error(errorWrongOperand2, codeline);
@@ -1857,6 +1859,7 @@ namespace MUZ {
 				src = indHL;
 			} else if (operrOK == optools.GetIndX(codeline, src, d)) {
 				codeline.SetCycles(23);
+				// 3 arguments? (undoc)
 				if (GetComma(codeline)) {
 					// RES bit,(X+d),reg  (undoc)
 					operr = optools.GetReg8(codeline, reg, REGFLAGS::ABCDEHL);
@@ -1866,7 +1869,7 @@ namespace MUZ {
 					}
 					return msg.Error(errorWrongOperand3, codeline);
 				}
-				return msg.Error(errorMissingComma, codeline);
+				// 2 arguments form, keep going
 			} else {
 				return msg.Error(errorWrongOperand2, codeline);
 			}
@@ -2309,6 +2312,7 @@ namespace MUZ {
 				src = indHL;
 			} else if (operrOK == optools.GetIndX(codeline, src, d)) {
 				codeline.SetCycles(23);
+				// 3 arguments? (undoc)
 				if (GetComma(codeline)) {
 					// SET bit,(X+d),reg  (undoc)
 					operr = optools.GetReg8(codeline, reg, REGFLAGS::ABCDEHL);
@@ -2318,7 +2322,7 @@ namespace MUZ {
 					}
 					return msg.Error(errorWrongOperand3, codeline);
 				}
-				return msg.Error(errorMissingComma, codeline);
+				// 2 arguments form, keep going
 			} else {
 				return msg.Error(errorWrongOperand2, codeline);
 			}

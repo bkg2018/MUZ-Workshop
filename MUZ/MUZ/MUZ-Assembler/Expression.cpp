@@ -35,6 +35,8 @@ namespace MUZ {
 	 	Unary operators are managed first, then 2-operands operators by decreasing priority.
 	 
 	 	The tokens array range is reduced to one token holding the result, which is also returned.
+
+	 	@throw EXPRESSIONLeftOperandMissing
 	 */
 	ParseToken ExpressionEvaluator::EvaluateExpression(ExpVector& tokens, int start, int& end)
 	{
@@ -72,6 +74,7 @@ namespace MUZ {
 				if (found < i || found < 0 || found + 1 > end)
 					break;// finished, no more operators
 				// 5a-2a) compute op(found) with arg(found-1) and arg(found+1)
+				if (found==0) throw EXPRESSIONLeftOperandMissing();
 				result = allOps[tokens[found].type].op->Exec(tokens[found-1], tokens[found+1]);
 				// 5a-2b) delete op(found) and argument(found+1)
 				tokens.erase(found, 2);
@@ -88,6 +91,8 @@ namespace MUZ {
 	
 	/** Reduces all parentheses sub-expressions to their result. The tokens array is reduced to arguments and operators which
 	 	form an expression with no parenthesis left. The end index is adjusted accrodingly.
+
+	 @throw EXPRESSIONLeftOperandMissing
 	 */
 	ParseToken ExpressionEvaluator::ReduceParenthesis(ExpVector& tokens, int start, int& end)
 	{
@@ -163,6 +168,7 @@ namespace MUZ {
 	 @param tokens the vector holding all tokens from a line
 	 @param start the first token to use for evaluation
 	 @return a token containing the result
+	 @throw EXPRESSIONLeftOperandMissing
 	 */
 	ParseToken ExpressionEvaluator::Evaluate(ExpVector& tokens, int start, int& end)
 	{

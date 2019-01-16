@@ -45,8 +45,7 @@ namespace MUZ {
 		if (!parser.ExistMoreToken(1)) return false;
 		ParseToken& symbol = parser.NextToken();
 		if (symbol.type != tokenTypeLETTERS) {
-			msg.Error(errorInvalidSymbol, codeline);
-			return false;
+			return msg.Error(errorInvalidSymbol, codeline);
 		}
 		// skip directive
 		parser.JumpTokens(1);
@@ -60,15 +59,17 @@ namespace MUZ {
 		if (parser.ExistMoreToken(1)) {
 			parser.JumpNextToken();// skip symbol
 			// convert letters to strings
-			parser.EvaluateString(value);
+			try { parser.EvaluateString(value); }
+			catch (const std::exception & e) {
+				return msg.Error(errorInvalidExpression, codeline);
+			}
 		}
 		DefSymbol* defsymbol = as.CreateDefSymbol(symbol.source, value);
 		if (defsymbol) {
 			defsymbol->codeline = &codeline;
 			return true;
 		}
-		msg.Error(errorDefine, codeline);
-		return false;
+		return msg.Error(errorDefine, codeline);
 	}
 
 	/** #UNDEF <symbol>
@@ -78,9 +79,8 @@ namespace MUZ {
 		if (!parser.ExistMoreToken(1)) return false;
 		ParseToken& symbol = parser.NextToken();
 		if (symbol.type != tokenTypeLETTERS) {
-			msg.Error(errorInvalidSymbol, codeline);
-			return false;
-		}
+			return msg.Error(errorInvalidSymbol, codeline);
+			}
 		// Delete the symbol : no symbol resolving or the symbol to undefine would be replaced by its value
 		as.DeleteDefSymbol(symbol.source);
 		parser.JumpTokens(1);
@@ -95,7 +95,10 @@ namespace MUZ {
 		if (!parser.ExistMoreToken(1)) return false;
 		std::string symbol;
 		parser.JumpNextToken();
-		parser.EvaluateString(symbol); // do not resolve symbols here!
+		try { parser.EvaluateString(symbol); }
+		catch (const std::exception & e) {
+			return msg.Error(errorInvalidExpression, codeline);
+		}
 		return as.ExistSymbol(symbol);
 	}
 
@@ -106,7 +109,10 @@ namespace MUZ {
 		if (!parser.ExistMoreToken(1)) return false;
 		std::string symbol;
 		parser.JumpNextToken();
-		parser.EvaluateString(symbol); // // do not resolve symbols here!
+		try { parser.EvaluateString(symbol); }
+		catch (const std::exception & e) {
+			return msg.Error(errorInvalidExpression, codeline);
+		}
 		return ! as.ExistSymbol(symbol);
 	}
 
@@ -118,7 +124,10 @@ namespace MUZ {
 		parser.ResolveNextSymbols(true); // use '*' joker
 		parser.JumpTokens(1);
 		bool b = false;
-		parser.EvaluateBoolean(b);
+		try { parser.EvaluateBoolean(b); }
+		catch (const std::exception & e) {
+			return msg.Error(errorInvalidExpression, codeline);
+		}
 		return b;
 	}
 	
@@ -131,8 +140,7 @@ namespace MUZ {
 		ParseToken& filetoken = parser.NextToken();
 		// and include new file
 		if ((filetoken.type != tokenTypeSTRING) && (filetoken.type != tokenTypeFILENAME)) {
-			msg.Error(errorInvalidSymbol, codeline);
-			return false;
+			return msg.Error(errorInvalidSymbol, codeline);
 		}
 		// trim spaces at the end of filename
 		strtrimright(filetoken.source);
@@ -158,8 +166,7 @@ namespace MUZ {
 		ParseToken& filetoken = parser.NextToken();
 		// and include new file
 		if ((filetoken.type != tokenTypeSTRING) && (filetoken.type != tokenTypeFILENAME)) {
-			msg.Error(errorFileSyntax, codeline);
-			return false;
+			return msg.Error(errorFileSyntax, codeline);
 		}
 		// trim spaces at the end of filename
 		strtrimright(filetoken.source);
@@ -181,8 +188,7 @@ namespace MUZ {
 		ParseToken& filetoken = parser.NextToken();
 		// and include new file
 		if ((filetoken.type != tokenTypeSTRING) && (filetoken.type != tokenTypeFILENAME)) {
-			msg.Error(errorFileSyntax, codeline);
-			return false;
+			return msg.Error(errorFileSyntax, codeline);
 		}
 		// trim spaces at the end of filename
 		strtrimright(filetoken.source);
@@ -208,9 +214,8 @@ namespace MUZ {
 		parser.ResolveNextSymbols(false);// allow string expressions
 		ParseToken& proc = parser.NextToken();
 		if (proc.source != "Z80") {
-			msg.Error(errorProcessor, codeline);
-			return false;
-		}
+			return msg.Error(errorProcessor, codeline);
+			}
 		// sets the instructions set into the assembler
 		as.SetInstructions(proc.source);
 		parser.JumpTokens(1);
@@ -223,7 +228,10 @@ namespace MUZ {
 		std::string name;
 		if (parser.ExistMoreToken(1)) {
 			parser.JumpNextToken();
-			parser.EvaluateString(name);
+			try { parser.EvaluateString(name); }
+			catch (const std::exception & e) {
+				return msg.Error(errorInvalidExpression, codeline);
+			}
 		}
 		as.SetCodeSection( name );
 		return true;
@@ -237,11 +245,17 @@ namespace MUZ {
 		if (parser.ExistMoreToken(1)) {
 			ParseToken& token = parser.JumpNextToken();
 			if (token.type != tokenTypeCOMMA) {
-				parser.EvaluateString(name);
+				try { parser.EvaluateString(name); }
+				catch (const std::exception & e) {
+					return msg.Error(errorInvalidExpression, codeline);
+				}
 			}
 			if (GetComma(codeline)) {
 				std::string param;
-				parser.EvaluateString(param);
+				try { parser.EvaluateString(param); }
+				catch (const std::exception & e) {
+					return msg.Error(errorInvalidExpression, codeline);
+				}
 				param = std::to_upper(param);
 				if (param == "SAVE") {
 					save = true;
@@ -262,6 +276,10 @@ namespace MUZ {
 		ADDRESSTYPE address = 0;
 		parser.JumpTokens(1); // skip after .EQU
 		parser.EvaluateAddress(address);
+		try { parser.EvaluateAddress(address); }
+		catch (const std::exception & e) {
+			return msg.Error(errorInvalidExpression, codeline);
+		}
 		if (label == nullptr)
 			label = codeline.label;
 		if (label) {
@@ -288,7 +306,10 @@ namespace MUZ {
 		}
 		// compute address, unsolved symbols have been replaced by "0"
 		parser.JumpTokens(1); // skip after .EQU
-		parser.EvaluateAddress(address);
+		try { parser.EvaluateAddress(address); }
+		catch (const std::exception & e) {
+			return msg.Error(errorInvalidExpression, codeline);
+		}
 		// use previous label if none on this line
 		if (label == nullptr)
 			label = codeline.label;
@@ -298,8 +319,7 @@ namespace MUZ {
 			codeline.label = label;
 			return true;
 		}
-		msg.Error(errorEquate, codeline);
-		return false;
+		return msg.Error(errorEquate, codeline);
 	}
 	
 	/** .DB <num8> [, <num8> [...]]
@@ -314,14 +334,20 @@ namespace MUZ {
 			ParseToken& token = parser.JumpNextToken();
 			if (token.type == tokenTypeSTRING) {
 				std::string result;
-				parser.EvaluateString(result);
+				try { parser.EvaluateString(result); }
+				catch (const std::exception & e) {
+					return msg.Error(errorInvalidExpression, codeline);
+				}
 				// store each byte off the string
 				for (auto c: result) {
 					codeline.AddCode(c);
 				}
 			} else if (token.type == tokenTypeDECNUMBER) {
 				ADDRESSTYPE address;
-				parser.EvaluateAddress(address);// will only use 8-bit in fact
+				try { parser.EvaluateAddress(address); }
+				catch (const std::exception & e) {
+					return msg.Error(errorInvalidExpression, codeline);
+				}
 				if ((address > 255)  && ! as.IsFirstPass()) {
 					msg.ForceWarning(warningTooBig8, codeline);
 				}
@@ -354,14 +380,20 @@ namespace MUZ {
 			ParseToken& token = parser.JumpNextToken();
 			if (token.type == tokenTypeSTRING) {
 				std::string result;
-				parser.EvaluateString(result);
+				try { parser.EvaluateString(result); }
+				catch (const std::exception & e) {
+					return msg.Error(errorInvalidExpression, codeline);
+				}
 				// store each byte off the string
 				for (auto c: result) {
 					codeline.AddCode(c);
 				}
 			} else if (token.type == tokenTypeDECNUMBER) {
 				ADDRESSTYPE address;
-				parser.EvaluateAddress(address);
+				try { parser.EvaluateAddress(address); }
+				catch (const std::exception & e) {
+					return msg.Error(errorInvalidExpression, codeline);
+				}
 				codeline.AddCode(address & 0xFF, address >> 8);
 			} else if (token.type == tokenTypeLETTERS && token.unsolved) {
 				codeline.AddCode(0,0);

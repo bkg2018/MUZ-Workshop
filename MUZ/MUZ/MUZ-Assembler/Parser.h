@@ -157,17 +157,21 @@ namespace MUZ {
 			return ResolveSymbols( *curtoken + 1, joker );
 		}
 		
-		/** Evaluate next tokens to produce a boolean result. */
-		bool EvaluateBoolean(bool & result);
+		/** Evaluate next tokens to produce a boolean result.
+		 @throw EXPRESSIONLeftOperandMissing
+		 */
+		bool EvaluateBoolean(bool & result) noexcept(false);
 
 		/** Evaluate next tokens to produce a string result. Operands must be strings, but automatic conversion will happen on
-		 	decimal numbers and booleans.
+		 	decimal numbers and booleans. May throw exceptions
+		 @throw EXPRESSIONLeftOperandMissing
 		 */
-		bool EvaluateString(std::string & result);
+		bool EvaluateString(std::string & result) noexcept(false);
 		
 		/** Evaluate nexxt tokens to produce an integer number masked by the address size.
+		 @throw EXPRESSIONLeftOperandMissing
 		 */
-		bool EvaluateAddress(ADDRESSTYPE & result);
+		bool EvaluateAddress(ADDRESSTYPE & result) noexcept(false);
 
 		/** Cuts a string into a vector of tokens.
 		 Spaces and tabs are not stored in tokens, only the significant parts are stored.

@@ -32,11 +32,15 @@ namespace MUZ {
 		/** Default type conversion. UNKNOWN means no type conversion. */
 		TokenType defaultTypeConversion = tokenTypeUNKNOWN;
 		
-		/** Evaluates a non-parenthesed expression starting at a given token index. Updates the end index depending on the tokens erased and replaced by intermediate results. Tokens before the starting index are untouched. */
-		ParseToken EvaluateExpression(ExpVector& tokens, int start, int& end);
+		/** Evaluates a non-parenthesed expression starting at a given token index. Updates the end index depending on the tokens erased and replaced by intermediate results. Tokens before the starting index are untouched.
+		 @throw EXPRESSIONLeftOperandMissing
+		 */
+		ParseToken EvaluateExpression(ExpVector& tokens, int start, int& end) noexcept(false);
 
-		/** Reduces all parentheses sub-expressions to their result. Updates the end index depending on the tokens erased and replaced by intermediate results. Tokens before the starting index are untouched. */
-		ParseToken ReduceParenthesis(ExpVector& tokens, int start, int& end);
+		/** Reduces all parentheses sub-expressions to their result. Updates the end index depending on the tokens erased and replaced by intermediate results. Tokens before the starting index are untouched.
+		 @throw EXPRESSIONLeftOperandMissing
+		 */
+		ParseToken ReduceParenthesis(ExpVector& tokens, int start, int& end) noexcept(false);
 
 	public:
 		ExpressionEvaluator();
@@ -57,8 +61,9 @@ namespace MUZ {
 		
 		/** Evaluates a sub expression starting at a given token until end of tokens or invalid token type.
 		 Returns a result, and updates the last token used
+		 @throw EXPRESSIONLeftOperandMissing
 		 */
-		ParseToken Evaluate(ExpVector& tokens, int start, int& end);
+		ParseToken Evaluate(ExpVector& tokens, int start, int& end) noexcept(false);
 	};
 	
 } // namespace

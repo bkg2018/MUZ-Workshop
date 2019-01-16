@@ -44,5 +44,9 @@ namespace MUZ {
 	class EXPRESSIONNotString: public std::exception {
 		virtual const char *what() const _NOEXCEPT{ return "expression doesn't compute as a string"; }
 	};
+	class EXPRESSIONLeftOperandMissing: public std::exception {
+		virtual const char *what() const _NOEXCEPT{ return "2-operands operator is missing left operand"; }
+	};
+
 }
 #endif /* Asm_Exceptions_h */

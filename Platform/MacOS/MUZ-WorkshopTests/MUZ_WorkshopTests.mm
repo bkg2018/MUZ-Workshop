@@ -34,19 +34,11 @@ using std::cout;
 const std::string SourcesRootDir = "/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/MUZ-GIT/MUZ/TestSources/";
 std::string RomHexFilePath ;
 std::string SourceFilePath;
-std::string ConditionnalsSourcePath;
-std::string ExpressionsSourcePath;
-std::string InstructionsSourcePath;
-std::string Z80InstructionsSourcePath;
 
 - (void)setUp {
 	
 	RomHexFilePath = "/Users/bkg2018/Desktop/IntelHex.hex";
 	SourceFilePath = "/Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm";
-	ConditionnalsSourcePath = SourcesRootDir + "Conditionnals.asm";
-	ExpressionsSourcePath = SourcesRootDir + "Expressions.asm";
-	InstructionsSourcePath = SourcesRootDir + "Instructions.asm";
-	Z80InstructionsSourcePath = SourcesRootDir + "Z80-Instructions.asm";
 }
 
 - (void)tearDown {
@@ -243,6 +235,8 @@ std::string Z80InstructionsSourcePath;
 	
 	// the virtual computer
 	YazeZ80 computer;
+	computer.InitRegisters();
+	computer.pc = 0;
 	computer.SetMaxRAM();
 	computer.SetROM(RomHexFilePath);
 	MUZ::ROMPagingPort pagingport(&computer, true);
@@ -285,7 +279,7 @@ std::string Z80InstructionsSourcePath;
 	MUZ::ErrorList msg;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testConditionnalsAssembler.LST");
-	as.AssembleFile(ConditionnalsSourcePath, msg);
+	as.AssembleFile(SourcesRootDir + "Conditionnals.asm", msg);
 	// dump warnings?
 	for (MUZ::ErrorMessage& m : msg) {
 		if (m.type == MUZ::errorTypeWARNING) {
@@ -299,7 +293,7 @@ std::string Z80InstructionsSourcePath;
 	MUZ::ErrorList msg;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testExpressionsAssembler.LST");
-	as.AssembleFile(ExpressionsSourcePath, msg);
+	as.AssembleFile(SourcesRootDir + "Expressions.asm", msg);
 }
 
 -(void) testInclude {
@@ -469,8 +463,8 @@ std::string Z80InstructionsSourcePath;
 			codeline.source = std::string("LD A,") + reg;
 			parser.Split(codeline, msg);
 			codeline.curtoken = 3;
-			bool result = optools.GetReg8(codeline, optype);
-			XCTAssertEqual(result, true);
+			MUZ::OperandError result = optools.GetReg8(codeline, optype);
+			XCTAssertEqual(result, MUZ::operrOK);
 		}
 		for (auto & reg: reg8bad) {
 			token.source = reg;
@@ -480,8 +474,8 @@ std::string Z80InstructionsSourcePath;
 			codeline.source = std::string("LD A,") + reg;
 			parser.Split(codeline, msg);
 			codeline.curtoken = 3;
-			bool result = optools.GetReg8(codeline, optype);
-			XCTAssertEqual(result, false);
+			MUZ::OperandError result = optools.GetReg8(codeline, optype);
+			XCTAssertNotEqual(result, MUZ::operrOK);
 		}
 	}
 	// 16 bit registers tests
@@ -640,7 +634,7 @@ std::string Z80InstructionsSourcePath;
 	as.SetListingFilename("testInstructionsCodes.LST");
 	as.SetMemoryFilename("testInstructionsCodesMemory.LST");
 	as.SetIntelHexFilename("testInstructionsCodesIntelHex.HEX");
-	as.AssembleFile(InstructionsSourcePath, msg); // false = not included
+	as.AssembleFile(SourcesRootDir + "Instructions.asm", msg); // false = not included
 }
 
 -(void) testZ80InstructionCodes {
@@ -648,8 +642,24 @@ std::string Z80InstructionsSourcePath;
 	MUZ::ErrorList msg;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testZ80InstructionsCodes.LST");
-	as.AssembleFile(Z80InstructionsSourcePath, msg); // false = not included
+	as.SetMemoryFilename("testZ80InstructionsCodesMemory.LST");
+	as.SetIntelHexFilename("testZ80InstructionsCodesIntelHex.HEX");
+	as.SetLogFilename("testZ80InstructionsCodes.LOG");
+	as.EnableFullListing(true); // don't limit .DB/.DS/.DW sequences to 8 bytes
+	as.AssembleFile(SourcesRootDir + "Z80-Instructions.asm", msg); // false = not included
 }
 
+-(void) testErrors {
+	MUZ::Assembler as;
+	MUZ::ErrorList msg;
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetListingFilename("testErrors.LST");
+	as.SetMemoryFilename("testErrorsMemory.LST");
+	as.SetIntelHexFilename("testErrorsIntelHex.HEX");
+	as.SetLogFilename("testErrors.LOG");
+	as.EnableFullListing(true); // don't limit .DB/.DS/.DW sequences to 8 bytes
+	as.AssembleFile(SourcesRootDir + "Errors.asm", msg); // false = not included
+
+}
 
 @end

@@ -324,8 +324,7 @@ namespace MUZ {
 			if (token.type == tokenTypeDIRECTIVE) {
 				Directive* directive = GetDirective(token.source);
 				if (!directive) {
-					msg.Error(errorUnknownDirective, codeline);
-					return false;
+					return msg.Error(errorUnknownDirective, codeline);
 				}
 				// Let the directive do further parsing and symbols resolving
 				bool result = directive->Parse(*this, parser, codeline, label, msg);
@@ -356,7 +355,7 @@ namespace MUZ {
 					instruction->Assemble(codeline, msg);
 					break;
 				} else {
-					msg.Error(errorUknownInstruction, codeline);
+					return msg.Error(errorUknownInstruction, codeline);
 				}
 			}
 			// assume it is something to convert, like HEXNUMBER
@@ -371,18 +370,22 @@ namespace MUZ {
 
 	/** Initializes listing file, close previous if any.
 	 */
-	void Assembler::PrepareListing(CodeLine& codeline, ErrorList& msg)
+	bool Assembler::PrepareListing(ErrorList& msg)
 	{
+		// cross reference log messages to codelines
+		msg.Close(*this);
+		// create file
 		if ( ! m_outputdir.empty() && ! m_listingfilename.empty()) {
 			string filename = m_outputdir + NORMAL_DIR_SEPARATOR + m_listingfilename;
 			if (m_listingfile) {
 				fclose(m_listingfile);
 			}
 			m_listingfile = fopen(filename.c_str(), "w");
-			if (m_listingfile == nullptr) {
-				msg.AboutFile(errorWritingListing, codeline, filename);
+			if (m_listingfile) {
+				return true;
 			}
 		}
+		return false;
 	}
 	
 	/** Generate a listing for an assembled code line. The listing file must have been initialized first.
@@ -534,6 +537,7 @@ namespace MUZ {
 				// get the assembled section it comes from
 				asmsection = FindSection(dumpaddress, dumpaddress + nbbytes - 1);
 				if (!asmsection) {
+					// This can NOT happen!
 					msg.Error(errorMUZNoSection, codeline);
 				} else if ( ! asmsection->save() ) {
 					// Comes from a non saved .data section, don't output
@@ -558,6 +562,160 @@ namespace MUZ {
 		fprintf(hexfile, "%s\n", ":00000001FF");
 		fclose(hexfile);
 	}
+
+	/** Generate listing from an assembled source file. */
+	void Assembler::GenerateListing(int file, ErrorList& msg)
+	{
+		if (m_listingfile == nullptr) return;
+		SourceFile* sourcefile = m_files.at(file);
+
+		// print the full file path in listing
+		string mainfile = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
+		fprintf(m_listingfile, "\n%s%s\n\n", spaces(20).c_str(), mainfile.c_str());
+
+		// List all lines and included files
+		for (auto & codeline : sourcefile->lines) {
+			// listing for this code line
+			GenerateListing(codeline, msg);
+			// warning/error?
+			if (codeline.message >= 0) {
+				ErrorMessage& m = msg.at(codeline.message);
+				string prefix = spaces(20);
+				if (m.type == MUZ::errorTypeWARNING) {
+					prefix += "^^^^  Warning W";
+				} else if (m.type == MUZ::errorTypeERROR) {
+					prefix += "^^^^  Error E";
+				}
+				if (m.token >= 0 && m.token < codeline.tokens.size()) {
+					fprintf(m_listingfile, "%s%04d: '%s': %s\n", prefix.c_str(), m.kind, codeline.tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
+				} else {
+					fprintf(m_listingfile, "%s%04d: %s\n", prefix.c_str(), m.kind, msg.GetMessage(m.kind).c_str());
+				}
+			}
+
+			// For included files, do the listing with a recursive call
+			if (codeline.includefile > codeline.file) {
+				GenerateListing(codeline.includefile, msg);// then recursively generate listing of the included file
+				// list current parent file to show that include if finished
+				fprintf(m_listingfile, "\n%s%s\n", spaces(20).c_str(), mainfile.c_str());
+				// end now
+			}
+		}
+	}
+
+	/** End listing file. */
+	void Assembler::EndListing()
+	{
+		// list sections
+		if (m_sections.size()) {
+			std::string s = "\nSections:\n------------------------------------------------------------------------------------\n";
+			fprintf(m_listingfile, "%s", s.c_str());
+			if (m_status.trace) printf("%s", s.c_str());
+			for (auto section: m_sections) {
+				s = string("\t") + section.first + ":";
+				if (section.second->m_ranges.size() == 0) {
+					s += "<empty>";
+				} else {
+					// sort ranges by starting addresses
+					std::sort(section.second->m_ranges.begin(), section.second->m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
+						return a.start < b.start;
+					});
+					for (auto range: section.second->m_ranges) {
+						s += " [" + address_to_base(range.start, 16, 4) + "-" + address_to_base(range.end, 16, 4) + "]";
+					}
+				}
+				fprintf(m_listingfile, "%s\n", s.c_str());
+			}
+		}
+
+		// list DEFINEs
+		if (m_defsymbols.size()) {
+			std::string s = "\nDefines:\n------------------------------------------------------------------------------------\n";
+			fprintf(m_listingfile, "%s", s.c_str());
+			if (m_status.trace) printf("%s", s.c_str());
+			std::map<string,DefSymbol*> sortedSymbols;
+			for (auto symbol: m_defsymbols) {
+				sortedSymbols[symbol.first] = symbol.second;
+			}
+			for (auto defsymbol: sortedSymbols) {
+				string sleft;
+				sleft = defsymbol.first.substr(0,29);
+				sleft += spaces(30 - (int)sleft.length());
+				sleft += " :" + defsymbol.second->value;
+				s = string("\t") + sleft + "\n";
+				fprintf(m_listingfile, "%s", s.c_str());
+				if (m_status.trace) printf("%s", s.c_str());
+			}
+		}
+
+		// build sorted map of equate and labels
+		std::map<string,Label*> sortedEquates;		// map, ordered by name
+		std::map<string,ADDRESSTYPE> nameSortedLabels;	//map ordered by name
+		std::map<ADDRESSTYPE, string> addressSortedLabels;	// map ordered by address
+		for (auto label: labels) {
+			if ( ! label.second->equate) {
+				nameSortedLabels[label.first] = label.second->addresses[0];
+				addressSortedLabels[label.second->addresses[0]] = label.first;
+			} else {
+				sortedEquates[label.first] = label.second;
+			}
+		}
+
+		// list equates
+		if (sortedEquates.size()) {
+			std::string s = "\nEquates:\n------------------------------------------------------------------------------------\n";
+			fprintf(m_listingfile, "%s", s.c_str());
+			if (m_status.trace) printf("%s", s.c_str());
+			for (auto equate: sortedEquates) {
+				string sleft;
+				sleft = equate.first.substr(0,29);
+				sleft += spaces(30 - (int)sleft.length());
+				sleft += " :" + address_to_base(equate.second->addresses[0], 16, 4);
+				s = string("\t") + sleft + "\n";
+				fprintf(m_listingfile, "%s", s.c_str());
+				if (m_status.trace) printf("%s", s.c_str());
+			}
+		}
+
+		// list global labels sorted by value then name
+		if (nameSortedLabels.size() || addressSortedLabels.size()) {
+			std::string s = "\nGlobal labels:\n--- By Name -------------------------------|---By Address --------------------------\n";
+			fprintf(m_listingfile, "%s", s.c_str());
+			if (m_status.trace) printf("%s", s.c_str());
+			bool nameFinished = false, addressFinished = false;
+			auto iterName = nameSortedLabels.begin();
+			auto iterAddress = addressSortedLabels.begin();
+			if (iterName == nameSortedLabels.end()) nameFinished = true;
+			if (iterAddress == addressSortedLabels.end()) addressFinished = true;
+			do {
+				string sleft, sright;
+				if (nameFinished) {
+					sleft = spaces(30) + "  " + spaces(4);
+				} else {
+					sleft = iterName->first.substr(0,29);
+					sleft += spaces(30 - (int)sleft.length());
+					sleft += " :" + address_to_base(iterName->second, 16, 4);
+					iterName++;
+					if (iterName == nameSortedLabels.end()) nameFinished = true;
+				}
+				if (!addressFinished) {
+					sright = address_to_base(iterAddress->first, 16, 4) + ": ";
+					sright += iterAddress->second.substr(0,30);
+					iterAddress++;
+					if (iterAddress == addressSortedLabels.end()) addressFinished = true;
+				}
+				s = string("\t") + sleft + spaces(3) + "|" + spaces(3) + sright + "\n";
+				fprintf(m_listingfile, "%s", s.c_str());
+				if (m_status.trace) printf("%s", s.c_str());
+
+			} while (!nameFinished || !addressFinished);
+		}
+
+		// listing finished
+		fclose(m_listingfile);
+		m_listingfile = nullptr;
+	}
+
 
 	/** Fill a memory image and list of sections from an assembled source file. */
 	void Assembler::FillFromFile(int file, DATATYPE* memory, Section& section, ErrorList& msg)
@@ -588,6 +746,9 @@ namespace MUZ {
 	/** Generate warning/error file. */
 	void Assembler::GenerateLog(ErrorList& msg)
 	{
+		// cross reference log messages to codelines
+		msg.Close(*this);
+		// create file
 		FILE* logfile = nullptr;
 		if ( ! m_outputdir.empty() && ! m_logfilename.empty()) {
 			string filename = m_outputdir + NORMAL_DIR_SEPARATOR + m_logfilename;
@@ -596,25 +757,33 @@ namespace MUZ {
 		if (logfile == nullptr) {
 			return;
 		}
-		std::sort(msg.begin(), msg.end(), []( ErrorMessage& m1, ErrorMessage& m2) {
-			return m1.file < m2.file || m1.line < m2.line;
-		});
+
 		// dump warnings?
 		string mainfile = m_files[0]->fileprefix + m_files[0]->filepath + NORMAL_DIR_SEPARATOR + m_files[0]->filename;
 		fprintf(logfile, "%s\n", mainfile.c_str());
 		fprintf(logfile, "%s\n", "WARNING:");
 		if (m_status.trace) printf("%s\n", "WARNING:");
 		for (MUZ::ErrorMessage& m : msg) {
+			CodeLine* codeline = GetCodeLine(m.file, m.line);
 			if (m.type == MUZ::errorTypeWARNING) {
-				fprintf(logfile, "%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
+				if (m.token >= 0 && m.token < codeline->tokens.size()) {
+					fprintf(logfile, "\t%5d: W%04d: '%s': %s\n", m.line, m.kind, codeline->tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
+				} else {
+					fprintf(logfile, "\t%5d: W%04d: %s\n", m.line, m.kind, msg.GetMessage(m.kind).c_str());
+				}
 				if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
 			}
 		}
 		fprintf(logfile, "%s\n", "ERRORS:");
 		if (m_status.trace) printf("%s\n", "ERRORS:");
 		for (MUZ::ErrorMessage& m : msg) {
+			CodeLine* codeline = GetCodeLine(m.file, m.line);
 			if (m.type == MUZ::errorTypeERROR) {
-				fprintf(logfile, "%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
+				if (m.token >= 0 && m.token < codeline->tokens.size()) {
+					fprintf(logfile, "\t%5d: E%04d: '%s': %s\n", m.line, m.kind, codeline->tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
+				} else {
+					fprintf(logfile, "\t%5d: E%04d: %s\n", m.line, m.kind, msg.GetMessage(m.kind).c_str());
+				}
 				if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
 			}
 		}
@@ -899,125 +1068,13 @@ namespace MUZ {
 		}
 		m_status.cursection = nullptr;
 
-		
 		// Execute pass 2
 		CodeLine codeline;
 		codeline.includefile = 0;
 		codeline.file = 0;
 		codeline.as = this;
-		PrepareListing(codeline, msg);
 		AssembleIncludedFilePassTwo(file, codeline, msg);
-		
-		// Close the listing file if finished main source
-		if (m_listingfile) {
-			
-			// list sections
-			if (m_sections.size()) {
-				std::string s = "\nSections:\n------------------------------------------------------------------------------------\n";
-				fprintf(m_listingfile, "%s", s.c_str());
-				if (m_status.trace) printf("%s", s.c_str());
-				for (auto section: m_sections) {
-					s = string("\t") + section.first + ":";
-					if (section.second->m_ranges.size() == 0) {
-						s += "<empty>";
-					} else {
-						// sort ranges by starting addresses
-						std::sort(section.second->m_ranges.begin(), section.second->m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
-							return a.start < b.start;
-						});
-						for (auto range: section.second->m_ranges) {
-							s += " [" + address_to_base(range.start, 16, 4) + "-" + address_to_base(range.end, 16, 4) + "]";
-						}
-					}
-					fprintf(m_listingfile, "%s\n", s.c_str());
-				}
-			}
-			
-			// list DEFINEs
-			if (m_defsymbols.size()) {
-				std::string s = "\nDefines:\n------------------------------------------------------------------------------------\n";
-				fprintf(m_listingfile, "%s", s.c_str());
-				if (m_status.trace) printf("%s", s.c_str());
-				std::map<string,DefSymbol*> sortedSymbols;
-				for (auto symbol: m_defsymbols) {
-					sortedSymbols[symbol.first] = symbol.second;
-				}
-				for (auto defsymbol: sortedSymbols) {
-					string sleft;
-					sleft = defsymbol.first.substr(0,29);
-					sleft += spaces(30 - (int)sleft.length());
-					sleft += " :" + defsymbol.second->value;
-					s = string("\t") + sleft + "\n";
-					fprintf(m_listingfile, "%s", s.c_str());
-					if (m_status.trace) printf("%s", s.c_str());
-				}
-			}
 
-			// build sorted map of equate and labels
-			std::map<string,Label*> sortedEquates;		// map, ordered by name
-			std::map<string,ADDRESSTYPE> nameSortedLabels;	//map ordered by name
-			std::map<ADDRESSTYPE, string> addressSortedLabels;	// map ordered by address
-			for (auto label: labels) {
-				if ( ! label.second->equate) {
-					nameSortedLabels[label.first] = label.second->addresses[0];
-					addressSortedLabels[label.second->addresses[0]] = label.first;
-				} else {
-					sortedEquates[label.first] = label.second;
-				}
-			}
-
-			// list equates
-			if (sortedEquates.size()) {
-				std::string s = "\nEquates:\n------------------------------------------------------------------------------------\n";
-				fprintf(m_listingfile, "%s", s.c_str());
-				if (m_status.trace) printf("%s", s.c_str());
-				for (auto equate: sortedEquates) {
-					string sleft;
-					sleft = equate.first.substr(0,29);
-					sleft += spaces(30 - (int)sleft.length());
-					sleft += " :" + address_to_base(equate.second->addresses[0], 16, 4);
-					s = string("\t") + sleft + "\n";
-					fprintf(m_listingfile, "%s", s.c_str());
-					if (m_status.trace) printf("%s", s.c_str());
-				}
-			}
-			
-			// list global labels sorted by value then name
-			if (nameSortedLabels.size() || addressSortedLabels.size()) {
-				std::string s = "\nGlobal labels:\n--- By Name -------------------------------|---By Address --------------------------\n";
-				fprintf(m_listingfile, "%s", s.c_str());
-				if (m_status.trace) printf("%s", s.c_str());
-				bool nameFinished = false, addressFinished = false;
-				auto iterName = nameSortedLabels.begin();
-				auto iterAddress = addressSortedLabels.begin();
-				if (iterName == nameSortedLabels.end()) nameFinished = true;
-				if (iterAddress == addressSortedLabels.end()) addressFinished = true;
-				do {
-					string sleft, sright;
-					if (nameFinished) {
-						sleft = spaces(30) + "  " + spaces(4);
-					} else {
-						sleft = iterName->first.substr(0,29);
-						sleft += spaces(30 - (int)sleft.length());
-						sleft += " :" + address_to_base(iterName->second, 16, 4);
-						iterName++;
-						if (iterName == nameSortedLabels.end()) nameFinished = true;
-					}
-					if (!addressFinished) {
-						sright = address_to_base(iterAddress->first, 16, 4) + ": ";
-						sright += iterAddress->second.substr(0,30);
-						iterAddress++;
-						if (iterAddress == addressSortedLabels.end()) addressFinished = true;
-					}
-					s = string("\t") + sleft + spaces(3) + "|" + spaces(3) + sright + "\n";
-					fprintf(m_listingfile, "%s", s.c_str());
-					if (m_status.trace) printf("%s", s.c_str());
-					
-				} while (!nameFinished || !addressFinished);
-			}
-			fclose(m_listingfile);
-			m_listingfile = nullptr;
-		}
 		return true;
 	}
 	
@@ -1095,18 +1152,10 @@ namespace MUZ {
 		// basic security
 		if (file.size() < 2) return false;
 		if (codeline.file >= (int)m_files.size()) return false;
-		
-		// For included files, put the #include in listing here before the included source is listed
-		if (codeline.file != codeline.includefile) GenerateListing(codeline, msg);
 
 		SourceFile* sourcefile = m_files.at(codeline.includefile);
 		m_status.curfile = codeline.includefile;
 	
-		// print the full file path in listing
-		if (m_listingfile) {
-			fprintf(m_listingfile, "\n                    %s\n\n", file.c_str()); // 20 spaces before file path
-		}
-		
 		// now reassemble line by line
 		for (CodeLine& cl : sourcefile->lines) {
 			
@@ -1115,20 +1164,6 @@ namespace MUZ {
 			if (cl.assembled) {
 				cl.address = GetAddress();
 				cl.section = GetSection();
-			}
-			// Add the assembled line to listing, or display parent filename if it was an #INCLUDE directive
-			if (cl.tokens.size() > 0) {
-				ParseToken& token = cl.tokens.at(0);
-				if (cl.assembled && token.isIncludingDirective()) {
-					// list current parent file to show that include if finished
-					fprintf(m_listingfile, "\n                    %s\n", file.c_str()); // 20 spaces before file path
-				} else {
-					// not assembled, or not an include directive: show normal listing
-					GenerateListing( cl, msg);
-				}
-			} else {
-				// no token: shoud be empty line, list it
-				GenerateListing( cl, msg);
 			}
 			AdvanceAddress(cl.code.size()) ;
 		}
@@ -1629,12 +1664,17 @@ namespace MUZ {
 			if (m_status.trace) printf("Pass 2: %s\n", file.c_str());
 			if (AssembleMainFilePassTwo(file, msg)) {
 
+				// Generate Listing with warnings and errors
+				if (PrepareListing(msg)) {
+					GenerateListing(0, msg);
+					EndListing();
+				}
+
 				// first build memory image and a section with all the written address ranges
 				DATATYPE* memory = (DATATYPE*)calloc(MEMMAXSIZE, 1);
 				Section section;
 				ErrorList mergingMsg;
 				FillFromFile(0, memory, section, mergingMsg); // this handles recursive calls for included files
-				
 
 				// dump in memory listing
 				GenerateMemoryListing(memory, section, mergingMsg);
@@ -1779,6 +1819,14 @@ namespace MUZ {
 		return false;
 	}
 	
+	/** Interface to files and lines. */
+	CodeLine* Assembler::GetCodeLine(int file, int line)
+	{
+		if (file < 0 || file >= m_files.size()) return nullptr;
+		SourceFile* sourcefile = m_files.at(file);
+		if (line < 0 || line >= sourcefile->lines.size()) return nullptr;
+		return &sourcefile->lines.at(line - 1);
+	}
 
 
 } // namespace MUZ

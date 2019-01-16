@@ -101,13 +101,17 @@ namespace MUZ {
 		/** Assembles a prepared code line. */
 		bool AssembleCodeLine(CodeLine& codeline, ErrorList& msg);
 		/** Initializes listing file, closes previous if any. */
-		void PrepareListing(CodeLine& codeline, ErrorList& msg);
+		bool PrepareListing(ErrorList& msg);
 		/** Generates a listing line for an assembled codeline. */
 		void GenerateListing(CodeLine& codeline, ErrorList& msg);
 		/** Initializes memory listing file, close previous if any. */
 		void GenerateMemoryListing(DATATYPE* memory, Section& section, ErrorList& msg);
 		/** Generate Intel HEX output. */
 		void GenerateIntelHex(DATATYPE* memory, Section& section, ErrorList& msg);
+		/** Generate listing from an assembled source file. */
+		void GenerateListing(int file, ErrorList& msg);
+		/** End listing file. */
+		void EndListing();
 		/** Fill a memory image and list of sections from an assembled source file. */
 		void FillFromFile(int file, DATATYPE* memory, Section& section, ErrorList& msg);
 		/** Generate warning/error file. */
@@ -242,6 +246,9 @@ namespace MUZ {
 		bool ReplaceDefSymbol(ParseToken& token);
 		/** try to replace a symbol from the Label table */
 		bool ReplaceLabel(std::string& source);
+
+		/** Interface to files and lines. */
+		CodeLine* GetCodeLine(int file, int line);
 
 	};
 }

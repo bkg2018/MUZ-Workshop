@@ -61,6 +61,8 @@ namespace MUZ {
 		class Label*		label = nullptr;
 		/** Assembler reference. */
 		class Assembler*	as = nullptr;
+		/** Error/Warning message reference, -1 if no message */
+		int 				message = -1;
 	
 		
 		/** Resets the token exploration system to the first token after the instruction. */

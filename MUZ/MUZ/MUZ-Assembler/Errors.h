@@ -73,10 +73,12 @@ namespace MUZ {
 		errorWrongCondition,			// A condition is invalid (e.g. JR PO,nn)
 		errorNotRegister,				// expected register name was not found
 		errorWrongComma,				// unexpected comma
+		errorLeftOperandMissing,		// left operand missing in expression
 
 		// errors detected by directives
 		errorDefine,					// #DEFINE could not define a symbol
 		errorInvalidSymbol,				// invalid symbol name after DEFINE
+		errorInvalidExpression,			// invalid expression after symbol
 		errorFileSyntax,				// invalid syntax for file name
 		errorProcessor,					// unsupported processor in .PROC
 		warningUnsolvedExpression,		// a symbol was unsolved in an expression
@@ -95,7 +97,8 @@ namespace MUZ {
 		ErrorKind kind=errorUnknown;			// (see enum above): what kind of error it is
 		int file;								// code file where it occured
 		int line;								// code line in code file
-		std::string filename="";					// relevant file name, or empty()
+		std::string filename="";				// relevant file name, or empty()
+		int token = -1;								// relevant token index, or -1
 	};
 	
 	class ErrorList : public std::vector<ErrorMessage>
@@ -122,7 +125,10 @@ namespace MUZ {
 		bool Fatal( ErrorKind kind, class CodeLine& codeline, int pass = 1);
 		/** Stores a fatal error message if the Assembler is doing Pass 1. */
 		bool Fatal( ErrorKind kind, class CodeLine& codeline, std::string filename, int pass = 1) ;
-		
+
+
+		/** Close the list by sorting it and setting message references into codelines. */
+		void Close(class Assembler& as);
 	};
 	
 } // namespace MUZ
