@@ -39,7 +39,9 @@
 		869B4C5421AC50F600E65FE7 /* MuzBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 869B4C5321AC50F600E65FE7 /* MuzBridge.mm */; };
 		86C121B321AEC742005A5C36 /* PortMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86C121B121AEC742005A5C36 /* PortMgr.cpp */; };
 		86C121B621AED01D005A5C36 /* ROMPagingPort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86C121B521AED01D005A5C36 /* ROMPagingPort.cpp */; };
-		86D4D26B21CBB50E0091B0E0 /* reÌ?duction expression.numbers in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26821CBB50E0091B0E0 /* reÌ?duction expression.numbers */; };
+		86C29DF221F0E5110069F6BE /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86C29DF121F0E5110069F6BE /* QuartzCore.framework */; };
+		86C29DF321F0E51F0069F6BE /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86C29DF121F0E5110069F6BE /* QuartzCore.framework */; };
+		86D4D26B21CBB50E0091B0E0 /* reduction expression.numbers in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26821CBB50E0091B0E0 /* reduction expression.numbers */; };
 		86D4D26C21CBB50E0091B0E0 /* binary comparison.numbers in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */; };
 		86D4D26D21CBB50E0091B0E0 /* Evaluation expression.md in Resources */ = {isa = PBXBuildFile; fileRef = 86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */; };
 /* End PBXBuildFile section */
@@ -248,7 +250,9 @@
 		86C121B521AED01D005A5C36 /* ROMPagingPort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ROMPagingPort.cpp; sourceTree = "<group>"; };
 		86C121EE21B0344D005A5C36 /* muz_simz80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muz_simz80.h; sourceTree = "<group>"; };
 		86C121EF21B0344E005A5C36 /* muz_mmu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muz_mmu.h; sourceTree = "<group>"; };
-		86D4D26821CBB50E0091B0E0 /* reÌ?duction expression.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "reÌ?duction expression.numbers"; sourceTree = "<group>"; };
+		86C29DEF21EFFEF40069F6BE /* GenerateListing.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GenerateListing.md; sourceTree = "<group>"; };
+		86C29DF121F0E5110069F6BE /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		86D4D26821CBB50E0091B0E0 /* reduction expression.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "reduction expression.numbers"; sourceTree = "<group>"; };
 		86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "binary comparison.numbers"; sourceTree = "<group>"; };
 		86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = "Evaluation expression.md"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -258,6 +262,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				86C29DF321F0E51F0069F6BE /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,6 +270,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				86C29DF221F0E5110069F6BE /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -529,10 +535,11 @@
 			isa = PBXGroup;
 			children = (
 				86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */,
-				86D4D26821CBB50E0091B0E0 /* reÌ?duction expression.numbers */,
+				86D4D26821CBB50E0091B0E0 /* reduction expression.numbers */,
 				8694B71D21B19468006EF947 /* design.md */,
 				86892BC821B95B6700EC24EF /* conditionnal assembling.md */,
 				86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */,
+				86C29DEF21EFFEF40069F6BE /* GenerateListing.md */,
 			);
 			path = work;
 			sourceTree = "<group>";
@@ -592,6 +599,7 @@
 				869B4C0821AC4F8000E65FE7 /* MUZ-Workshop */,
 				869B4C5C21AD8B3F00E65FE7 /* MUZ-WorkshopTests */,
 				869B4C0721AC4F8000E65FE7 /* Products */,
+				86C29DF021F0E5110069F6BE /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -683,6 +691,14 @@
 			path = "MUZ-WorkshopTests";
 			sourceTree = "<group>";
 		};
+		86C29DF021F0E5110069F6BE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				86C29DF121F0E5110069F6BE /* QuartzCore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -765,7 +781,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				869B4C0E21AC4F8000E65FE7 /* Assets.xcassets in Resources */,
-				86D4D26B21CBB50E0091B0E0 /* reÌ?duction expression.numbers in Resources */,
+				86D4D26B21CBB50E0091B0E0 /* reduction expression.numbers in Resources */,
 				86D4D26D21CBB50E0091B0E0 /* Evaluation expression.md in Resources */,
 				869B4C1121AC4F8000E65FE7 /* Main.storyboard in Resources */,
 				86D4D26C21CBB50E0091B0E0 /* binary comparison.numbers in Resources */,

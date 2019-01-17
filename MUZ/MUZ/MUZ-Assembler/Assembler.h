@@ -27,19 +27,60 @@ namespace MUZ {
 	
 	class Assembler
 	{
+	public:
+		//MARK: - Public structures for API
+
+		/** Public structure for various parts of a listing line, returned by GetListing public function. */
+		struct ListingLine {
+
+			/** Flags for parts of the listing. Each flag is set to 1 to enable the corresponding data part in the line.
+			 	These flags use a bitfield structure so they take 0 or 1 values only. */
+			struct ListingParts {
+				int address: 1;	// display address at left most
+				int code:1;		// display bytes of code
+				int line:1;		// display line number
+				int source:1;	// display source instruction/directive
+				int comment:1;	// display comment
+				int message:1;	// display message
+				int file:1;		// display own file path
+				int include:1;	// display include file path
+			} parts;
+
+			/** nullptr or pointer to previous line when contiuing a block of 5+ bytes. */
+			ListingLine* prev = nullptr;
+			/** Address or value part. (left most). Enabled by parts.address */
+			ADDRESSTYPE address = 0;
+			/** Up to 4 bytes of code. Enabled by parts.code */
+			std::string codebytes;
+			/** File number. Display name if parts.file is 1 */
+			int file = 0;
+			/** Included file number. Displays name if parts.include is 1 */
+			int includefile = -1;
+			/** Line number. Enabled by parts.line */
+			int line = 0;
+			/** Source code without comment. Enabled by parts.source */
+			std::string source;
+			/** Comment. Enabled by parts.comment */
+			std::string comment;
+			/** Warning/Error message reference. */
+			int message = -1;
+			int token = -1;
+		};
+
+	private:
 		//MARK: - Private management structures
 		/** Definition for one source file. */
 		struct SourceFile
 		{
-			bool	included = false; 		// true for #INCLUDEd files
-			int		parentfile = -1;		// if included, parent file reference
-			int		parentline = -1;		// if included, line number in parent file
-			SourceFile* parent = nullptr;	// if included, parent source file
-			std::string fileprefix;			// Windows specific prefixes
-			std::string filepath;			// path part of the file
-			std::string filename;			// filename part of the file
+			bool		included = false; 	// true for #INCLUDEd files
+			int			parentfile = -1;	// if included, parent file reference
+			int			parentline = -1;	// if included, line number in parent file
+			SourceFile*	parent = nullptr;	// if included, parent source file
+			std::string	fileprefix;			// Windows specific prefixes
+			std::string	filepath;			// path part of the file
+			std::string	filename;			// filename part of the file
 			std::vector<CodeLine> lines;	// parsed/assembled content, matches the source file lines
-			LabelMap labels;				// local labels
+			LabelMap	labels;				// local labels
 			
 			/** Gets the root parent of this SourceFile. */
 			SourceFile* Root();
@@ -64,6 +105,9 @@ namespace MUZ {
 		LabelMap					labels;
 		std::vector<SourceFile*>	m_files;
 		std::unordered_map<std::string, Section*> m_sections;
+
+		// Tables for IDE interaction
+		
 		
 		// Stack for imbricated conditionnal modes
 		ParsingModeStack			m_modes;	// stack of all imbricated levels, root being the first and never popped
@@ -77,6 +121,7 @@ namespace MUZ {
 			std::string	lastlabel;				// last global label, used as a prefix for local labels starting with '@'
 			bool		trace		= false;	// true to activate debug trace on standard output
 			bool 		allcodelisting=false;	// true to list all bytes of a line, false to limit to 2 lines of listing
+			bool		listing    = true;		// true to enable listings (directives #LIST ON/OFF and #NOLIST)
 		} m_status;
 		
 		//MARK: - Private Output directory and file names
@@ -103,18 +148,22 @@ namespace MUZ {
 		/** Initializes listing file, closes previous if any. */
 		bool PrepareListing(ErrorList& msg);
 		/** Generates a listing line for an assembled codeline. */
-		void GenerateListing(CodeLine& codeline, ErrorList& msg);
+		void GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg);
+		/** Generates a listing line for an assembled codeline. */
+		void GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg, std::vector<ListingLine> & listing);
 		/** Initializes memory listing file, close previous if any. */
 		void GenerateMemoryListing(DATATYPE* memory, Section& section, ErrorList& msg);
-		/** Generate Intel HEX output. */
+		/** Generates Intel HEX output. */
 		void GenerateIntelHex(DATATYPE* memory, Section& section, ErrorList& msg);
-		/** Generate listing from an assembled source file. */
-		void GenerateListing(int file, ErrorList& msg);
+		/** Generates file listing from current assembling. */
+		void GenerateFileListing(int file, ErrorList& msg);
+		/** Generates in-memory file listing from current assembling. */
+		void GenerateFileListing(int file, ErrorList& msg, std::vector<ListingLine> & listing);
 		/** End listing file. */
 		void EndListing();
-		/** Fill a memory image and list of sections from an assembled source file. */
+		/** Fills a memory image and lists of sections from an assembled source file. */
 		void FillFromFile(int file, DATATYPE* memory, Section& section, ErrorList& msg);
-		/** Generate warning/error file. */
+		/** Generates warning/error file. */
 		void GenerateLog(ErrorList& msg);
 		
 		//MARK: - Private Sections management
@@ -165,7 +214,7 @@ namespace MUZ {
 
 	public:
 		//MARK: - PUBLIC API
-		
+
 		//MARK: - Constructor and destructor
 		/** Initialize directives and instructions. */
 		Assembler();
@@ -193,6 +242,12 @@ namespace MUZ {
 		void SetSymbolsFilename(std::string filename);
 		/** Sets the erros/warnings log filename. */
 		void SetLogFilename(std::string filename);
+		/** Gets the full listing from current assembling. */
+		std::vector<ListingLine> GetListing(ErrorList& msg);
+		/** Enable/Disable the listings. */
+		void EnableListing(bool yes);
+		/** Known listing enabled status. */
+		bool isListingEnabled();
 		
 		//MARK: - Sections and current address management
 		/** sets current section to code .*/

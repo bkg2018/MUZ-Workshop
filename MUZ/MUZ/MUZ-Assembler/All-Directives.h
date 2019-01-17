@@ -68,6 +68,16 @@ namespace MUZ {
 	class DirectiveINSERTBIN : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
+	/** #NOLIST */
+	class DirectiveLISTOFF : public Directive {
+		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	};
+	/** #LIST */
+	class DirectiveLIST : public Directive {
+		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	};
+
+
 
 	// Assembler directives (.xxx)
 	

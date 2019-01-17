@@ -265,6 +265,7 @@ namespace MUZ {
 					// non empty strings considered true
 					newValue = token.source.empty() ? "" : "t";
 				}
+				token.source = newValue;
 			}
 			// value has been adjusted now take new type
 			token.type = newType;

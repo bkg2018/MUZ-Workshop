@@ -202,7 +202,32 @@ namespace MUZ {
 		parser.JumpTokens(1);
 		return true;
 	}
-	
+
+	/** #NOLIST
+	 */
+	bool DirectiveLISTOFF::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
+		as.EnableListing(false);
+		return true;
+	}
+	/** #LIST [ON|OFF]
+	 */
+	bool DirectiveLIST::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
+		bool enable = true;
+		if (parser.ExistMoreToken(1)) {
+			std::string value;
+			parser.JumpNextToken();
+			try { parser.EvaluateString(value); }
+			catch (const std::exception & e) {
+				return msg.Error(errorInvalidExpression, codeline);
+			}
+			enable = (std::to_upper(value) == "OFF") ? false : true;
+		}
+		as.EnableListing(enable);
+		// always list this line if it is not #LIST OFF
+		if (enable) codeline.listing = true;
+		return true;
+	}
+
 	//MARK: - Assembler directives (.)
 	
 	/** .PROC Z80

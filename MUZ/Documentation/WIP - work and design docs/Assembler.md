@@ -90,8 +90,10 @@ The preprocessor has been made compatible with *Steve Cousins Workshop* assemble
 |`#INCLUDE <filepath>`                |`#INCLUDE    Hardware\Workshop\!Manager.asm`        |Includes another assembler source file. The current defsymbols, labels, address and sections are all active during the assembly of the included file. Absolute and relative paths can be used. Both Windows `\` and UNIX `/` are path separators. Multiples separators are considered as one: `///` and `\\\` are the same as `/`. Relative paths are relative to the main source path. File names with no path are searched in the parent path first, and if not found, in the main source directory.|
 |`#INSERTHEX <hexfile>`               |                                                    |Inserts an Intel Hex File in code. Each Intel HEX record has its own fixed address and will update the current assembling address counter. MUZ Assembler only processes the type-0 (16-bit address and up to 255 bytes) and type-1 (end of file) records. The file path follows the same rules as for `#INCLUDE` directive (see above.)|
 |`#INSERTBIN <binfile>`               |                                                    |Inserts the content of a file byte by byte at current address of current section. The file path follows the same rules as for `#INCLUDE` directive (see above.)|
+|`#NOLIST` ||Disables listing from now on, until `#LIST` is used. 
+|`#LIST [ON|OFF]`||Enables or disables listing from now on. `#LIST` alone acts as `#LIST ON`.
 
-
+**Remark: ** `COND` is a synonym to `#IF` and `ENDC` is a synonym of  `#ENDIF`. 
 
 ### Preprocessor Symbols <`defsymbol`>
 

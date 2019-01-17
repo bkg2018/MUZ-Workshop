@@ -41,13 +41,13 @@ class ViewController: NSViewController {
 	@IBAction func hitStep(_ sender: Any) {
 		self.bridge.step()
 		let reg = self.bridge.registers()
-		registerPC.stringValue = String(format:"%04X", reg.pc)
-		registerAF.stringValue = String(format:"%04X", reg.af)
-		registerBC.stringValue = String(format:"%04X", reg.bc)
-		registerDE.stringValue = String(format:"%04X", reg.de)
-		registerHL.stringValue = String(format:"%04X", reg.hl)
-		registerIX.stringValue = String(format:"%04X", reg.ix)
-		registerIY.stringValue = String(format:"%04X", reg.iy)
+		registerPC.stringValue = String(format:"%04X", reg.pc & 0xFFFF)
+		registerAF.stringValue = String(format:"%04X", reg.af & 0xFFFF)
+		registerBC.stringValue = String(format:"%04X", reg.bc & 0xFFFF)
+		registerDE.stringValue = String(format:"%04X", reg.de & 0xFFFF)
+		registerHL.stringValue = String(format:"%04X", reg.hl & 0xFFFF)
+		registerIX.stringValue = String(format:"%04X", reg.ix & 0xFFFF)
+		registerIY.stringValue = String(format:"%04X", reg.iy & 0xFFFF)
 	}
 	override var representedObject: Any? {
 		didSet {

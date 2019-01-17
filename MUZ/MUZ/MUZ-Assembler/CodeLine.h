@@ -63,8 +63,9 @@ namespace MUZ {
 		class Assembler*	as = nullptr;
 		/** Error/Warning message reference, -1 if no message */
 		int 				message = -1;
+		/** Enable/disable listing. */
+		bool				listing = true;
 	
-		
 		/** Resets the token exploration system to the first token after the instruction. */
 		void ResetInstruction(int start);
 		

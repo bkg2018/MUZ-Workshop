@@ -73,7 +73,7 @@ namespace MUZ {
 	 @param address the starting address to put first
 	 @param code the vector of code containing all code
 	 @param firstcode the index of the first code to display
-	 @param nbcodes the number of codes to display, frfom 0 to 4 maximum
+	 @param nbcodes the number of codes to display, from 0 to 4 maximum
 	 @param label a label containing a value to display instead of 'address', or nullptr to ignore
 	 @param file the file number of the code source line, -1 to ignore
 	 @param line the line number of the code source line, -1 to ignore
@@ -136,6 +136,8 @@ namespace MUZ {
 	vector<string> buildListingLines(CodeLine& codeline, bool all)
 	{
 		vector<string> result;
+		if (!codeline.listing) return result;
+
 		vector<BYTE>& code = codeline.code;
 		int codesize = (int)code.size();
 		
@@ -161,7 +163,91 @@ namespace MUZ {
 		return result;
 	}
 	
-	
+	/** Builds one listing line from a code index.
+	 @param address the starting address to put first
+	 @param code the vector of code containing all code
+	 @param firstcode the index of the first code to display
+	 @param nbcodes the number of codes to display, from 0 to 4 maximum
+	 @param label a label containing a value to display instead of 'address', or nullptr to ignore
+	 @param file the file number of the code source line, -1 to ignore
+	 @param line the line number of the code source line, -1 to ignore
+	 @param source the source code to display after address, code and line number
+	 @return the string containing the listing line
+	 */
+	Assembler::ListingLine buildOneListingLineStructure(ADDRESSTYPE address, vector<BYTE> code, int firstcode = 0, int nbcodes = 4, Label* label = nullptr, int file = -1, int line = -1, string source = "")
+	{
+		Assembler::ListingLine ll;
+		ll.parts = {0};
+
+		// address part
+		if (!code.empty() || (label != nullptr && label->codeline && label->codeline->file == file && label->codeline->line == line)) {
+			ll.address = address;
+			ll.parts.address = 1;
+		}
+
+		// separate source and comment
+		string instr, comment;
+		size_t semicommapos = source.find(";");
+		if (semicommapos != std::string::npos) {
+			instr = source.substr(0, semicommapos);
+			comment = source.substr( semicommapos);
+		} else {
+			instr = source;
+		}
+
+		// for no-code and for first line of code, include line number source and comment
+		if (code.empty() || (firstcode == 0)) {
+			ll.line = line;
+			ll.parts.line = 1;
+			ll.source = instr;
+			ll.parts.source = 1;
+			ll.comment = comment;
+			ll.parts.comment = 1;
+		}
+		// for all lines of code, include byte codes
+		if (! code.empty()) {
+			ll.codebytes = buildCodes(code, firstcode, nbcodes);
+			ll.parts.code = 1;
+		}
+
+		return ll;
+	}
+
+	/** Build one or more lines of listing for the codes given.
+	 @param codeline the assembled code line containing code to list.
+	 @param all true to list all bytes , false to limit to 2 lines of listing, with a "..." ellipsis for code not listed
+	 @return a vector of strings to display/list in order
+	 */
+	vector<Assembler::ListingLine> buildListingLineStructures(CodeLine& codeline, bool all )
+	{
+		vector<Assembler::ListingLine> result;
+		if (!codeline.listing) return result;
+
+		vector<BYTE>& code = codeline.code;
+		int codesize = (int)code.size();
+
+		// first line complete with 0 to 4 bytes of code
+		result.push_back(buildOneListingLineStructure(codeline.address, code, 0, std::min<int>(4, codesize), codeline.label, codeline.file, codeline.line, codeline.source));
+
+		// second line depend on the number of codes
+		if (codesize >= 5 && codesize <= 8) {
+			// second line with 1 to 4 bytes of code
+			result.push_back(buildOneListingLineStructure(codeline.address + 4, code, 4, codesize - 4));
+		} else if (codeline.code.size() >= 9) {
+			// rest of listing
+			if (all) {
+				// each packet of 4 code bytes
+				for (int start = 4 ; start < codeline.code.size() ; start += 4) {
+					result.push_back(buildOneListingLineStructure(codeline.address + start, code, start, 4));
+				}
+			} else {
+				// one line only with 1 to 3 bytes of code bytes 4 to 7, then "..." if there's more
+				result.push_back(buildOneListingLineStructure(codeline.address + 4, code, 4, 3));
+			}
+		}
+		return result;
+	}
+
 	//MARK: - Assembler::SourceFile structure
 	
 	/** Gets the root up the whole parent SourceFile tree. Should return the structure for the main source file. */
@@ -392,10 +478,11 @@ namespace MUZ {
 	 @param codeline the assembled code line containing code to list
 	 @param msg the error and warning list returned by assembler
 	 */
-	void Assembler::GenerateListing(CodeLine& codeline, ErrorList& msg)
+	void Assembler::GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg)
 	{
 		if (! m_listingfile) return;
 		vector<string> lines ;
+		if (!codeline.listing) return;
 		
 		if (codeline.assembled) {
 			lines = buildListingLines(codeline, m_status.allcodelisting);
@@ -411,7 +498,33 @@ namespace MUZ {
 			if (m_status.trace) printf("%s\n", thisline.c_str());
 		}
 	}
-	
+
+	/** Generate listing for an assembled code line.
+	 @param codeline the assembled code line containing code to list
+	 @param msg the error and warning list returned by assembler
+	 */
+	void Assembler::GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg, std::vector<ListingLine> & listing)
+	{
+		if (codeline.listing) {
+			if (codeline.assembled) {
+				std::vector<ListingLine> lines;
+				lines = buildListingLineStructures(codeline, m_status.allcodelisting);
+				for (auto & line: lines) listing.push_back(line);
+			} else {
+				vector<BYTE> emptycode;
+				listing.push_back(buildOneListingLineStructure(codeline.address, emptycode,  0, 0, nullptr, codeline.file, codeline.line, codeline.source));
+			}
+		}
+		// always add warning/errors
+		if (codeline.message >= 0) {
+			ListingLine line;
+			line.parts = {0};
+			line.parts.message = 1;
+			line.message = codeline.message;
+			listing.push_back(line);
+		}
+	}
+
 	/** Initializes memory listing file, close previous if any.
 	 */
 	void Assembler::GenerateMemoryListing(DATATYPE* memory, Section& section, ErrorList& mergingMsg)
@@ -564,7 +677,7 @@ namespace MUZ {
 	}
 
 	/** Generate listing from an assembled source file. */
-	void Assembler::GenerateListing(int file, ErrorList& msg)
+	void Assembler::GenerateFileListing(int file, ErrorList& msg)
 	{
 		if (m_listingfile == nullptr) return;
 		SourceFile* sourcefile = m_files.at(file);
@@ -576,7 +689,7 @@ namespace MUZ {
 		// List all lines and included files
 		for (auto & codeline : sourcefile->lines) {
 			// listing for this code line
-			GenerateListing(codeline, msg);
+			GenerateCodeLineListing(codeline, msg);
 			// warning/error?
 			if (codeline.message >= 0) {
 				ErrorMessage& m = msg.at(codeline.message);
@@ -595,10 +708,41 @@ namespace MUZ {
 
 			// For included files, do the listing with a recursive call
 			if (codeline.includefile > codeline.file) {
-				GenerateListing(codeline.includefile, msg);// then recursively generate listing of the included file
+				GenerateFileListing(codeline.includefile, msg);// then recursively generate listing of the included file
 				// list current parent file to show that include if finished
 				fprintf(m_listingfile, "\n%s%s\n", spaces(20).c_str(), mainfile.c_str());
 				// end now
+			}
+		}
+	}
+
+	/** Generate in-memory listing from current assembling. */
+	void Assembler::GenerateFileListing(int file, ErrorList& msg, std::vector<ListingLine> & listing)
+	{
+		// get shortcut to the file to list
+		if (file < 0 || file >= m_files.size()) return;
+		SourceFile* sourcefile = m_files.at(file);
+
+		// work variable
+		ListingLine fileline;
+		fileline.parts = {0};
+		fileline.parts.file = 1;
+		fileline.file = file;
+
+		// add the file path to listing
+		listing.push_back(fileline);
+
+		// List all lines and included files
+		for (auto & codeline : sourcefile->lines) {
+
+			// record listing lines for this code line
+			GenerateCodeLineListing(codeline, msg, listing);
+
+			// For included files, do the listing with a recursive call
+			if (codeline.includefile > codeline.file) {
+				GenerateFileListing(codeline.includefile, msg, listing);
+				// list current parent file to show that include if finished
+				listing.push_back(fileline);
 			}
 		}
 	}
@@ -736,11 +880,14 @@ namespace MUZ {
 				}
 			}
 		}
-		// sort ranges by starting addresses
-		std::sort(section.m_ranges.begin(), section.m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
-			return a.start < b.start;
-		});
 
+		// master file?
+		if (file == 0) {
+			// sort ranges by starting addresses
+			std::sort(section.m_ranges.begin(), section.m_ranges.end(), []( AddressRange const& a, AddressRange const& b) {
+				return a.start < b.start;
+			});
+		}
 	}
 
 	/** Generate warning/error file. */
@@ -1038,6 +1185,7 @@ namespace MUZ {
 			cl.source = string((char*)buffer);
 			cl.line = (int)sourcefile->lines.size()  + 1;
 			cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
+			cl.listing = m_status.listing; // enable or disable listing
 			// Assemble this line, will include another file if #INCLUDE is met
 			cl.assembled = AssembleCodeLine(cl, msg);
 			if (cl.assembled) {
@@ -1356,10 +1504,13 @@ namespace MUZ {
 		m_directives["#ELSE"] = new DirectiveELSE();
 		m_directives["#IFNDEF"] = new DirectiveIFNDEF();
 		m_directives["#ENDIF"] = new DirectiveENDIF();
+		m_directives["ENDC"] = new DirectiveENDIF();
 		m_directives["#INCLUDE"] = new DirectiveINCLUDE();
 		m_directives["#INSERTHEX"] = new DirectiveINSERTHEX();
 		m_directives["#INSERTBIN"] = new DirectiveINSERTBIN();
-		
+		m_directives["#NOLIST"] = new DirectiveLISTOFF();
+		m_directives["#LIST"] = new DirectiveLIST();
+
 		// Assembler directives
 		m_directives[".PROC"] = new DirectivePROC();
 		m_directives[".ORG"] = new DirectiveORG();
@@ -1376,6 +1527,7 @@ namespace MUZ {
 		m_directives[".DW"] = new DirectiveWORD();
 		m_directives["DW"] = new DirectiveWORD();
 		m_directives["DEFW"] = new DirectiveWORD();
+		m_directives[".SPACE"] = new DirectiveSPACE();
 		m_directives[".DS"] = new DirectiveSPACE();
 		m_directives["DS"] = new DirectiveSPACE();
 		m_directives["DEFS"] = new DirectiveSPACE();
@@ -1546,6 +1698,27 @@ namespace MUZ {
 		m_logfilename = filename;
 	}
 
+	/** Gets the full listing from current assembling. */
+	std::vector<Assembler::ListingLine> Assembler::GetListing(ErrorList& msg)
+	{
+		std::vector<Assembler::ListingLine> result;
+		GenerateFileListing(0, msg, result);
+		return result;
+	}
+
+	/** Enable/Disable the listings. */
+	void Assembler::EnableListing(bool yes)
+	{
+		m_status.listing = yes;
+	}
+
+	/** Known listing enabled status. */
+	bool Assembler::isListingEnabled()
+	{
+		return m_status.listing;
+	}
+
+
 	//MARK: - Sections and current address management
 	
 	/** Sets current section to code section.*/
@@ -1666,7 +1839,7 @@ namespace MUZ {
 
 				// Generate Listing with warnings and errors
 				if (PrepareListing(msg)) {
-					GenerateListing(0, msg);
+					GenerateFileListing(0, msg);
 					EndListing();
 				}
 

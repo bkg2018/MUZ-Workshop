@@ -6,11 +6,11 @@ MUZ is a Z-80 development workshop for MacOS and aimed at all OS-es, inspired by
 
 Its heart is a C++ 11 conformant library featuring an internal C++ **Z-80 assembler** and a **computer model**. For the initial Z-80 version, MUZ computer model is integrating the [YAZE Z-80 emulator](http://www.mathematik.uni-ulm.de/users/ag/yaze-ag) as its **virtual CPU** and implements classes for the RC2014 computer.
 
-MUZ Computer has been designed to emulate the RC2014 backplane Pro with Z-80 CPU, Clock, Pageable ROM, 64KB RAM and SIO/2 Serial modules.
+* *MUZ-Computer* has been designed to emulate the RC2014 built with a Backplane Pro and Z-80 CPU, Clock, Pageable ROM, 64KB RAM and SIO/2 Serial modules.
 
-MUZ Assembler is designed to be compatible with Small Computer Workshop outputs, and will compile the SC Monitor sources with no modification.
+* *MUZ-Assembler* is designed to be compatible with Small Computer Workshop outputs, and will compile the SC Monitor sources with no modification. MUZ-Assembler features a lot of helps for the programmer, like cross-references, label listings and warnings. It also features hel
 
-The project features a MacOS workshop, which in turn links with the C++ MUZ library into a multi editor / debugguer / assembler development system, trying to bring to the Mac the same services as Steve Cousins SCWorkshop on Windows.
+* *MUZ-Workshop* is an EDI project in Swift for MacOS XCode. It links with the C++ MUZ library into a multi editor / debugguer / assembler development system, trying to bring to the Mac the same services as Steve Cousins SCWorkshop on Windows.
 
 Main directories:
 

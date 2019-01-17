@@ -13,20 +13,20 @@
 
 // structure to hold registers
 @interface MuzRegisters  : NSObject
-	@property (nonatomic) int16_t		af;
-	@property (nonatomic) int16_t		afprime;
-	@property (nonatomic) int16_t 		bc;
-	@property (nonatomic) int16_t 		de;
-	@property (nonatomic) int16_t 		hl;
-	@property (nonatomic) int16_t 		bcprime;
-	@property (nonatomic) int16_t 		deprime;
-	@property (nonatomic) int16_t 		hlprime;
-	@property (nonatomic) int16_t		ix;
-	@property (nonatomic) int16_t		iy;
-	@property (nonatomic) int16_t		sp;
-	@property (nonatomic) int16_t		pc;
-	@property (nonatomic) int16_t		ir;
-	@property (nonatomic) int16_t		iff;
+	@property (nonatomic) uint16_t		af;
+	@property (nonatomic) uint16_t		afprime;
+	@property (nonatomic) uint16_t 		bc;
+	@property (nonatomic) uint16_t 		de;
+	@property (nonatomic) uint16_t 		hl;
+	@property (nonatomic) uint16_t 		bcprime;
+	@property (nonatomic) uint16_t 		deprime;
+	@property (nonatomic) uint16_t 		hlprime;
+	@property (nonatomic) uint16_t		ix;
+	@property (nonatomic) uint16_t		iy;
+	@property (nonatomic) uint16_t		sp;
+	@property (nonatomic) uint16_t		pc;
+	@property (nonatomic) uint16_t		ir;
+	@property (nonatomic) uint16_t		iff;
 @end
 
 @interface MuzBridge : NSObject

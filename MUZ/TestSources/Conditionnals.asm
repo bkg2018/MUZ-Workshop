@@ -12,6 +12,8 @@ Label1: .ORG 0x0000 ; no
 Label2: .ORG 0x1000 ; yes
 #ENDIF
 
+#LIST OFF
+
 #IFNDEF NOT_DEFINED
 Label3: .ORG 0x2000 ; yes
 #ELSE
@@ -21,6 +23,8 @@ Label4: .ORG 0x3000 ; no
 ; define some symbols
 #DEFINE BUILD R0
 #DEFINE DEFINED_EMPTY
+
+#LIST ON
 
 ; escaped joker
 #if BUILD = "R\*"
