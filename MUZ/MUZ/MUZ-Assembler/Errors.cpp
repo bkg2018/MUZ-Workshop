@@ -23,7 +23,7 @@ namespace MUZ {
 		{ errorOpeningSource, "Cannot open source file: asm, hex or binary file not found"},
 		{ errorElseNoIf, "#ELSE without corresponding #IF/#IFDEF/#IFNDEF"},
 		{ errorEndifNoIf, "#ENDIF without #ELSE or #IF"},
-		{ errorLabelExists,	 "A label already exists with the same name"},
+		{ errorLabelExists,	 "label re-defined later"},
 		{ errorUnknownSyntax, "line does not start with a label, a directive or an instruction"},
 		{ errorUnknownDirective, "directive starting with '.' or '#' is unknown"},
 		{ errorUknownInstruction, "an instruction should have been found, probable wrong syntax"},
@@ -51,6 +51,7 @@ namespace MUZ {
 		{ warningTooBig8, "number too big for 8 bits"},
 		{ warningTooBig16, "number too big for 16 bits"},
 		{ warningTooFar, "DJNZ or JR target is too far"},
+
 	};
 
 	void ErrorList::Clear() {

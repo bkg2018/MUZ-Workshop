@@ -300,14 +300,13 @@ namespace MUZ {
 		std::vector<int> unsolved = parser.ResolveNextSymbols(false);
 		ADDRESSTYPE address = 0;
 		parser.JumpTokens(1); // skip after .EQU
-		parser.EvaluateAddress(address);
 		try { parser.EvaluateAddress(address); }
 		catch (const std::exception & e) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
 		if (label == nullptr)
 			label = codeline.label;
-		if (label) {
+		if (label && as.IsFirstPass()) {
 			label->SetAddress(address);
 			codeline.label = label;
 		}
@@ -345,6 +344,15 @@ namespace MUZ {
 			return true;
 		}
 		return msg.Error(errorEquate, codeline);
+	}
+
+	/** Identifies a source string as self. */
+	bool DirectiveEQU::Identify( std::string source )
+	{
+		std::string upper = std::to_upper(source);
+		if (upper==".EQU") return true;
+		if (upper=="EQU") return true;
+		return false;
 	}
 	
 	/** .DB <num8> [, <num8> [...]]

@@ -80,129 +80,65 @@ namespace MUZ {
 	 @param source the source code to display after address, code and line number
 	 @return the string containing the listing line
 	 */
-	string buildOneListingLine(ADDRESSTYPE address, vector<BYTE> code, int firstcode = 0, int nbcodes = 4, Label* label = nullptr, int file = -1, int line = -1, string source = "")
-	{
-		string thisline;
-		if (code.empty() && label != nullptr && label->codeline && label->codeline->file == file && label->codeline->line == line) {
-			thisline = address_to_base(label->AddressFrom(address), 16, 4) + ": ";
-		} else {
-			thisline = (code.empty()) ? spaces(6) : address_to_base(address, 16, 4) + ": ";
-		}
-		
-		//prepare line number
-		string linenum = "";
-		if (line <0) {
-			linenum = spaces(4);
-		} else {
-			linenum = std::to_string(line);
-			while (linenum.length() < 4) {
-				linenum = "0" + linenum;
-			}
-		}
-		
-		// 0 byte : one line, all space instead of code, then line number and source
-		// 02EE:               0033  ConInitialise:
-		if (code.empty()) {
-			return thisline + buildCodes(code, 0, 0) + spaces(2) + linenum + spaces(2) + source;
-		}
-		
-		// 1 to 4 bytes: one line with all elements and codes 0..3/2/1/0
-		// 1 to 8 bytes: one line with all elements and codes 0..3, one line with codes 4..7 and no line number nor source
-		// 	02CB: 31 2E         0716              .DB  '0'+kVersMajor,'.'
-		//	02C3: 56 65 72 73   0715              .DB  "Version "
-		//	02C7: 69 6F 6E 20   1089
-		// 1 to 9 bytes: one line with all elements and codes 0..3, one line with codes 4..5 and ".." and no line nor source
-		
-		// get the code part
-		//int nbcodes = std::min<int>(4, (int)code.size() - firstcode);
-		// 0 to 4 bytes -> 0 to 3
-		// 5 to 8 bytes -> 4 if starting at 0, 0 to 3 if starting at 4 ...
-		thisline += buildCodes(code, firstcode, nbcodes);;
-		
-		if (firstcode == 0) {
-			// add line number
-			thisline += spaces(2) + linenum;
-			thisline += spaces(2) + source;
-		}
-		
-		return thisline;
-	}
-	
-	/** Build one or more lines of listing for the codes given.
-	 @param codeline the assembled code line containing code to list.
-	 @param all true to list all bytes , false to limit to 2 lines of listing, with a "..." ellipsis for code not listed
-	 @return a vector of strings to display/list in order
-	 */
-	vector<string> buildListingLines(CodeLine& codeline, bool all)
-	{
-		vector<string> result;
-		if (!codeline.listing) return result;
-
-		vector<BYTE>& code = codeline.code;
-		int codesize = (int)code.size();
-		
-		// first line complete with 0 to 4 bytes of code
-		result.push_back(buildOneListingLine(codeline.address, code, 0, std::min<int>(4, codesize), codeline.label, codeline.file, codeline.line, codeline.source));
-		
-		// second line depend on the number of codes
-		if (codesize >= 5 && codesize <= 8) {
-			// second line with 1 to 4 bytes of code
-			result.push_back(buildOneListingLine(codeline.address + 4, code, 4, codesize - 4));
-		} else if (codeline.code.size() >= 9) {
-			// rest of listing
-			if (all) {
-				// each packet of 4 code bytes
-				for (int start = 4 ; start < codeline.code.size() ; start += 4) {
-					result.push_back(buildOneListingLine(codeline.address + start, code, start, 4));
-				}
-			} else {
-				// one line only with 1 to 3 bytes of code bytes 4 to 7, then "..." if there's more
-				result.push_back(buildOneListingLine(codeline.address + 4, code, 4, 3));
-			}
-		}
-		return result;
-	}
-	
-	/** Builds one listing line from a code index.
-	 @param address the starting address to put first
-	 @param code the vector of code containing all code
-	 @param firstcode the index of the first code to display
-	 @param nbcodes the number of codes to display, from 0 to 4 maximum
-	 @param label a label containing a value to display instead of 'address', or nullptr to ignore
-	 @param file the file number of the code source line, -1 to ignore
-	 @param line the line number of the code source line, -1 to ignore
-	 @param source the source code to display after address, code and line number
-	 @return the string containing the listing line
-	 */
-	Assembler::ListingLine buildOneListingLineStructure(ADDRESSTYPE address, vector<BYTE> code, int firstcode = 0, int nbcodes = 4, Label* label = nullptr, int file = -1, int line = -1, string source = "")
+	Assembler::ListingLine buildOneListingLineStructure(ADDRESSTYPE address, vector<BYTE> code, int firstcode, int nbcodes, Label* label, int file, int line, string source, int message)
 	{
 		Assembler::ListingLine ll;
 		ll.parts = {0};
 
-		// address part
-		if (!code.empty() || (label != nullptr && label->codeline && label->codeline->file == file && label->codeline->line == line)) {
+		// Is there any code?
+		if (code.empty()) {
+			// no code: any label on this line?
+			if ((label != nullptr) && label->isAt(file, line)) {
+				ll.address = label->AddressFrom(address);
+				ll.parts.address = 1;
+			}
+		} else {
 			ll.address = address;
 			ll.parts.address = 1;
 		}
+		if (message >= 0) {
+			ll.parts.warnaddress = 1;
+		}
 
+		string instr = source;
+		string comment = "";
+		/* -- align last comments on the right, commented-out for now: this breaks commented-out aligned code.
 		// separate source and comment
 		string instr, comment;
 		size_t semicommapos = source.find(";");
-		if (semicommapos != std::string::npos) {
-			instr = source.substr(0, semicommapos);
-			comment = source.substr( semicommapos);
+		if (semicommapos != string::npos) {
+			if (semicommapos == 0) {
+				// first character is ';', try to find another one
+				semicommapos = source.substr(1).rfind(";");
+				if (semicommapos != std::string::npos) {
+					// comment at first pos, then another one
+					instr = source.substr(0, semicommapos+1); // until second ';'
+					strtrimright(instr);
+					comment = source.substr(semicommapos+1);	// from second ';'
+				} else {
+					// only one comment at first pos
+					comment = source;		// full comment
+				}
+			} else {
+				// one comment somewhere
+				instr = source.substr(0, semicommapos);
+				strtrimright(instr);
+				comment = source.substr( semicommapos);
+			}
 		} else {
+			// no comment
 			instr = source;
 		}
+		*/
 
 		// for no-code and for first line of code, include line number source and comment
 		if (code.empty() || (firstcode == 0)) {
 			ll.line = line;
 			ll.parts.line = 1;
 			ll.source = instr;
-			ll.parts.source = 1;
+			ll.parts.source = instr.empty() ? 0 : 1;
 			ll.comment = comment;
-			ll.parts.comment = 1;
+			ll.parts.comment = comment.empty() ? 0 : 1;
 		}
 		// for all lines of code, include byte codes
 		if (! code.empty()) {
@@ -213,36 +149,53 @@ namespace MUZ {
 		return ll;
 	}
 
+	/** Builds one listing line for a non assembled line
+	 @param file the file number of the code source line, -1 to ignore
+	 @param line the line number of the code source line, -1 to ignore
+	 @param source the source code to display after address, code and line number
+	 @return the string containing the listing line
+	 */
+	Assembler::ListingLine buildOneListingLineStructure(int file, int line, string source, ErrorList& msg)
+	{
+		Assembler::ListingLine ll;
+		ll.parts = {0};
+		ll.line = line;
+		ll.parts.line = 1;
+		ll.source = source;
+		ll.parts.source = source.empty() ? 0 : 1;
+		return ll;
+	}
+
 	/** Build one or more lines of listing for the codes given.
 	 @param codeline the assembled code line containing code to list.
 	 @param all true to list all bytes , false to limit to 2 lines of listing, with a "..." ellipsis for code not listed
 	 @return a vector of strings to display/list in order
 	 */
-	vector<Assembler::ListingLine> buildListingLineStructures(CodeLine& codeline, bool all )
+	Assembler::Listing buildListingLineStructures(CodeLine& codeline, ErrorList& msg, bool all )
 	{
-		vector<Assembler::ListingLine> result;
+		Assembler::Listing result;
 		if (!codeline.listing) return result;
 
 		vector<BYTE>& code = codeline.code;
 		int codesize = (int)code.size();
 
 		// first line complete with 0 to 4 bytes of code
-		result.push_back(buildOneListingLineStructure(codeline.address, code, 0, std::min<int>(4, codesize), codeline.label, codeline.file, codeline.line, codeline.source));
+		result.push_back(buildOneListingLineStructure(codeline.address, code, 0, std::min<int>(4, codesize), codeline.label, codeline.file, codeline.line, codeline.source, codeline.message));
 
 		// second line depend on the number of codes
 		if (codesize >= 5 && codesize <= 8) {
 			// second line with 1 to 4 bytes of code
-			result.push_back(buildOneListingLineStructure(codeline.address + 4, code, 4, codesize - 4));
+			result.push_back(buildOneListingLineStructure(codeline.address + 4, code, 4, codesize - 4, nullptr, -1, -1, "", -1));
 		} else if (codeline.code.size() >= 9) {
 			// rest of listing
 			if (all) {
 				// each packet of 4 code bytes
 				for (int start = 4 ; start < codeline.code.size() ; start += 4) {
-					result.push_back(buildOneListingLineStructure(codeline.address + start, code, start, 4));
+					result.push_back(buildOneListingLineStructure(codeline.address + start, code, start, 4, nullptr, -1, -1, "", -1));
 				}
 			} else {
 				// one line only with 1 to 3 bytes of code bytes 4 to 7, then "..." if there's more
-				result.push_back(buildOneListingLineStructure(codeline.address + 4, code, 4, 3));
+				result.push_back(buildOneListingLineStructure(codeline.address + 4, code, 4, 3, nullptr, -1, -1, "", -1));
 			}
 		}
 		return result;
@@ -399,7 +352,8 @@ namespace MUZ {
 		
 		// If there is a label it can be assigned the current address. Local labels
 		// can store more than one address, while global labels store only one address
-		if (label) {
+		// ignore equates, they are set by EQU directive
+		if (label && IsFirstPass() && !label->equate) {
 			label->SetAddress(GetAddress());
 		}
 		
@@ -455,47 +409,28 @@ namespace MUZ {
 	}
 
 	/** Initializes listing file, close previous if any.
+	 	Returns the standard output if "output" is the name for the listing file.
 	 */
-	bool Assembler::PrepareListing(ErrorList& msg)
+	FILE* Assembler::PrepareListing(ErrorList& msg)
 	{
 		// cross reference log messages to codelines
 		msg.Close(*this);
-		// create file
+
+		// create listing file
 		if ( ! m_outputdir.empty() && ! m_listingfilename.empty()) {
+			if (m_listingfilename == "stdout") return stdout;
 			string filename = m_outputdir + NORMAL_DIR_SEPARATOR + m_listingfilename;
-			if (m_listingfile) {
-				fclose(m_listingfile);
-			}
-			m_listingfile = fopen(filename.c_str(), "w");
-			if (m_listingfile) {
-				return true;
-			}
+			return fopen(filename.c_str(), "w");
 		}
-		return false;
+		return nullptr;
 	}
-	
-	/** Generate a listing for an assembled code line. The listing file must have been initialized first.
-	 @param codeline the assembled code line containing code to list
-	 @param msg the error and warning list returned by assembler
-	 */
-	void Assembler::GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg)
+
+	/** Closes the listing file, ignore if the name is "stdout". */
+	void Assembler::CloseListing( FILE* & file )
 	{
-		if (! m_listingfile) return;
-		vector<string> lines ;
-		if (!codeline.listing) return;
-		
-		if (codeline.assembled) {
-			lines = buildListingLines(codeline, m_status.allcodelisting);
-		} else {
-			vector<BYTE> emptycode;
-			lines.push_back(buildOneListingLine(codeline.address, emptycode,  0, 0, nullptr, codeline.file, codeline.line, codeline.source));
-		}
-		
-		// write to listing file and trace on standard output
-		for ( auto thisline: lines) {
-			fprintf(m_listingfile, "%s\n", thisline.c_str());
-			fflush(m_listingfile);
-			if (m_status.trace) printf("%s\n", thisline.c_str());
+		if (m_listingfilename != "stdout") {
+			fclose(file);
+			file = nullptr;
 		}
 	}
 
@@ -503,16 +438,15 @@ namespace MUZ {
 	 @param codeline the assembled code line containing code to list
 	 @param msg the error and warning list returned by assembler
 	 */
-	void Assembler::GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg, std::vector<ListingLine> & listing)
+	void Assembler::GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg, Listing & listing)
 	{
 		if (codeline.listing) {
+			// Full address/code details for assembled lines, simple line source for non assembled
 			if (codeline.assembled) {
-				std::vector<ListingLine> lines;
-				lines = buildListingLineStructures(codeline, m_status.allcodelisting);
+				Listing lines = buildListingLineStructures(codeline, msg, m_status.allcodelisting);
 				for (auto & line: lines) listing.push_back(line);
 			} else {
-				vector<BYTE> emptycode;
-				listing.push_back(buildOneListingLineStructure(codeline.address, emptycode,  0, 0, nullptr, codeline.file, codeline.line, codeline.source));
+				listing.push_back(buildOneListingLineStructure(codeline.file, codeline.line, codeline.source, msg));
 			}
 		}
 		// always add warning/errors
@@ -521,13 +455,14 @@ namespace MUZ {
 			line.parts = {0};
 			line.parts.message = 1;
 			line.message = codeline.message;
+			line.token = codeline.curtoken;
 			listing.push_back(line);
 		}
 	}
 
 	/** Initializes memory listing file, close previous if any.
 	 */
-	void Assembler::GenerateMemoryListing(DATATYPE* memory, Section& section, ErrorList& mergingMsg)
+	void Assembler::GenerateMemoryDump(DATATYPE* memory, Section& section, ErrorList& mergingMsg)
 	{
 		FILE* memoryfile = nullptr;
 		if ( ! m_outputdir.empty() && ! m_memoryfilename.empty()) {
@@ -676,48 +611,8 @@ namespace MUZ {
 		fclose(hexfile);
 	}
 
-	/** Generate listing from an assembled source file. */
-	void Assembler::GenerateFileListing(int file, ErrorList& msg)
-	{
-		if (m_listingfile == nullptr) return;
-		SourceFile* sourcefile = m_files.at(file);
-
-		// print the full file path in listing
-		string mainfile = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
-		fprintf(m_listingfile, "\n%s%s\n\n", spaces(20).c_str(), mainfile.c_str());
-
-		// List all lines and included files
-		for (auto & codeline : sourcefile->lines) {
-			// listing for this code line
-			GenerateCodeLineListing(codeline, msg);
-			// warning/error?
-			if (codeline.message >= 0) {
-				ErrorMessage& m = msg.at(codeline.message);
-				string prefix = spaces(20);
-				if (m.type == MUZ::errorTypeWARNING) {
-					prefix += "^^^^  Warning W";
-				} else if (m.type == MUZ::errorTypeERROR) {
-					prefix += "^^^^  Error E";
-				}
-				if (m.token >= 0 && m.token < codeline.tokens.size()) {
-					fprintf(m_listingfile, "%s%04d: '%s': %s\n", prefix.c_str(), m.kind, codeline.tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
-				} else {
-					fprintf(m_listingfile, "%s%04d: %s\n", prefix.c_str(), m.kind, msg.GetMessage(m.kind).c_str());
-				}
-			}
-
-			// For included files, do the listing with a recursive call
-			if (codeline.includefile > codeline.file) {
-				GenerateFileListing(codeline.includefile, msg);// then recursively generate listing of the included file
-				// list current parent file to show that include if finished
-				fprintf(m_listingfile, "\n%s%s\n", spaces(20).c_str(), mainfile.c_str());
-				// end now
-			}
-		}
-	}
-
 	/** Generate in-memory listing from current assembling. */
-	void Assembler::GenerateFileListing(int file, ErrorList& msg, std::vector<ListingLine> & listing)
+	void Assembler::GenerateFileListing(int file, ErrorList& msg, Listing & listing)
 	{
 		// get shortcut to the file to list
 		if (file < 0 || file >= m_files.size()) return;
@@ -747,13 +642,13 @@ namespace MUZ {
 		}
 	}
 
-	/** End listing file. */
-	void Assembler::EndListing()
+	/** Generates the sections list in an opened file. */
+	void Assembler::GenerateSectionsList( FILE* file )
 	{
 		// list sections
 		if (m_sections.size()) {
 			std::string s = "\nSections:\n------------------------------------------------------------------------------------\n";
-			fprintf(m_listingfile, "%s", s.c_str());
+			fprintf(file, "%s", s.c_str());
 			if (m_status.trace) printf("%s", s.c_str());
 			for (auto section: m_sections) {
 				s = string("\t") + section.first + ":";
@@ -768,14 +663,18 @@ namespace MUZ {
 						s += " [" + address_to_base(range.start, 16, 4) + "-" + address_to_base(range.end, 16, 4) + "]";
 					}
 				}
-				fprintf(m_listingfile, "%s\n", s.c_str());
+				fprintf(file, "%s\n", s.c_str());
 			}
 		}
+	}
 
+	/** Generates the #DEFINE symbols list in an opened file. */
+	void Assembler::GenerateDefSymbolsList( FILE* file )
+	{
 		// list DEFINEs
 		if (m_defsymbols.size()) {
 			std::string s = "\nDefines:\n------------------------------------------------------------------------------------\n";
-			fprintf(m_listingfile, "%s", s.c_str());
+			fprintf(file, "%s", s.c_str());
 			if (m_status.trace) printf("%s", s.c_str());
 			std::map<string,DefSymbol*> sortedSymbols;
 			for (auto symbol: m_defsymbols) {
@@ -787,20 +686,19 @@ namespace MUZ {
 				sleft += spaces(30 - (int)sleft.length());
 				sleft += " :" + defsymbol.second->value;
 				s = string("\t") + sleft + "\n";
-				fprintf(m_listingfile, "%s", s.c_str());
+				fprintf(file, "%s", s.c_str());
 				if (m_status.trace) printf("%s", s.c_str());
 			}
 		}
+	}
 
-		// build sorted map of equate and labels
+	/** Generates the .EQU equate symbols list in an opened file. */
+	void Assembler::GenerateEquatesList( FILE* file )
+	{
+		// build sorted map of equates
 		std::map<string,Label*> sortedEquates;		// map, ordered by name
-		std::map<string,ADDRESSTYPE> nameSortedLabels;	//map ordered by name
-		std::map<ADDRESSTYPE, string> addressSortedLabels;	// map ordered by address
 		for (auto label: labels) {
-			if ( ! label.second->equate) {
-				nameSortedLabels[label.first] = label.second->addresses[0];
-				addressSortedLabels[label.second->addresses[0]] = label.first;
-			} else {
+			if ( label.second->equate) {
 				sortedEquates[label.first] = label.second;
 			}
 		}
@@ -808,7 +706,7 @@ namespace MUZ {
 		// list equates
 		if (sortedEquates.size()) {
 			std::string s = "\nEquates:\n------------------------------------------------------------------------------------\n";
-			fprintf(m_listingfile, "%s", s.c_str());
+			fprintf(file, "%s", s.c_str());
 			if (m_status.trace) printf("%s", s.c_str());
 			for (auto equate: sortedEquates) {
 				string sleft;
@@ -816,15 +714,28 @@ namespace MUZ {
 				sleft += spaces(30 - (int)sleft.length());
 				sleft += " :" + address_to_base(equate.second->addresses[0], 16, 4);
 				s = string("\t") + sleft + "\n";
-				fprintf(m_listingfile, "%s", s.c_str());
+				fprintf(file, "%s", s.c_str());
 				if (m_status.trace) printf("%s", s.c_str());
 			}
 		}
+	}
 
+	/** Generates the labels list in an opened file. */
+	void Assembler::GenerateLabelsList( FILE* file )
+	{
+		// build sorted maps of labels
+		std::map<string,ADDRESSTYPE> nameSortedLabels;	//map ordered by name
+		std::map<ADDRESSTYPE, string> addressSortedLabels;	// map ordered by address
+		for (auto label: labels) {
+			if ( ! label.second->equate) {
+				nameSortedLabels[label.first] = label.second->addresses[0];
+				addressSortedLabels[label.second->addresses[0]] = label.first;
+			}
+		}
 		// list global labels sorted by value then name
 		if (nameSortedLabels.size() || addressSortedLabels.size()) {
 			std::string s = "\nGlobal labels:\n--- By Name -------------------------------|---By Address --------------------------\n";
-			fprintf(m_listingfile, "%s", s.c_str());
+			fprintf(file, "%s", s.c_str());
 			if (m_status.trace) printf("%s", s.c_str());
 			bool nameFinished = false, addressFinished = false;
 			auto iterName = nameSortedLabels.begin();
@@ -849,15 +760,20 @@ namespace MUZ {
 					if (iterAddress == addressSortedLabels.end()) addressFinished = true;
 				}
 				s = string("\t") + sleft + spaces(3) + "|" + spaces(3) + sright + "\n";
-				fprintf(m_listingfile, "%s", s.c_str());
+				fprintf(file, "%s", s.c_str());
 				if (m_status.trace) printf("%s", s.c_str());
 
 			} while (!nameFinished || !addressFinished);
 		}
+	}
 
-		// listing finished
-		fclose(m_listingfile);
-		m_listingfile = nullptr;
+	/** List tables in an opened file. */
+	void Assembler::SaveTables( FILE* file )
+	{
+		GenerateSectionsList( file );
+		GenerateDefSymbolsList( file );
+		GenerateEquatesList( file );
+		GenerateLabelsList( file );
 	}
 
 
@@ -990,7 +906,7 @@ namespace MUZ {
 				// neutralize colon for parser
 				codeline.tokens[1].type = tokenTypeIGNORE;
 				// store as last global label iff not followed by .EQU
-				if ((nbtokens <= 2) || ((codeline.tokens[2].source != ".EQU") && (codeline.tokens[2].source != "EQU"))) {
+				if ((nbtokens <= 2) || !DirectiveEQU::Identify(codeline.tokens[2].source)) {
 					SetLastLabelName(labelName) ;
 				}
 				return CreateLabel(labelName, codeline, msg);
@@ -998,7 +914,7 @@ namespace MUZ {
 			// <letters> <directive> ?
 			if (GetDirective(codeline.tokens[1].source)) {
 				// store as last global label unless it is an .EQU or local label
-				if (codeline.tokens[1].source != ".EQU" && codeline.tokens[1].source != "EQU") {
+				if (!DirectiveEQU::Identify(codeline.tokens[1].source)) {
 					SetLastLabelName(labelName) ;
 				}
 				return CreateLabel(labelName, codeline, msg);
@@ -1019,22 +935,34 @@ namespace MUZ {
 	{
 		if (name.empty()) return nullptr;				// warning if this label already exists
 		Label* label = GetLabel(name);
+		// Existing label?
 		if (label) {
-			msg.Warning(errorLabelExists, codeline);
-		}
-		if (label == nullptr) {
-			label = new Label();
-			if (!label) throw OutOfMemoryException();
-			if (name[0] == '@') {
-				string fullname = GetLastLabelName() + name;
-				m_files[m_status.curfile]->labels[fullname] = label;
-				label->multiple = true;
-			} else {
-				labels[name] = label;
-				label->multiple = false;
+			// Different line?
+			if (! label->isAt(codeline.file, codeline.line)) {
+				// Signal a warning, only for pass 2
+				msg.Warning(errorLabelExists, codeline, 2);
 			}
+			// Set new file and line, only on pass 1
+			if (codeline.as->IsFirstPass()) {
+				label->SetFileLine(codeline.file, codeline.line);
+			}
+			// finished
+			return label;
 		}
-		label->codeline = &codeline;
+		// Non existing label, create for this file/line
+		label = new Label();
+		if (!label) throw OutOfMemoryException();
+		if (name[0] == '@') {
+			// Local label in current file
+			string fullname = GetLastLabelName() + name;
+			m_files[m_status.curfile]->labels[fullname] = label;
+			label->multiple = true;
+		} else {
+			// Global label
+			labels[name] = label;
+			label->multiple = false;
+		}
+		label->SetFileLine(codeline.file, codeline.line);
 		return label;
 	}
 
@@ -1187,6 +1115,7 @@ namespace MUZ {
 			cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
 			cl.listing = m_status.listing; // enable or disable listing
 			// Assemble this line, will include another file if #INCLUDE is met
+			cl.as = this;
 			cl.assembled = AssembleCodeLine(cl, msg);
 			if (cl.assembled) {
 				cl.address = GetAddress();// useless?
@@ -1276,9 +1205,10 @@ namespace MUZ {
 			cl.line = (int)sourcefile->lines.size()  + 1;
 			cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
 			// Assemble this line, will include another file if #INCLUDE is met
+			cl.as = this;
 			cl.assembled = AssembleCodeLine(cl, msg);
 			if (cl.assembled) {
-				cl.address = GetAddress();// useless?
+				cl.address = GetAddress();// act up possible ORG
 				cl.section = GetSection();
 				lastLabel = cl.label;
 			}
@@ -1308,6 +1238,7 @@ namespace MUZ {
 		for (CodeLine& cl : sourcefile->lines) {
 			
 			cl.code.clear();
+			cl.as = this;
 			cl.assembled = AssembleCodeLine(cl, msg);
 			if (cl.assembled) {
 				cl.address = GetAddress();
@@ -1385,6 +1316,7 @@ namespace MUZ {
 					cl.line = (int)sourcefile->lines.size()  + 1;
 					cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
 					// Assemble this line, will include another file if #INCLUDE is met
+					cl.as = this;
 					cl.assembled = AssembleCodeLine(cl, msg);
 					if (cl.assembled) {
 						cl.address = GetAddress();// useless?
@@ -1423,13 +1355,17 @@ namespace MUZ {
 			// Prepare the path and name for file
 			SourceFile* sourcefile = new SourceFile;
 			if (sourcefile == nullptr) throw MUZ::OutOfMemoryException();
-			if (!sourcefile->Set(file, codeline.file >= 0 ? m_files[codeline.file] : nullptr)) return false;
+			if (!sourcefile->Set(file, codeline.file >= 0 ? m_files[codeline.file] : nullptr)) {
+				delete sourcefile;
+				return false;
+			}
 			
 			// try to open the source file
 			file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
 			FILE* f = fopen(file.c_str(), "r");
 			if (!f) {
 				msg.Fatal(errorOpeningSource, codeline, file);
+				delete sourcefile;
 				throw MUZ::NoFileException();
 			}
 			
@@ -1465,6 +1401,7 @@ namespace MUZ {
 				cl.line = (int)sourcefile->lines.size()  + 1;
 				cl.label = nullptr;
 				// Assemble this line, will include another file if #INCLUDE is met
+				cl.as = this;
 				cl.assembled = AssembleCodeLine(cl, msg);
 				if (cl.assembled) {
 					cl.address = GetAddress();// useless?
@@ -1699,9 +1636,12 @@ namespace MUZ {
 	}
 
 	/** Gets the full listing from current assembling. */
-	std::vector<Assembler::ListingLine> Assembler::GetListing(ErrorList& msg)
+	Assembler::Listing Assembler::GetListing(ErrorList& msg)
 	{
-		std::vector<Assembler::ListingLine> result;
+		// cross reference log messages to codelines
+		msg.Close(*this);
+
+		Listing result;
 		GenerateFileListing(0, msg, result);
 		return result;
 	}
@@ -1815,6 +1755,7 @@ namespace MUZ {
 		//codeline.offset = 0;
 		//codeline.size = 0;
 		codeline.source = sourceline;
+		codeline.as = this;
 		codeline.assembled = AssembleCodeLine(codeline, msg);
 		return codeline;
 	}
@@ -1830,18 +1771,14 @@ namespace MUZ {
 	{
 		SetFirstPass(true);
 		msg.Clear();							// clear warnings
-		CodeLine codeline;
 		if (m_status.trace)	printf("Pass 1: %s\n", file.c_str());
 		if (AssembleMainFilePassOne(file, msg)) {
 			SetFirstPass(false);
 			if (m_status.trace) printf("Pass 2: %s\n", file.c_str());
 			if (AssembleMainFilePassTwo(file, msg)) {
 
-				// Generate Listing with warnings and errors
-				if (PrepareListing(msg)) {
-					GenerateFileListing(0, msg);
-					EndListing();
-				}
+				Listing listing = GetListing(msg);
+				SaveListing(listing, m_listingfilename, msg);
 
 				// first build memory image and a section with all the written address ranges
 				DATATYPE* memory = (DATATYPE*)calloc(MEMMAXSIZE, 1);
@@ -1850,7 +1787,7 @@ namespace MUZ {
 				FillFromFile(0, memory, section, mergingMsg); // this handles recursive calls for included files
 
 				// dump in memory listing
-				GenerateMemoryListing(memory, section, mergingMsg);
+				GenerateMemoryDump(memory, section, mergingMsg);
 				
 				// Output Intel Hex format
 				GenerateIntelHex(memory, section, mergingMsg);
@@ -2001,5 +1938,92 @@ namespace MUZ {
 		return &sourcefile->lines.at(line - 1);
 	}
 
+	//MARK: - Listing in memory
+
+	/** Save a memory listing to a text file. Use "stdout" to print on standard output. */
+	void Assembler::SaveListing( Listing & listing, std::string filename, ErrorList& msg)
+	{
+		m_listingfilename = filename;
+		FILE* file = PrepareListing(msg);
+		if (file) {
+			SaveListing(listing,file,msg);
+			SaveTables(file);
+			CloseListing(file);
+		}
+	}
+
+	/** Save a memory listing to a text file. Use "stdout" to just print on standard output. */
+	void Assembler::SaveListing( Listing & listing, FILE* file, ErrorList& msg )
+	{
+		FILE* output = (file == nullptr ? stdout : file);
+
+		// TODO: write listing to file
+		for (auto & line : listing) {
+
+			SourceFile* sourcefile = m_files[line.file];
+			string s;
+			// file?
+			if (line.parts.file ) {
+				string mainfile = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
+				s ="\n" + spaces(20) + mainfile + "\n\n";
+				fprintf(output, "%s", s.c_str());
+			} else if (line.parts.message) {
+				ErrorMessage & m =  msg.at(line.message);
+				CodeLine& codeline = sourcefile->lines.at(m.line - 1);
+				string prefix = spaces(20);
+				if (m.type == MUZ::errorTypeWARNING) {
+					prefix += "  ??  Warning W";
+				} else if (m.type == MUZ::errorTypeERROR) {
+					prefix += "  ??  Error E";
+				}
+				if (m.token >= 0 && m.token < codeline.tokens.size()) {
+					fprintf(output, "%s%04d: '%s': %s\n", prefix.c_str(), m.kind, codeline.tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
+				} else {
+					fprintf(output, "%s%04d: %s\n", prefix.c_str(), m.kind, msg.GetMessage(m.kind).c_str());
+				}
+			} else {
+				if (line.parts.address) {
+					s = address_to_base(line.address, 16, 4);
+					if (line.parts.warnaddress) {
+						s += "? ";
+					} else {
+						s += ": ";
+					}
+				} else {
+					if (line.parts.warnaddress) {
+						s += "??" + spaces(4);
+					} else {
+						s = spaces(6);
+					}
+				}
+				if (line.parts.code) {
+					s += line.codebytes + "  ";
+				} else {
+					s += spaces(14);
+				}
+				if (line.parts.line) {
+					string linenum = std::to_string(line.line);
+					while (linenum.length() < 4) {
+						linenum = "0" + linenum;
+					}
+					s += linenum + spaces(2);
+				} else {
+					s += spaces(6);
+				}
+				if (line.parts.source) {
+					s += line.source;
+				}
+				if (line.parts.comment) {
+					s += line.comment;
+				}
+				fprintf(output, "%s\n", s.c_str());
+			}
+
+		}
+
+	}
+
+
 
 } // namespace MUZ
+

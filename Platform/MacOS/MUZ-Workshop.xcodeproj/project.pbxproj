@@ -252,6 +252,7 @@
 		86C121EF21B0344E005A5C36 /* muz_mmu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = muz_mmu.h; sourceTree = "<group>"; };
 		86C29DEF21EFFEF40069F6BE /* GenerateListing.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = GenerateListing.md; sourceTree = "<group>"; };
 		86C29DF121F0E5110069F6BE /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		86C29DF421F1D7330069F6BE /* SCWorkshopDifferences.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SCWorkshopDifferences.md; sourceTree = "<group>"; };
 		86D4D26821CBB50E0091B0E0 /* reduction expression.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "reduction expression.numbers"; sourceTree = "<group>"; };
 		86D4D26921CBB50E0091B0E0 /* binary comparison.numbers */ = {isa = PBXFileReference; lastKnownFileType = file; path = "binary comparison.numbers"; sourceTree = "<group>"; };
 		86D4D26A21CBB50E0091B0E0 /* Evaluation expression.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = "Evaluation expression.md"; sourceTree = "<group>"; };
@@ -549,6 +550,7 @@
 			children = (
 				868A32E621E4FDDA00A6466A /* work */,
 				8694B71B21B13EE6006EF947 /* Assembler.md */,
+				86C29DF421F1D7330069F6BE /* SCWorkshopDifferences.md */,
 			);
 			path = Documentation;
 			sourceTree = "<group>";

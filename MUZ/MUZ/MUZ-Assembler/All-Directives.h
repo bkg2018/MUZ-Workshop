@@ -101,6 +101,8 @@ namespace MUZ {
 	/** .EQU */
 	class DirectiveEQU : public Directive {
 		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	public:
+		static bool Identify( std::string source );
 	};
 	/** .DB */
 	class DirectiveBYTE : public Directive {

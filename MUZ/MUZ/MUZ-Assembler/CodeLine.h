@@ -57,7 +57,7 @@ namespace MUZ {
 		class Section*		section = nullptr;
 		/** File reference for the Assembler if this line includes another file. */
 		int					includefile = 0;
-		/** Label reference for the Assembler if this line has a label or is after a line containing only a label. */
+		/** Label reference if this line has a label or is after a line containing only a label. */
 		class Label*		label = nullptr;
 		/** Assembler reference. */
 		class Assembler*	as = nullptr;

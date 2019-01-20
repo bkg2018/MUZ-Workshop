@@ -90,6 +90,7 @@ namespace MUZ {
 		warningTooBig8,					// number too big for 8 bits
 		warningTooBig16,				// number too big for 16 bits
 		warningTooFar,					// DJNZ or JR target is too far
+
 	};
 	
 	struct ErrorMessage {

@@ -19,8 +19,10 @@ namespace MUZ {
 	/** Structure to store a label from source file. */
 	class Label : public Name
 	{
+		//class CodeLine* 				codeline;		// code line defining this label
+		int								file;
+		int 							line;
 	public:
-		class CodeLine* 				codeline;		// code line deffining this label
 		std::vector<ADDRESSTYPE>		addresses;		// addresses of this label, unique for global label, multiple for local
 		bool							equate=false;	// this label is set by a .EQU
 		std::vector<class CodeLine*>	referencers;	// Code lines where it is used
@@ -30,10 +32,16 @@ namespace MUZ {
 			addresses.clear();
 		}
 		
-		void SetCodeLine(class CodeLine* cl) {
-			codeline = cl;
+		void SetFileLine(int thefile, int theline) {
+			file = thefile;
+			line = theline;
 		}
-		
+
+		/** returns true if the label is at the given file/line .*/
+		bool isAt(int thefile, int theline) {
+			return (file == thefile && line == theline);
+		}
+
 		/** Sets a label address value from a .EQU directive. This sets the label with a unique value and equate mode. */
 		void Equate(unsigned int integer) {
 			equate = true;

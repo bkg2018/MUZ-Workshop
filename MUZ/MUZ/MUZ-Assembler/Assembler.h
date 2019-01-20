@@ -37,6 +37,7 @@ namespace MUZ {
 			 	These flags use a bitfield structure so they take 0 or 1 values only. */
 			struct ListingParts {
 				int address: 1;	// display address at left most
+				int warnaddress:1;	// display address with a warning (wrong value)
 				int code:1;		// display bytes of code
 				int line:1;		// display line number
 				int source:1;	// display source instruction/directive
@@ -47,7 +48,8 @@ namespace MUZ {
 			} parts;
 
 			/** nullptr or pointer to previous line when contiuing a block of 5+ bytes. */
-			ListingLine* prev = nullptr;
+			//ListingLine* prev = nullptr;
+
 			/** Address or value part. (left most). Enabled by parts.address */
 			ADDRESSTYPE address = 0;
 			/** Up to 4 bytes of code. Enabled by parts.code */
@@ -65,6 +67,12 @@ namespace MUZ {
 			/** Warning/Error message reference. */
 			int message = -1;
 			int token = -1;
+		};
+
+		// Contains a ready to use listing
+		struct Listing : public std::vector<ListingLine>
+		{
+			// contains all lines
 		};
 
 	private:
@@ -101,66 +109,82 @@ namespace MUZ {
 		DirectivesMap				m_directives;
 		
 		// Tables for the assembly
+
+		/** Table for all the #DEFINE symbols. */
 		DefSymbolsMap				m_defsymbols;
+		/** Table for all the global labels. */
 		LabelMap					labels;
+		/** Table for each fils, [0] is the main file, following are the included files in their inclusion order. */
 		std::vector<SourceFile*>	m_files;
+		/** Map of all sections. Default names are CODE and DATA for the .CODE and .DATA section. */
 		std::unordered_map<std::string, Section*> m_sections;
 
-		// Tables for IDE interaction
-		
-		
-		// Stack for imbricated conditionnal modes
-		ParsingModeStack			m_modes;	// stack of all imbricated levels, root being the first and never popped
-		size_t						m_curlevel = 0; // should be 1 when at root
+		// Stack for imbricated #IF conditionnal modes
+
+		/** Stack of each #IF stacked mode. The mode at level 0 is always ROOT and is never popped. */
+		ParsingModeStack			m_modes;
+		/** Current #IF mode level, this is the size of the m_modes stack. Should be 1 when at root. */
+		size_t						m_curlevel = 0; //
 		
 		/** Current assembly status singleton. */
 		struct AssemblyStatus {
-			Section*	cursection = nullptr;	// current code or data section
-			bool		firstpass  = true;		// true for first ass, false for second
-			int			curfile		= 0;		// current file number in m_files, used for local labels
-			std::string	lastlabel;				// last global label, used as a prefix for local labels starting with '@'
-			bool		trace		= false;	// true to activate debug trace on standard output
-			bool 		allcodelisting=false;	// true to list all bytes of a line, false to limit to 2 lines of listing
-			bool		listing    = true;		// true to enable listings (directives #LIST ON/OFF and #NOLIST)
+			/** Current code or data section. */
+			Section*	cursection = nullptr;
+			/** Number of current assembly pass. 0 for first pass, 1 for second pass. */
+			bool		firstpass  = true;
+			/** Number of current file, should always be the last in the m_files array. */
+			int			curfile		= 0;
+			/** Last global label, used as a prefix for local labels starting with '@'. */
+			std::string	lastlabel;
+			/** Flag to activate debug trace on standard output. */
+			bool		trace		= false;
+			/** Flag to list all bytes of a line, false to limit to 2 lines of listing. */
+			bool 		allcodelisting=false;
+			/** Flag to enable listings (directives #LIST ON/OFF and #NOLIST). */
+			bool		listing    = true;
 		} m_status;
 		
 		//MARK: - Private Output directory and file names
-		/// root output directory for all files
+		/** root output directory for all files */
 		std::string					m_outputdir;
-		/// file name for the binary output
+		/** file name for the binary output */
 		std::string					m_binfilename;
-		/// file name for the Intel HEX output
+		/** file name for the Intel HEX output */
 		std::string 				m_hexfilename;
-		/// file name for the listing output
+		/** file name for the listing output */
 		std::string					m_listingfilename;
-		/// file name for the memory output
+		/** file name for the memory output */
 		std::string					m_memoryfilename;
-		/// file name for the symbols output
+		/** file name for the symbols output */
 		std::string					m_symbolsfilename;
-		/// file name for errors/warnings log
+		/** file name for errors/warnings log */
 		std::string					m_logfilename;
-		/// current opened listing file
-		FILE*						m_listingfile = nullptr;
 
 		//MARK: - Private Assembler functions
 		/** Assembles a prepared code line. */
 		bool AssembleCodeLine(CodeLine& codeline, ErrorList& msg);
 		/** Initializes listing file, closes previous if any. */
-		bool PrepareListing(ErrorList& msg);
+		FILE* PrepareListing(ErrorList& msg);
+		/** Closes the listing file, ignore if the name is "stdout". */
+		void CloseListing( FILE* & file );
 		/** Generates a listing line for an assembled codeline. */
-		void GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg);
-		/** Generates a listing line for an assembled codeline. */
-		void GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg, std::vector<ListingLine> & listing);
+		void GenerateCodeLineListing(CodeLine& codeline, ErrorList& msg, Listing & listing);
 		/** Initializes memory listing file, close previous if any. */
-		void GenerateMemoryListing(DATATYPE* memory, Section& section, ErrorList& msg);
+		void GenerateMemoryDump(DATATYPE* memory, Section& section, ErrorList& msg);
 		/** Generates Intel HEX output. */
 		void GenerateIntelHex(DATATYPE* memory, Section& section, ErrorList& msg);
-		/** Generates file listing from current assembling. */
-		void GenerateFileListing(int file, ErrorList& msg);
 		/** Generates in-memory file listing from current assembling. */
-		void GenerateFileListing(int file, ErrorList& msg, std::vector<ListingLine> & listing);
-		/** End listing file. */
-		void EndListing();
+		void GenerateFileListing(int file, ErrorList& msg, Listing & listing);
+		/** Generate the sections list in an opened file. */
+		void GenerateSectionsList( FILE* file );
+		/** Generates the #DEFINE symbols list in an opened file. */
+		void GenerateDefSymbolsList( FILE* file );
+		/** Generates the .EQU equate symbols list in an opened file. */
+		void GenerateEquatesList( FILE* file );
+		/** Generates the global labels in an opened file. */
+		void GenerateLabelsList( FILE* file );
+		/** List tables in an opened file. */
+		void SaveTables( FILE* file );
 		/** Fills a memory image and lists of sections from an assembled source file. */
 		void FillFromFile(int file, DATATYPE* memory, Section& section, ErrorList& msg);
 		/** Generates warning/error file. */
@@ -200,7 +224,8 @@ namespace MUZ {
 		/** Closes one conditionnal mode. The expected mode must be given. */
 		bool ExitMode(ParsingMode p);
 	
-		//MARK: - Private ASM, HEX and binary files including
+		//MARK: - Private ASM, HEX and binary assembling/including
+
 		/** Assembles a main source file. */
 		bool AssembleMainFilePassOne(std::string file, ErrorList& msg);
 		bool AssembleMainFilePassTwo(std::string file, ErrorList& msg);
@@ -243,7 +268,13 @@ namespace MUZ {
 		/** Sets the erros/warnings log filename. */
 		void SetLogFilename(std::string filename);
 		/** Gets the full listing from current assembling. */
-		std::vector<ListingLine> GetListing(ErrorList& msg);
+		Listing GetListing(ErrorList& msg);
+
+		/** Save a memory listing to a text file. Use "stdout" to print on standard output. */
+		void SaveListing( Listing & listing, std::string file, ErrorList& msg);
+		/** Save a memory listing to an opened file. */
+		void SaveListing( Listing & listing, FILE* file, ErrorList& msg);
+
 		/** Enable/Disable the listings. */
 		void EnableListing(bool yes);
 		/** Known listing enabled status. */
