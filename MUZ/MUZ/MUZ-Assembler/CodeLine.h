@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "Types.h"
+#include "MUZ-Common/Types.h"
 #include "ExpVector.h"
 
 namespace MUZ {

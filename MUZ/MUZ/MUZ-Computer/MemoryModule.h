@@ -34,7 +34,7 @@
 
 #include "Exceptions.h"
 #include "Module.h"
-#include "Types.h"
+#include "MUZ-Common/Types.h"
 
 namespace MUZ {
 

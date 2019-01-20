@@ -10,8 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Types.h"
-#include "StrUtils.h"
+#include "MUZ-Common/Types.h"
+#include "MUZ-Common/StrUtils.h"
 
 namespace MUZ {
 

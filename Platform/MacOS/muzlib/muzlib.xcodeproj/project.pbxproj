@@ -1,0 +1,582 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		86ABFE2C21F476260010245E /* Computer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDEA21F476260010245E /* Computer.cpp */; };
+		86ABFE2D21F476260010245E /* PortMgr.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDEB21F476260010245E /* PortMgr.h */; };
+		86ABFE2E21F476260010245E /* MemoryMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDEC21F476260010245E /* MemoryMgr.cpp */; };
+		86ABFE2F21F476260010245E /* PortModule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDED21F476260010245E /* PortModule.cpp */; };
+		86ABFE3021F476260010245E /* Module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDEE21F476260010245E /* Module.cpp */; };
+		86ABFE3121F476260010245E /* Computer.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDEF21F476260010245E /* Computer.h */; };
+		86ABFE3221F476260010245E /* MemoryModule.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDF021F476260010245E /* MemoryModule.cpp */; };
+		86ABFE3321F476260010245E /* ROMPagingPort.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDF121F476260010245E /* ROMPagingPort.cpp */; };
+		86ABFE3421F476260010245E /* CPU.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDF221F476260010245E /* CPU.h */; };
+		86ABFE3521F476260010245E /* ROMPagingPort.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDF321F476260010245E /* ROMPagingPort.h */; };
+		86ABFE3621F476260010245E /* MemoryModule.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDF421F476260010245E /* MemoryModule.h */; };
+		86ABFE3721F476260010245E /* Peripheral.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDF521F476260010245E /* Peripheral.cpp */; };
+		86ABFE3821F476260010245E /* CPU.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDF621F476260010245E /* CPU.cpp */; };
+		86ABFE3921F476260010245E /* PortMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDF721F476260010245E /* PortMgr.cpp */; };
+		86ABFE3A21F476260010245E /* Module.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDF821F476260010245E /* Module.h */; };
+		86ABFE3B21F476260010245E /* Peripheral.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDF921F476260010245E /* Peripheral.h */; };
+		86ABFE3C21F476260010245E /* MemoryMgr.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDFA21F476260010245E /* MemoryMgr.h */; };
+		86ABFE3D21F476260010245E /* PortModule.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDFB21F476260010245E /* PortModule.h */; };
+		86ABFE3E21F476260010245E /* Config.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDFC21F476260010245E /* Config.h */; };
+		86ABFE3F21F476260010245E /* AddressZone.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDFE21F476260010245E /* AddressZone.h */; };
+		86ABFE4021F476260010245E /* MemoryMgr_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0021F476260010245E /* MemoryMgr_test.cpp */; };
+		86ABFE4121F476260010245E /* MemoryModule_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0121F476260010245E /* MemoryModule_test.cpp */; };
+		86ABFE4221F476260010245E /* Computer_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0221F476260010245E /* Computer_test.cpp */; };
+		86ABFE4321F476260010245E /* All-Operators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0421F476260010245E /* All-Operators.cpp */; };
+		86ABFE4421F476260010245E /* DefSymbol.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0521F476260010245E /* DefSymbol.h */; };
+		86ABFE4521F476260010245E /* Assembler.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0621F476260010245E /* Assembler.h */; };
+		86ABFE4621F476260010245E /* ExpVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0721F476260010245E /* ExpVector.cpp */; };
+		86ABFE4721F476260010245E /* ParseToken.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0821F476260010245E /* ParseToken.h */; };
+		86ABFE4821F476260010245E /* Label.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0921F476260010245E /* Label.h */; };
+		86ABFE4921F476260010245E /* Name.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0A21F476260010245E /* Name.h */; };
+		86ABFE4A21F476260010245E /* CodeLine.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0B21F476260010245E /* CodeLine.h */; };
+		86ABFE4B21F476260010245E /* Operator.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0C21F476260010245E /* Operator.h */; };
+		86ABFE4C21F476260010245E /* Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0D21F476260010245E /* Parser.h */; };
+		86ABFE4D21F476260010245E /* Asm-Exceptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0E21F476260010245E /* Asm-Exceptions.h */; };
+		86ABFE4E21F476260010245E /* All-Directives.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0F21F476260010245E /* All-Directives.cpp */; };
+		86ABFE4F21F476260010245E /* Z80-Operands.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE1021F476260010245E /* Z80-Operands.cpp */; };
+		86ABFE5021F476260010245E /* Operator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE1121F476260010245E /* Operator.cpp */; };
+		86ABFE5121F476260010245E /* Z80-Instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE1221F476260010245E /* Z80-Instructions.cpp */; };
+		86ABFE5221F476260010245E /* Errors.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE1321F476260010245E /* Errors.h */; };
+		86ABFE5321F476260010245E /* CodeLine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE1421F476260010245E /* CodeLine.cpp */; };
+		86ABFE5421F476260010245E /* Assembler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE1521F476260010245E /* Assembler.cpp */; };
+		86ABFE5521F476260010245E /* ParsingMode.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE1621F476260010245E /* ParsingMode.h */; };
+		86ABFE5621F476260010245E /* ExpVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE1721F476260010245E /* ExpVector.h */; };
+		86ABFE5721F476260010245E /* Directive.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE1821F476260010245E /* Directive.h */; };
+		86ABFE5821F476260010245E /* Expression.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE1921F476260010245E /* Expression.h */; };
+		86ABFE5921F476260010245E /* All-Directives.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE1A21F476260010245E /* All-Directives.h */; };
+		86ABFE5A21F476260010245E /* TokenType.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE1B21F476260010245E /* TokenType.h */; };
+		86ABFE5B21F476260010245E /* All-Operators.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE1C21F476260010245E /* All-Operators.h */; };
+		86ABFE5C21F476260010245E /* Errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE1D21F476260010245E /* Errors.cpp */; };
+		86ABFE5D21F476260010245E /* Instruction.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE1E21F476260010245E /* Instruction.h */; };
+		86ABFE5E21F476260010245E /* Expression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE1F21F476260010245E /* Expression.cpp */; };
+		86ABFE5F21F476260010245E /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE2021F476260010245E /* Parser.cpp */; };
+		86ABFE6021F476260010245E /* Z80-Instructions.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE2121F476260010245E /* Z80-Instructions.h */; };
+		86ABFE6121F476260010245E /* Z80-Operands.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE2221F476260010245E /* Z80-Operands.h */; };
+		86ABFE6221F476260010245E /* StrUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE2421F476260010245E /* StrUtils.h */; };
+		86ABFE6321F476260010245E /* FileUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE2521F476260010245E /* FileUtils.h */; };
+		86ABFE6421F476260010245E /* Types.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE2621F476260010245E /* Types.h */; };
+		86ABFE6521F476260010245E /* Exceptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE2721F476260010245E /* Exceptions.h */; };
+		86ABFE6621F476260010245E /* FileUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE2821F476260010245E /* FileUtils.cpp */; };
+		86ABFE6721F476260010245E /* Section.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE2921F476260010245E /* Section.h */; };
+		86ABFE6821F476260010245E /* Section.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE2A21F476260010245E /* Section.cpp */; };
+		86ABFE6921F476260010245E /* StrUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE2B21F476260010245E /* StrUtils.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		86ABFDDA21F475F20010245E /* libmuzlib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmuzlib.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		86ABFDEA21F476260010245E /* Computer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Computer.cpp; sourceTree = "<group>"; };
+		86ABFDEB21F476260010245E /* PortMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PortMgr.h; sourceTree = "<group>"; };
+		86ABFDEC21F476260010245E /* MemoryMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryMgr.cpp; sourceTree = "<group>"; };
+		86ABFDED21F476260010245E /* PortModule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PortModule.cpp; sourceTree = "<group>"; };
+		86ABFDEE21F476260010245E /* Module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Module.cpp; sourceTree = "<group>"; };
+		86ABFDEF21F476260010245E /* Computer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Computer.h; sourceTree = "<group>"; };
+		86ABFDF021F476260010245E /* MemoryModule.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryModule.cpp; sourceTree = "<group>"; };
+		86ABFDF121F476260010245E /* ROMPagingPort.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ROMPagingPort.cpp; sourceTree = "<group>"; };
+		86ABFDF221F476260010245E /* CPU.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPU.h; sourceTree = "<group>"; };
+		86ABFDF321F476260010245E /* ROMPagingPort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ROMPagingPort.h; sourceTree = "<group>"; };
+		86ABFDF421F476260010245E /* MemoryModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryModule.h; sourceTree = "<group>"; };
+		86ABFDF521F476260010245E /* Peripheral.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Peripheral.cpp; sourceTree = "<group>"; };
+		86ABFDF621F476260010245E /* CPU.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CPU.cpp; sourceTree = "<group>"; };
+		86ABFDF721F476260010245E /* PortMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PortMgr.cpp; sourceTree = "<group>"; };
+		86ABFDF821F476260010245E /* Module.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Module.h; sourceTree = "<group>"; };
+		86ABFDF921F476260010245E /* Peripheral.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Peripheral.h; sourceTree = "<group>"; };
+		86ABFDFA21F476260010245E /* MemoryMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryMgr.h; sourceTree = "<group>"; };
+		86ABFDFB21F476260010245E /* PortModule.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PortModule.h; sourceTree = "<group>"; };
+		86ABFDFC21F476260010245E /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
+		86ABFDFE21F476260010245E /* AddressZone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AddressZone.h; sourceTree = "<group>"; };
+		86ABFE0021F476260010245E /* MemoryMgr_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryMgr_test.cpp; sourceTree = "<group>"; };
+		86ABFE0121F476260010245E /* MemoryModule_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MemoryModule_test.cpp; sourceTree = "<group>"; };
+		86ABFE0221F476260010245E /* Computer_test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Computer_test.cpp; sourceTree = "<group>"; };
+		86ABFE0421F476260010245E /* All-Operators.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "All-Operators.cpp"; sourceTree = "<group>"; };
+		86ABFE0521F476260010245E /* DefSymbol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DefSymbol.h; sourceTree = "<group>"; };
+		86ABFE0621F476260010245E /* Assembler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Assembler.h; sourceTree = "<group>"; };
+		86ABFE0721F476260010245E /* ExpVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ExpVector.cpp; sourceTree = "<group>"; };
+		86ABFE0821F476260010245E /* ParseToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParseToken.h; sourceTree = "<group>"; };
+		86ABFE0921F476260010245E /* Label.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Label.h; sourceTree = "<group>"; };
+		86ABFE0A21F476260010245E /* Name.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Name.h; sourceTree = "<group>"; };
+		86ABFE0B21F476260010245E /* CodeLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodeLine.h; sourceTree = "<group>"; };
+		86ABFE0C21F476260010245E /* Operator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Operator.h; sourceTree = "<group>"; };
+		86ABFE0D21F476260010245E /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parser.h; sourceTree = "<group>"; };
+		86ABFE0E21F476260010245E /* Asm-Exceptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Asm-Exceptions.h"; sourceTree = "<group>"; };
+		86ABFE0F21F476260010245E /* All-Directives.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "All-Directives.cpp"; sourceTree = "<group>"; };
+		86ABFE1021F476260010245E /* Z80-Operands.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Z80-Operands.cpp"; sourceTree = "<group>"; };
+		86ABFE1121F476260010245E /* Operator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Operator.cpp; sourceTree = "<group>"; };
+		86ABFE1221F476260010245E /* Z80-Instructions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Z80-Instructions.cpp"; sourceTree = "<group>"; };
+		86ABFE1321F476260010245E /* Errors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Errors.h; sourceTree = "<group>"; };
+		86ABFE1421F476260010245E /* CodeLine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CodeLine.cpp; sourceTree = "<group>"; };
+		86ABFE1521F476260010245E /* Assembler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Assembler.cpp; sourceTree = "<group>"; };
+		86ABFE1621F476260010245E /* ParsingMode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParsingMode.h; sourceTree = "<group>"; };
+		86ABFE1721F476260010245E /* ExpVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExpVector.h; sourceTree = "<group>"; };
+		86ABFE1821F476260010245E /* Directive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Directive.h; sourceTree = "<group>"; };
+		86ABFE1921F476260010245E /* Expression.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Expression.h; sourceTree = "<group>"; };
+		86ABFE1A21F476260010245E /* All-Directives.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "All-Directives.h"; sourceTree = "<group>"; };
+		86ABFE1B21F476260010245E /* TokenType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TokenType.h; sourceTree = "<group>"; };
+		86ABFE1C21F476260010245E /* All-Operators.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "All-Operators.h"; sourceTree = "<group>"; };
+		86ABFE1D21F476260010245E /* Errors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Errors.cpp; sourceTree = "<group>"; };
+		86ABFE1E21F476260010245E /* Instruction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Instruction.h; sourceTree = "<group>"; };
+		86ABFE1F21F476260010245E /* Expression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Expression.cpp; sourceTree = "<group>"; };
+		86ABFE2021F476260010245E /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Parser.cpp; sourceTree = "<group>"; };
+		86ABFE2121F476260010245E /* Z80-Instructions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Z80-Instructions.h"; sourceTree = "<group>"; };
+		86ABFE2221F476260010245E /* Z80-Operands.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "Z80-Operands.h"; sourceTree = "<group>"; };
+		86ABFE2421F476260010245E /* StrUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StrUtils.h; sourceTree = "<group>"; };
+		86ABFE2521F476260010245E /* FileUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileUtils.h; sourceTree = "<group>"; };
+		86ABFE2621F476260010245E /* Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Types.h; sourceTree = "<group>"; };
+		86ABFE2721F476260010245E /* Exceptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Exceptions.h; sourceTree = "<group>"; };
+		86ABFE2821F476260010245E /* FileUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileUtils.cpp; sourceTree = "<group>"; };
+		86ABFE2921F476260010245E /* Section.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Section.h; sourceTree = "<group>"; };
+		86ABFE2A21F476260010245E /* Section.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Section.cpp; sourceTree = "<group>"; };
+		86ABFE2B21F476260010245E /* StrUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StrUtils.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		86ABFDD821F475F20010245E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		86ABFDD121F475F20010245E = {
+			isa = PBXGroup;
+			children = (
+				86ABFDDC21F475F20010245E /* muzlib */,
+				86ABFDDB21F475F20010245E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		86ABFDDB21F475F20010245E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				86ABFDDA21F475F20010245E /* libmuzlib.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		86ABFDDC21F475F20010245E /* muzlib */ = {
+			isa = PBXGroup;
+			children = (
+				86ABFDE821F476260010245E /* MUZ */,
+			);
+			path = muzlib;
+			sourceTree = "<group>";
+		};
+		86ABFDE821F476260010245E /* MUZ */ = {
+			isa = PBXGroup;
+			children = (
+				86ABFDE921F476260010245E /* MUZ-Computer */,
+				86ABFDFC21F476260010245E /* Config.h */,
+				86ABFDFD21F476260010245E /* unused */,
+				86ABFDFF21F476260010245E /* Tests */,
+				86ABFE0321F476260010245E /* MUZ-Assembler */,
+				86ABFE2321F476260010245E /* MUZ-Common */,
+			);
+			name = MUZ;
+			path = ../../../../MUZ/MUZ;
+			sourceTree = "<group>";
+		};
+		86ABFDE921F476260010245E /* MUZ-Computer */ = {
+			isa = PBXGroup;
+			children = (
+				86ABFDEA21F476260010245E /* Computer.cpp */,
+				86ABFDEB21F476260010245E /* PortMgr.h */,
+				86ABFDEC21F476260010245E /* MemoryMgr.cpp */,
+				86ABFDED21F476260010245E /* PortModule.cpp */,
+				86ABFDEE21F476260010245E /* Module.cpp */,
+				86ABFDEF21F476260010245E /* Computer.h */,
+				86ABFDF021F476260010245E /* MemoryModule.cpp */,
+				86ABFDF121F476260010245E /* ROMPagingPort.cpp */,
+				86ABFDF221F476260010245E /* CPU.h */,
+				86ABFDF321F476260010245E /* ROMPagingPort.h */,
+				86ABFDF421F476260010245E /* MemoryModule.h */,
+				86ABFDF521F476260010245E /* Peripheral.cpp */,
+				86ABFDF621F476260010245E /* CPU.cpp */,
+				86ABFDF721F476260010245E /* PortMgr.cpp */,
+				86ABFDF821F476260010245E /* Module.h */,
+				86ABFDF921F476260010245E /* Peripheral.h */,
+				86ABFDFA21F476260010245E /* MemoryMgr.h */,
+				86ABFDFB21F476260010245E /* PortModule.h */,
+			);
+			path = "MUZ-Computer";
+			sourceTree = "<group>";
+		};
+		86ABFDFD21F476260010245E /* unused */ = {
+			isa = PBXGroup;
+			children = (
+				86ABFDFE21F476260010245E /* AddressZone.h */,
+			);
+			path = unused;
+			sourceTree = "<group>";
+		};
+		86ABFDFF21F476260010245E /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				86ABFE0021F476260010245E /* MemoryMgr_test.cpp */,
+				86ABFE0121F476260010245E /* MemoryModule_test.cpp */,
+				86ABFE0221F476260010245E /* Computer_test.cpp */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		86ABFE0321F476260010245E /* MUZ-Assembler */ = {
+			isa = PBXGroup;
+			children = (
+				86ABFE0421F476260010245E /* All-Operators.cpp */,
+				86ABFE0521F476260010245E /* DefSymbol.h */,
+				86ABFE0621F476260010245E /* Assembler.h */,
+				86ABFE0721F476260010245E /* ExpVector.cpp */,
+				86ABFE0821F476260010245E /* ParseToken.h */,
+				86ABFE0921F476260010245E /* Label.h */,
+				86ABFE0A21F476260010245E /* Name.h */,
+				86ABFE0B21F476260010245E /* CodeLine.h */,
+				86ABFE0C21F476260010245E /* Operator.h */,
+				86ABFE0D21F476260010245E /* Parser.h */,
+				86ABFE0E21F476260010245E /* Asm-Exceptions.h */,
+				86ABFE0F21F476260010245E /* All-Directives.cpp */,
+				86ABFE1021F476260010245E /* Z80-Operands.cpp */,
+				86ABFE1121F476260010245E /* Operator.cpp */,
+				86ABFE1221F476260010245E /* Z80-Instructions.cpp */,
+				86ABFE1321F476260010245E /* Errors.h */,
+				86ABFE1421F476260010245E /* CodeLine.cpp */,
+				86ABFE1521F476260010245E /* Assembler.cpp */,
+				86ABFE1621F476260010245E /* ParsingMode.h */,
+				86ABFE1721F476260010245E /* ExpVector.h */,
+				86ABFE1821F476260010245E /* Directive.h */,
+				86ABFE1921F476260010245E /* Expression.h */,
+				86ABFE1A21F476260010245E /* All-Directives.h */,
+				86ABFE1B21F476260010245E /* TokenType.h */,
+				86ABFE1C21F476260010245E /* All-Operators.h */,
+				86ABFE1D21F476260010245E /* Errors.cpp */,
+				86ABFE1E21F476260010245E /* Instruction.h */,
+				86ABFE1F21F476260010245E /* Expression.cpp */,
+				86ABFE2021F476260010245E /* Parser.cpp */,
+				86ABFE2121F476260010245E /* Z80-Instructions.h */,
+				86ABFE2221F476260010245E /* Z80-Operands.h */,
+			);
+			path = "MUZ-Assembler";
+			sourceTree = "<group>";
+		};
+		86ABFE2321F476260010245E /* MUZ-Common */ = {
+			isa = PBXGroup;
+			children = (
+				86ABFE2421F476260010245E /* StrUtils.h */,
+				86ABFE2521F476260010245E /* FileUtils.h */,
+				86ABFE2621F476260010245E /* Types.h */,
+				86ABFE2721F476260010245E /* Exceptions.h */,
+				86ABFE2821F476260010245E /* FileUtils.cpp */,
+				86ABFE2921F476260010245E /* Section.h */,
+				86ABFE2A21F476260010245E /* Section.cpp */,
+				86ABFE2B21F476260010245E /* StrUtils.cpp */,
+			);
+			path = "MUZ-Common";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		86ABFDD621F475F20010245E /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86ABFE6321F476260010245E /* FileUtils.h in Headers */,
+				86ABFE5A21F476260010245E /* TokenType.h in Headers */,
+				86ABFE6121F476260010245E /* Z80-Operands.h in Headers */,
+				86ABFE5721F476260010245E /* Directive.h in Headers */,
+				86ABFE6021F476260010245E /* Z80-Instructions.h in Headers */,
+				86ABFE5521F476260010245E /* ParsingMode.h in Headers */,
+				86ABFE5921F476260010245E /* All-Directives.h in Headers */,
+				86ABFE3E21F476260010245E /* Config.h in Headers */,
+				86ABFE6721F476260010245E /* Section.h in Headers */,
+				86ABFE3C21F476260010245E /* MemoryMgr.h in Headers */,
+				86ABFE5B21F476260010245E /* All-Operators.h in Headers */,
+				86ABFE3B21F476260010245E /* Peripheral.h in Headers */,
+				86ABFE6221F476260010245E /* StrUtils.h in Headers */,
+				86ABFE4821F476260010245E /* Label.h in Headers */,
+				86ABFE3F21F476260010245E /* AddressZone.h in Headers */,
+				86ABFE3421F476260010245E /* CPU.h in Headers */,
+				86ABFE2D21F476260010245E /* PortMgr.h in Headers */,
+				86ABFE5821F476260010245E /* Expression.h in Headers */,
+				86ABFE4421F476260010245E /* DefSymbol.h in Headers */,
+				86ABFE5621F476260010245E /* ExpVector.h in Headers */,
+				86ABFE3A21F476260010245E /* Module.h in Headers */,
+				86ABFE6521F476260010245E /* Exceptions.h in Headers */,
+				86ABFE5D21F476260010245E /* Instruction.h in Headers */,
+				86ABFE3521F476260010245E /* ROMPagingPort.h in Headers */,
+				86ABFE4D21F476260010245E /* Asm-Exceptions.h in Headers */,
+				86ABFE3621F476260010245E /* MemoryModule.h in Headers */,
+				86ABFE6421F476260010245E /* Types.h in Headers */,
+				86ABFE4A21F476260010245E /* CodeLine.h in Headers */,
+				86ABFE4B21F476260010245E /* Operator.h in Headers */,
+				86ABFE4521F476260010245E /* Assembler.h in Headers */,
+				86ABFE3D21F476260010245E /* PortModule.h in Headers */,
+				86ABFE4921F476260010245E /* Name.h in Headers */,
+				86ABFE4C21F476260010245E /* Parser.h in Headers */,
+				86ABFE5221F476260010245E /* Errors.h in Headers */,
+				86ABFE4721F476260010245E /* ParseToken.h in Headers */,
+				86ABFE3121F476260010245E /* Computer.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		86ABFDD921F475F20010245E /* muzlib */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 86ABFDE521F475F20010245E /* Build configuration list for PBXNativeTarget "muzlib" */;
+			buildPhases = (
+				86ABFDD621F475F20010245E /* Headers */,
+				86ABFDD721F475F20010245E /* Sources */,
+				86ABFDD821F475F20010245E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = muzlib;
+			productName = asmuzlib;
+			productReference = 86ABFDDA21F475F20010245E /* libmuzlib.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		86ABFDD221F475F20010245E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1010;
+				ORGANIZATIONNAME = "Francis Pierot";
+				TargetAttributes = {
+					86ABFDD921F475F20010245E = {
+						CreatedOnToolsVersion = 10.1;
+					};
+				};
+			};
+			buildConfigurationList = 86ABFDD521F475F20010245E /* Build configuration list for PBXProject "muzlib" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 86ABFDD121F475F20010245E;
+			productRefGroup = 86ABFDDB21F475F20010245E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				86ABFDD921F475F20010245E /* muzlib */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		86ABFDD721F475F20010245E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86ABFE5321F476260010245E /* CodeLine.cpp in Sources */,
+				86ABFE4121F476260010245E /* MemoryModule_test.cpp in Sources */,
+				86ABFE3821F476260010245E /* CPU.cpp in Sources */,
+				86ABFE4021F476260010245E /* MemoryMgr_test.cpp in Sources */,
+				86ABFE5421F476260010245E /* Assembler.cpp in Sources */,
+				86ABFE3721F476260010245E /* Peripheral.cpp in Sources */,
+				86ABFE5C21F476260010245E /* Errors.cpp in Sources */,
+				86ABFE5E21F476260010245E /* Expression.cpp in Sources */,
+				86ABFE3221F476260010245E /* MemoryModule.cpp in Sources */,
+				86ABFE2C21F476260010245E /* Computer.cpp in Sources */,
+				86ABFE3021F476260010245E /* Module.cpp in Sources */,
+				86ABFE4321F476260010245E /* All-Operators.cpp in Sources */,
+				86ABFE3921F476260010245E /* PortMgr.cpp in Sources */,
+				86ABFE6921F476260010245E /* StrUtils.cpp in Sources */,
+				86ABFE5121F476260010245E /* Z80-Instructions.cpp in Sources */,
+				86ABFE6821F476260010245E /* Section.cpp in Sources */,
+				86ABFE5F21F476260010245E /* Parser.cpp in Sources */,
+				86ABFE5021F476260010245E /* Operator.cpp in Sources */,
+				86ABFE4221F476260010245E /* Computer_test.cpp in Sources */,
+				86ABFE4E21F476260010245E /* All-Directives.cpp in Sources */,
+				86ABFE2F21F476260010245E /* PortModule.cpp in Sources */,
+				86ABFE4F21F476260010245E /* Z80-Operands.cpp in Sources */,
+				86ABFE2E21F476260010245E /* MemoryMgr.cpp in Sources */,
+				86ABFE4621F476260010245E /* ExpVector.cpp in Sources */,
+				86ABFE3321F476260010245E /* ROMPagingPort.cpp in Sources */,
+				86ABFE6621F476260010245E /* FileUtils.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		86ABFDE321F475F20010245E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../../MUZ/MUZ\"";
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		86ABFDE421F475F20010245E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = "\"$(SRCROOT)/../../../MUZ/MUZ\"";
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		86ABFDE621F475F20010245E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		86ABFDE721F475F20010245E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		86ABFDD521F475F20010245E /* Build configuration list for PBXProject "muzlib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86ABFDE321F475F20010245E /* Debug */,
+				86ABFDE421F475F20010245E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		86ABFDE521F475F20010245E /* Build configuration list for PBXNativeTarget "muzlib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86ABFDE621F475F20010245E /* Debug */,
+				86ABFDE721F475F20010245E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 86ABFDD221F475F20010245E /* Project object */;
+}

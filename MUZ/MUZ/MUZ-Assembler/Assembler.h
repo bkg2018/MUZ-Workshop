@@ -13,13 +13,14 @@
 #include <vector>
 #include <unordered_map>
 
-#include "Types.h"
+#include "MUZ-Common/Types.h"
+#include "MUZ-Common/Exceptions.h"
+
 #include "ParsingMode.h"
 #include "Errors.h"
 #include "Label.h"
 #include "DefSymbol.h"
 #include "Directive.h"
-#include "Exceptions.h"
 #include "ExpVector.h"
 #include "CodeLine.h"
 

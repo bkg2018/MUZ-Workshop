@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "MUZ::InstructionJR::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::GetLabel(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "m_status.lastlabel">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Section::extendedBy(unsigned short, unsigned short):Types.h">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Parser::EvaluateAddress():Parser.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Parser::ResolveSymbolAt(int, bool):Parser.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionSUB::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "::-[MUZ_WorkshopTests testParseNumbers]():MUZ_WorkshopTests.mm">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::CodeLine::Assemble(MUZ::Assembler&amp;, std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;&amp;, std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;&amp;):CodeLine.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::number8(MUZ::ExpVector*, int&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "::-[MUZ_WorkshopTests testAssembler]():MUZ_WorkshopTests.mm">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::CodeLine::Assemble(MUZ::Assembler&amp;, MUZ::ErrorList&amp;):CodeLine.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::ExpressionEvaluator::Evaluate(MUZ::ExpVector&amp;, int, int&amp;):Expression.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::indirect16(MUZ::ExpVector*, int&amp;, MUZ::OperandType&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::buildListingLines(MUZ::CodeLine&amp;, bool):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::DirectiveINCLUDE::Parse(MUZ::Assembler&amp;, MUZ::Parser&amp;, MUZ::CodeLine&amp;, MUZ::Label*, MUZ::ErrorList&amp;):All-Directives.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::Assemble(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, bool, int, int):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Section::SetOrg(unsigned short):Types.h">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::~Assembler():Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Parser::EvaluateBoolean():Parser.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::SetAddress(unsigned short):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "m_status.cursection">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::DirectiveDEFINE::Parse(MUZ::Assembler&amp;, MUZ::Parser&amp;, MUZ::Label*, MUZ::ErrorList&amp;):Z80-Directives.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Parser::Split(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::vector&lt;MUZ::ParseToken, std::__1::allocator&lt;MUZ::ParseToken&gt; &gt;&amp;, std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;&amp;):ParseToken.h">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Section::SetAddress(unsigned short):Types.h">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::GenerateCodeLineListing(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;, MUZ::Assembler::Listing&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::AssembleIncludedFilePassOne(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "cl.label">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::AssembleIncludedFilePassTwo(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionADC::Assemble(MUZ::Assembler&amp;, MUZ::CodeLine&amp;, MUZ::Label*, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Parser::EvaluateAddress(unsigned short&amp;):Parser.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::SaveListing(MUZ::Assembler::Listing&amp;, std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::ErrorList&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::FindSection(unsigned short, unsigned short):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::buildListingLineStructures(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;, bool):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::indirect16(MUZ::ExpVector*, int, MUZ::OperandType&amp;, int&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionADC::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::DirectiveEQU::Parse(MUZ::Assembler&amp;, std::__1::vector&lt;MUZ::ParseToken, std::__1::allocator&lt;MUZ::ParseToken&gt; &gt;, int&amp;, MUZ::Label*, std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;&amp;, std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;&amp;):Z80-Directives.h">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Z80::OperandTools::GetNum16(MUZ::CodeLine&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionOUT::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::GetSection(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::ReplaceLabel(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::AdvanceAddress(unsigned short):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "m_status.cursection">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Z80::InstructionJP::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::FillFromFile(int, unsigned char*, std::__1::vector&lt;MUZ::Section, std::__1::allocator&lt;MUZ::Section&gt; &gt;&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Parser::Init(std::__1::vector&lt;MUZ::ParseToken, std::__1::allocator&lt;MUZ::ParseToken&gt; &gt;&amp;, int&amp;):Parser.h">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::DirectiveORG::Parse(MUZ::Assembler&amp;, MUZ::Parser&amp;, MUZ::CodeLine&amp;, MUZ::Label*, MUZ::ErrorList&amp;):All-Directives.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::DirectiveEQU::Parse(MUZ::Assembler&amp;, MUZ::Parser&amp;, MUZ::CodeLine&amp;, MUZ::Label*, MUZ::ErrorList&amp;):All-Directives.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "codeline.source">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::TestPass(MUZ::CodeLine&amp;, int):Errors.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::SourceFile::Set(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::Assembler::SourceFile*):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::CodeLine::GetNum8(int&amp;):CodeLine.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::ParsingState::Split(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::vector&lt;MUZ::ParseToken, std::__1::allocator&lt;MUZ::ParseToken&gt; &gt;&amp;, std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;&amp;):ParseToken.h">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::indirectHL(MUZ::ExpVector*, int, MUZ::OperandType&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::GetNum8(MUZ::CodeLine&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::DirectiveWORD::Parse(MUZ::Assembler&amp;, MUZ::Parser&amp;, MUZ::CodeLine&amp;, MUZ::Label*, MUZ::ErrorList&amp;):All-Directives.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::AssembleCodeLine(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "codeline.source">
+            </PersistentString>
+            <PersistentString
+               value = "m_files[57]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Parser::Split(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::ErrorList&amp;):Parser.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionXOR::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Z80::InstructionLD::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::DirectiveBYTE::Parse(MUZ::Assembler&amp;, MUZ::Parser&amp;, MUZ::CodeLine&amp;, MUZ::Label*, MUZ::ErrorList&amp;):All-Directives.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "codeline.source">
+            </PersistentString>
+            <PersistentString
+               value = "*parser.curtoken">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::number16(MUZ::ExpVector*, int&amp;, MUZ::OperandType&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionADD::Assemble(MUZ::Assembler&amp;, MUZ::CodeLine&amp;, MUZ::Label*, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::ReplaceDefSymbol(MUZ::ParseToken&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionLD::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Label::SetAddress(unsigned int):Label.h">
+      </ContextState>
+      <ContextState
+         contextName = "::-[MUZ_WorkshopTests testAllCodes]():MUZ_WorkshopTests.mm">
+      </ContextState>
+      <ContextState
+         contextName = "::-[MUZ_WorkshopTests testParseExpressions]():MUZ_WorkshopTests.mm">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::DirectivePROC::Parse(MUZ::Assembler&amp;, MUZ::Parser&amp;, MUZ::CodeLine&amp;, MUZ::Label*, MUZ::ErrorList&amp;):All-Directives.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionBIT::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::AssembleMainFilePassTwo(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::ErrorList&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::AssembleMainFilePassOne(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::ErrorList&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::CreateLabel(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "m_status.firstpass">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::buildOneListingLine(unsigned short, std::__1::vector&lt;unsigned char, std::__1::allocator&lt;unsigned char&gt; &gt;, int, int, MUZ::Label*, int, int, std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::ScanLabel(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "m_status.lastlabel">
+            </PersistentString>
+            <PersistentString
+               value = "codeline.source">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::buildListingLines(MUZ::CodeLine&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::indirectX(MUZ::ExpVector*, int&amp;, MUZ::OperandType&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Label::Equate(unsigned int):Label.h">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Parser::StoreToken():Parser.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::ExpressionEvaluator::EvaluateExpression(MUZ::ExpVector&amp;, int, int&amp;):Expression.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::ExpressionEvaluator::Evaluate(MUZ::ExpVector&amp;, int&amp;, int&amp;):Expression.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "tokens.at(4)">
+            </PersistentString>
+            <PersistentString
+               value = "tokens.at(2)">
+            </PersistentString>
+            <PersistentString
+               value = "tokens.at(0)">
+            </PersistentString>
+            <PersistentString
+               value = "tokens.at(5)">
+            </PersistentString>
+            <PersistentString
+               value = "tokens.at(3)">
+            </PersistentString>
+            <PersistentString
+               value = "tokens.at(1)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::buildOneListingLineStructure(unsigned short, std::__1::vector&lt;unsigned char, std::__1::allocator&lt;unsigned char&gt; &gt;, int, int, MUZ::Label*, int, int, std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::ErrorList&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::AssembleFile(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, bool, MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "cl">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::CodeLine::GetInd16(int&amp;):CodeLine.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::OperatorSUB::Exec(MUZ::ParseToken&amp;, MUZ::ParseToken&amp;):All-Operators.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "::-[MUZ_WorkshopTests testZ80]():MUZ_WorkshopTests.mm">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionJP::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::GenerateIntelHex(unsigned char*, std::__1::vector&lt;MUZ::Section, std::__1::allocator&lt;MUZ::Section&gt; &gt;&amp;, MUZ::ErrorList&amp;):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "((~sum) + 1)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::DirectiveDATA::Parse(MUZ::Assembler&amp;, MUZ::Parser&amp;, MUZ::CodeLine&amp;, MUZ::Label*, MUZ::ErrorList&amp;):All-Directives.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "as.m_status.cursection">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Parser::ResolveSymbolAt(int):Parser.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::Assemble(std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, MUZ::ErrorList&amp;, bool, int, int):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "m_defsymbols">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::Assemble(MUZ::CodeLine&amp;, std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;&amp;, std::__1::vector&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt;, std::__1::allocator&lt;std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; &gt; &gt;&amp;):Assembler.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Assembler::FillFromFile(int, unsigned char*, std::__1::vector&lt;MUZ::Section, std::__1::allocator&lt;MUZ::Section&gt; &gt;&amp;, MUZ::ErrorList&amp;):Assembler.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "sourcefile">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::Z80::InstructionJR::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+         <PersistentStrings>
+            <PersistentString
+               value = "codeline.as-&gt;m_status">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::bitnumber(MUZ::ExpVector*, int&amp;, MUZ::OperandType&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::indirect16(MUZ::ExpVector*, int, MUZ::OperandType&amp;, int&amp;):Z80-Operands.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::InstructionCP::Assemble(MUZ::CodeLine&amp;, MUZ::ErrorList&amp;):Z80-Instructions.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::ExpressionEvaluator::Evaluate(MUZ::ExpVector&amp;, int):Expression.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::ErrorList::Warning(MUZ::ErrorKind, MUZ::CodeLine&amp;, int):Errors.cpp">
+      </ContextState>
+      <ContextState
+         contextName = "MUZ::OperatorADD::Exec(MUZ::ParseToken&amp;, MUZ::ParseToken&amp;):All-Operators.cpp">
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>

@@ -9,7 +9,7 @@
 #ifndef Token_hpp
 #define Token_hpp
 
-#include "Types.h"
+#include "MUZ-Common/Types.h"
 #include "Errors.h"
 #include "ParseToken.h"
 #include "ExpVector.h"

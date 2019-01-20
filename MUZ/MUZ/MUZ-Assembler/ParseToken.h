@@ -10,8 +10,8 @@
 #define ParseToken_h
 
 #include <string>
-#include "Types.h"
-#include "StrUtils.h"
+#include "MUZ-Common/Types.h"
+#include "MUZ-Common/StrUtils.h"
 #include "TokenType.h"
 
 namespace MUZ {

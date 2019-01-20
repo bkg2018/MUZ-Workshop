@@ -16,7 +16,7 @@
 #ifndef SRC_MUZ_MODULE_H_
 #define SRC_MUZ_MODULE_H_
 
-#include "Types.h"
+#include "MUZ-Common/Types.h"
 
 namespace MUZ {
 

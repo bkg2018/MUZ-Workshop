@@ -9,7 +9,7 @@
 #ifndef AddressZone_h
 #define AddressZone_h
 
-#include "Types.h"
+#include "MUZ-Common/Types.h"
 #include <stdexcept>
 
 namespace MUZ {

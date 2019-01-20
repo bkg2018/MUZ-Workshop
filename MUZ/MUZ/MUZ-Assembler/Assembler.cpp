@@ -824,30 +824,51 @@ namespace MUZ {
 		// dump warnings?
 		string mainfile = m_files[0]->fileprefix + m_files[0]->filepath + NORMAL_DIR_SEPARATOR + m_files[0]->filename;
 		fprintf(logfile, "%s\n", mainfile.c_str());
-		fprintf(logfile, "%s\n", "WARNING:");
-		if (m_status.trace) printf("%s\n", "WARNING:");
+		if (m_status.trace) printf("%s\n", mainfile.c_str());
+
+		// count warnings and errors
+		int nbWarnings = 0;
+		int nbErrors = 0;
 		for (MUZ::ErrorMessage& m : msg) {
-			CodeLine* codeline = GetCodeLine(m.file, m.line);
-			if (m.type == MUZ::errorTypeWARNING) {
-				if (m.token >= 0 && m.token < codeline->tokens.size()) {
-					fprintf(logfile, "\t%5d: W%04d: '%s': %s\n", m.line, m.kind, codeline->tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
-				} else {
-					fprintf(logfile, "\t%5d: W%04d: %s\n", m.line, m.kind, msg.GetMessage(m.kind).c_str());
+			if (m.type == MUZ::errorTypeWARNING) nbWarnings++;
+			if (m.type == MUZ::errorTypeERROR) nbErrors++;
+		}
+
+		if (nbWarnings == 0) {
+			fprintf(logfile, "%s\n", "No Warnings");
+			if (m_status.trace) printf("%s\n", "No Warnings");
+		} else {
+			fprintf(logfile, "%s\n", "WARNINGS:");
+			if (m_status.trace) printf("%s\n", "WARNINGS:");
+			for (MUZ::ErrorMessage& m : msg) {
+				if (m.type == MUZ::errorTypeWARNING) {
+					CodeLine* codeline = GetCodeLine(m.file, m.line);
+					if (m.token >= 0 && m.token < codeline->tokens.size()) {
+						fprintf(logfile, "\t%5d: W%04d: '%s': %s\n", m.line, m.kind, codeline->tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
+					} else {
+						fprintf(logfile, "\t%5d: W%04d: %s\n", m.line, m.kind, msg.GetMessage(m.kind).c_str());
+					}
+					if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
 				}
-				if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
 			}
 		}
-		fprintf(logfile, "%s\n", "ERRORS:");
-		if (m_status.trace) printf("%s\n", "ERRORS:");
-		for (MUZ::ErrorMessage& m : msg) {
-			CodeLine* codeline = GetCodeLine(m.file, m.line);
-			if (m.type == MUZ::errorTypeERROR) {
-				if (m.token >= 0 && m.token < codeline->tokens.size()) {
-					fprintf(logfile, "\t%5d: E%04d: '%s': %s\n", m.line, m.kind, codeline->tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
-				} else {
-					fprintf(logfile, "\t%5d: E%04d: %s\n", m.line, m.kind, msg.GetMessage(m.kind).c_str());
+
+		if (nbErrors == 0) {
+			fprintf(logfile, "%s\n", "No Errors");
+			if (m_status.trace) printf("%s\n", "No Errors");
+		} else {
+			fprintf(logfile, "%s\n", "ERRORS:");
+			if (m_status.trace) printf("%s\n", "ERRORS:");
+			for (MUZ::ErrorMessage& m : msg) {
+				if (m.type == MUZ::errorTypeERROR) {
+					CodeLine* codeline = GetCodeLine(m.file, m.line);
+					if (m.token >= 0 && m.token < codeline->tokens.size()) {
+						fprintf(logfile, "\t%5d: E%04d: '%s': %s\n", m.line, m.kind, codeline->tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
+					} else {
+						fprintf(logfile, "\t%5d: E%04d: %s\n", m.line, m.kind, msg.GetMessage(m.kind).c_str());
+					}
+					if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
 				}
-				if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
 			}
 		}
 		fclose(logfile);

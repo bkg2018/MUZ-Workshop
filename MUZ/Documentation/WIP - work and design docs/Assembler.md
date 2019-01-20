@@ -514,3 +514,21 @@ Here are some of the contexts where an HEX file can be used:
 * In MUZ-Computer, the MemoryModule class can load an HEX file.
 
 
+## Command Line Shell
+
+MUZ-Assembler has a simple command-line shell utility which allows compilation of an HEX output file from a main ASM source ffile.
+
+
+
+Parameters for this utility are:
+
+| option | Details | C++ equivalent |
+|---------|--------|-------------------|
+|  | Sets the output directory where files will be written. | as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+| | Sets the file name for the assembly listing |  as.SetListingFilename("testErrors.LST");
+| | Sets the file name for the memory dump | as.SetMemoryFilename("testErrorsMemory.LST");
+| | Sets the file name for the Intel HEX output | as.SetIntelHexFilename("testErrorsIntelHex.HEX");
+| | Sets the file name for the warnings/errors log | as.SetLogFilename("testErrors.LOG");
+| | Enables full byte sequences in listing, by default byte sequences are limited to 7 bytes (on 2 lines) with ellipsis "..." | as.EnableFullListing(true);
+| | Sets the file name of the main input source file | as.AssembleFile(SourcesRootDir + "Errors.asm", msg); 
+
