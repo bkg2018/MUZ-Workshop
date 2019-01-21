@@ -12,7 +12,7 @@
 #include "Directive.h"
 #include "CodeLine.h"
 #include "Assembler.h"
-#include "StrUtils.h"
+#include "MUZ-Common/StrUtils.h"
 
 namespace MUZ {
 	
@@ -20,13 +20,13 @@ namespace MUZ {
 	 @param codeline the parsed code line, with curtoken set to the start token for analysis
 	 @return true if a comma has been found
 	 */
-	bool GetComma(class MUZ::CodeLine& codeline) ;
+	bool GetComma(struct CodeLine& codeline) ;
 	
 	/** Returns true if the tokens array has at least the resquested number of tokens available starting at curtoken.
 	 @param codeline the parsed code line, with curtoken set to the start token for analysis
 	 @return true if there are enough tokens left after current token
 	 */
-	bool EnoughTokensLeft(class CodeLine& codeline, int number) ;
+	bool EnoughTokensLeft(struct CodeLine& codeline, int number) ;
 	
 
 	// Preprocessor directives (#xxx)

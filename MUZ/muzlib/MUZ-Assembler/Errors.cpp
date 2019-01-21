@@ -5,7 +5,7 @@
 //  Created by Francis Pierot on 14/01/2019.
 //  Copyright © 2019 Francis Pierot. All rights reserved.
 //
-
+#include "pch.h"
 #include "Errors.h"
 #include "CodeLine.h"
 #include "Assembler.h"
@@ -73,37 +73,37 @@ namespace MUZ {
 		return pass == 1 ? codeline.as->IsFirstPass() : ! codeline.as->IsFirstPass();
 
 	}
-	void ErrorList::Info( ErrorKind kind, class CodeLine& codeline, int pass) {
+	void ErrorList::Info( ErrorKind kind, struct CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeINFO, kind, codeline.file, codeline.line, "", codeline.curtoken});
 	}
-	void ErrorList::Warning( ErrorKind kind, class CodeLine& codeline, int pass) {
+	void ErrorList::Warning( ErrorKind kind, struct CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeWARNING, kind, codeline.file, codeline.line, "", codeline.curtoken});
 	}
-	void ErrorList::ForceWarning( ErrorKind kind, class CodeLine& codeline) {
+	void ErrorList::ForceWarning( ErrorKind kind, struct CodeLine& codeline) {
 		push_back({ errorTypeWARNING, kind, codeline.file, codeline.line, "", codeline.curtoken});
 	}
-	void ErrorList::AboutFile( ErrorKind kind, class CodeLine& codeline, std::string file, int pass) {
+	void ErrorList::AboutFile( ErrorKind kind, struct CodeLine& codeline, std::string file, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeABOUTFILE, kind, codeline.file, codeline.line, file, codeline.curtoken});
 	}
-	bool ErrorList::Error( ErrorKind kind, class CodeLine& codeline, int pass) {
+	bool ErrorList::Error( ErrorKind kind, struct CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeERROR, kind, codeline.file, codeline.line, "", codeline.curtoken});
 		return false;
 	}
-	bool ErrorList::Error( ErrorKind kind, class CodeLine& codeline, std::string file, int pass) {
+	bool ErrorList::Error( ErrorKind kind, struct CodeLine& codeline, std::string file, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeERROR, kind, codeline.file, codeline.line, file, codeline.curtoken});
 		return false;
 	}
-	bool ErrorList::Fatal( ErrorKind kind, class CodeLine& codeline, int pass) {
+	bool ErrorList::Fatal( ErrorKind kind, struct CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeFATAL, kind, codeline.file, codeline.line, "", codeline.curtoken});
 		return false;
 	}
-	bool ErrorList::Fatal( ErrorKind kind, class CodeLine& codeline, std::string file, int pass) {
+	bool ErrorList::Fatal( ErrorKind kind, struct CodeLine& codeline, std::string file, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeFATAL, kind, codeline.file, codeline.line, file, codeline.curtoken});
 		return false;

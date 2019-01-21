@@ -4,12 +4,12 @@
  *  Created on: Nov 23, 2018
  *      Author: Francis Piérot
  */
-
+#include "pch.h"
 #include "MemoryModule.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <algorithm>
 #include "MUZ-Common/Types.h"
 #include "MUZ-Common/StrUtils.h"
 

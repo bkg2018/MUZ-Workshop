@@ -5,7 +5,7 @@
 //  Created by Francis Pierot on 02/12/2018.
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
-
+#include "pch.h"
 #include "Assembler.h"
 #include "All-Directives.h"
 #include "Z80-Operands.h"

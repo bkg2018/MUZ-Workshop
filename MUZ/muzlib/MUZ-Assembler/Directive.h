@@ -31,7 +31,7 @@ namespace MUZ {
 		virtual ~Directive() {}
 		virtual bool Parse(class Assembler& ,
 						   class Parser& ,
-						   class CodeLine& codeline,
+						   struct CodeLine& codeline,
 						   class Label* ,				// nullptr or label found in line
 						   ErrorList& msg) {
 			return msg.Error(errorNonDerivedDirective, codeline);

@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="MUZ-Assembler">
+      <UniqueIdentifier>{c406fc24-8336-440c-8ac1-95af17debda1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MUZ-Common">
+      <UniqueIdentifier>{e6eddd58-9c9b-42cf-8ec4-4bf35044bcad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MUZ-Computer">
+      <UniqueIdentifier>{9cdabe32-30fe-4168-8f76-b8de32c57035}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\All-Directives.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\All-Operators.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\Assembler.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\CodeLine.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\Errors.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\Expression.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\ExpVector.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\Operator.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\Parser.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\Z80-Instructions.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Assembler\Z80-Operands.cpp">
+      <Filter>MUZ-Assembler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Common\FileUtils.cpp">
+      <Filter>MUZ-Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Common\Section.cpp">
+      <Filter>MUZ-Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Common\StrUtils.cpp">
+      <Filter>MUZ-Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Computer\Computer.cpp">
+      <Filter>MUZ-Computer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Computer\CPU.cpp">
+      <Filter>MUZ-Computer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Computer\MemoryMgr.cpp">
+      <Filter>MUZ-Computer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Computer\MemoryModule.cpp">
+      <Filter>MUZ-Computer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Computer\Module.cpp">
+      <Filter>MUZ-Computer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Computer\Peripheral.cpp">
+      <Filter>MUZ-Computer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Computer\PortMgr.cpp">
+      <Filter>MUZ-Computer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Computer\PortModule.cpp">
+      <Filter>MUZ-Computer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\MUZ-Computer\ROMPagingPort.cpp">
+      <Filter>MUZ-Computer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\MUZ\muzlib\pch.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\All-Directives.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\All-Operators.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Asm-Exceptions.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Assembler.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\CodeLine.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\DefSymbol.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Directive.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Errors.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Expression.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\ExpVector.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Instruction.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Label.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Operator.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Parser.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\ParseToken.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\ParsingMode.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\TokenType.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Z80-Instructions.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Assembler\Z80-Operands.h">
+      <Filter>MUZ-Assembler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Common\Exceptions.h">
+      <Filter>MUZ-Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Common\FileUtils.h">
+      <Filter>MUZ-Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Common\Section.h">
+      <Filter>MUZ-Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Common\StrUtils.h">
+      <Filter>MUZ-Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Common\Types.h">
+      <Filter>MUZ-Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Computer\Computer.h">
+      <Filter>MUZ-Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Computer\CPU.h">
+      <Filter>MUZ-Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Computer\MemoryMgr.h">
+      <Filter>MUZ-Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Computer\MemoryModule.h">
+      <Filter>MUZ-Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Computer\Module.h">
+      <Filter>MUZ-Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Computer\Peripheral.h">
+      <Filter>MUZ-Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Computer\PortMgr.h">
+      <Filter>MUZ-Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Computer\PortModule.h">
+      <Filter>MUZ-Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\MUZ-Computer\ROMPagingPort.h">
+      <Filter>MUZ-Computer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\MUZ\muzlib\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

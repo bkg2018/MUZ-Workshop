@@ -23,7 +23,7 @@ namespace MUZ {
 	public:
 		std::vector<ADDRESSTYPE>		addresses;		// addresses of this label, unique for global label, multiple for local
 		bool							equate=false;	// this label is set by a .EQU
-		std::vector<class CodeLine*>	referencers;	// Code lines where it is used
+		std::vector<struct CodeLine*>	referencers;	// Code lines where it is used
 		bool							multiple=false;	// true to authorize more than one address
 		
 		void ClearAddresses() {
@@ -61,7 +61,7 @@ namespace MUZ {
 		}
 		
 		/** Adds a referencing code line to the list of referencers. */
-		void AddReferencer(class CodeLine* codeline) {
+		void AddReferencer(struct CodeLine* codeline) {
 			referencers.push_back(codeline);
 		}
 		

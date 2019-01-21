@@ -31,7 +31,7 @@ namespace MUZ {
 		 @param codeline the code line in which assembled codes will be stored
 		 @param msg the message list which will receive any warning or error information
 		 */
-		virtual bool Assemble(class CodeLine& codeline, ErrorList& msg) {
+		virtual bool Assemble(struct CodeLine& codeline, ErrorList& msg) {
 			msg.Fatal(ErrorKind::errorNonDerivedInstruction, codeline);
 			return true;
 		};

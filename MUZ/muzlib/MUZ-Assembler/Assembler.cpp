@@ -6,28 +6,18 @@
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
 
-#include <stdio.h>
-#include <string.h>
-#include <set>
-#include "StrUtils.h"
-#include "FileUtils.h"
-#include "Exceptions.h"
-#include "Assembler.h"
-#include "Parser.h"
-
+#include "pch.h"
 #include "All-Directives.h"
 #include "Z80-Instructions.h"
-#include "Z80-Operands.h"
-
 using MUZ::BYTE;
 using MUZ::ADDRESSTYPE;
 using std::vector;
 using std::string;
 
-#include <sstream>
-#include <iostream>
-#include <stdio.h>
-#include "Section.h"
+#ifdef _WIN32
+// Windows macro conflicts with ErrorList::GetMessage()
+#undef GetMessage
+#endif
 
 namespace MUZ {
 
@@ -232,7 +222,7 @@ namespace MUZ {
 			// Separate the possible prefixes on Windows
 			
 			// UNC long names on Windows
-			if (file.substr(0,4) == "\\\\?\\")) {
+			if (file.substr(0,4) == "\\\\?\\") {
 				fileprefix = "\\\\?\\";
 				file = file.substr(4); // cut UNC prefix
 			}

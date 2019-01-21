@@ -10,6 +10,9 @@
 #define Asm_Exceptions_h
 
 #include <exception>
+#ifdef _WIN32
+#define _NOEXCEPT
+#endif
 
 namespace MUZ {
 	// wrong type for an operator in an expression

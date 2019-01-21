@@ -5,16 +5,13 @@
 //  Created by Francis Pierot on 02/12/2018.
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
-
-#include "StrUtils.h"
+#include "pch.h"
 #include "Parser.h"
 #include "Expression.h"
 #include "CodeLine.h"
 #include "Assembler.h"
 #include "All-Directives.h"
 
-#include <vector>
-#include <map>
 using std::string;
 using std::vector;
 using std::map;

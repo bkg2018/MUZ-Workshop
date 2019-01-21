@@ -112,21 +112,21 @@ namespace MUZ {
 		/** Returns a message text for an error code (kind). */
 		static std::string GetMessage( ErrorKind kind ) ;
 		/** Stores an information message if the Assembler is doing Pass 1. */
-		void Info( ErrorKind kind, class CodeLine& codeline, int pass = 1) ;
+		void Info( ErrorKind kind, struct CodeLine& codeline, int pass = 1) ;
 		/** Stores a warning message if the Assembler is doing Pass 1. */
-		void Warning( ErrorKind kind, class CodeLine& codeline, int pass = 1);
+		void Warning( ErrorKind kind, struct CodeLine& codeline, int pass = 1);
 		/** Stores a warning message. Ignore the assembler pass. */
-		void ForceWarning( ErrorKind kind, class CodeLine& codeline);
+		void ForceWarning( ErrorKind kind, struct CodeLine& codeline);
 		/** Stores a message about a file name if the Assembler is doing Pass 1. */
-		void AboutFile( ErrorKind kind, class CodeLine& codeline, std::string filename, int pass = 1);
+		void AboutFile( ErrorKind kind, struct CodeLine& codeline, std::string filename, int pass = 1);
 		/** Stores an error message if the Assembler is doing Pass 1. */
-		bool Error( ErrorKind kind, class CodeLine& codeline, int pass = 1);
+		bool Error( ErrorKind kind, struct CodeLine& codeline, int pass = 1);
 		/** Stores an error message if the Assembler is doing Pass 1. */
-		bool Error( ErrorKind kind, class CodeLine& codeline, std::string filename, int pass = 1) ;
+		bool Error( ErrorKind kind, struct CodeLine& codeline, std::string filename, int pass = 1) ;
 		/** Stores a fatal error message if the Assembler is doing Pass 1. */
-		bool Fatal( ErrorKind kind, class CodeLine& codeline, int pass = 1);
+		bool Fatal( ErrorKind kind, struct CodeLine& codeline, int pass = 1);
 		/** Stores a fatal error message if the Assembler is doing Pass 1. */
-		bool Fatal( ErrorKind kind, class CodeLine& codeline, std::string filename, int pass = 1) ;
+		bool Fatal( ErrorKind kind, struct CodeLine& codeline, std::string filename, int pass = 1) ;
 
 
 		/** Close the list by sorting it and setting message references into codelines. */

@@ -5,13 +5,8 @@
 //  Created by Francis Pierot on 03/12/2018.
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
-
+#include "pch.h"
 #include "All-Directives.h"
-#include "Assembler.h"
-#include "Errors.h"
-#include "Expression.h"
-#include "Parser.h"
-#include "Section.h"
 
 namespace MUZ {
 
@@ -62,7 +57,7 @@ namespace MUZ {
 			parser.JumpNextToken();// skip symbol
 			// convert letters to strings
 			try { parser.EvaluateString(value); }
-			catch (const std::exception & e) {
+			catch (... /*const std::exception & e*/) {
 				return msg.Error(errorInvalidExpression, codeline);
 			}
 		}
@@ -105,7 +100,7 @@ namespace MUZ {
 		std::string symbol;
 		parser.JumpNextToken();
 		try { parser.EvaluateString(symbol); }
-		catch (const std::exception & e) {
+		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
 		return as.ExistSymbol(symbol);
@@ -126,7 +121,7 @@ namespace MUZ {
 		std::string symbol;
 		parser.JumpNextToken();
 		try { parser.EvaluateString(symbol); }
-		catch (const std::exception & e) {
+		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
 		return ! as.ExistSymbol(symbol);
@@ -148,7 +143,7 @@ namespace MUZ {
 		parser.JumpTokens(1);
 		bool b = false;
 		try { parser.EvaluateBoolean(b); }
-		catch (const std::exception & e) {
+		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
 		return b;
@@ -265,7 +260,7 @@ namespace MUZ {
 			std::string value;
 			parser.JumpNextToken();
 			try { parser.EvaluateString(value); }
-			catch (const std::exception & e) {
+			catch (... /*const std::exception & e*/) {
 				return msg.Error(errorInvalidExpression, codeline);
 			}
 			enable = (std::to_upper(value) == "OFF") ? false : true;
@@ -302,7 +297,7 @@ namespace MUZ {
 		if (parser.ExistMoreToken(1)) {
 			parser.JumpNextToken();
 			try { parser.EvaluateString(name); }
-			catch (const std::exception & e) {
+			catch (... /*const std::exception & e*/) {
 				return msg.Error(errorInvalidExpression, codeline);
 			}
 		}
@@ -319,14 +314,14 @@ namespace MUZ {
 			ParseToken& token = parser.JumpNextToken();
 			if (token.type != tokenTypeCOMMA) {
 				try { parser.EvaluateString(name); }
-				catch (const std::exception & e) {
+				catch (... /*const std::exception & e*/) {
 					return msg.Error(errorInvalidExpression, codeline);
 				}
 			}
 			if (GetComma(codeline)) {
 				std::string param;
 				try { parser.EvaluateString(param); }
-				catch (const std::exception & e) {
+				catch (... /*const std::exception & e*/) {
 					return msg.Error(errorInvalidExpression, codeline);
 				}
 				param = std::to_upper(param);
@@ -349,7 +344,7 @@ namespace MUZ {
 		ADDRESSTYPE address = 0;
 		parser.JumpTokens(1); // skip after .EQU
 		try { parser.EvaluateAddress(address); }
-		catch (const std::exception & e) {
+		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
 		if (label == nullptr)
@@ -379,7 +374,7 @@ namespace MUZ {
 		// compute address, unsolved symbols have been replaced by "0"
 		parser.JumpTokens(1); // skip after .EQU
 		try { parser.EvaluateAddress(address); }
-		catch (const std::exception & e) {
+		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
 		// use previous label if none on this line
@@ -416,7 +411,7 @@ namespace MUZ {
 			if (token.type == tokenTypeSTRING) {
 				std::string result;
 				try { parser.EvaluateString(result); }
-				catch (const std::exception & e) {
+				catch (... /*const std::exception & e*/) {
 					return msg.Error(errorInvalidExpression, codeline);
 				}
 				// store each byte off the string
@@ -426,7 +421,7 @@ namespace MUZ {
 			} else if (token.type == tokenTypeDECNUMBER) {
 				ADDRESSTYPE address;
 				try { parser.EvaluateAddress(address); }
-				catch (const std::exception & e) {
+				catch (... /*const std::exception & e*/) {
 					return msg.Error(errorInvalidExpression, codeline);
 				}
 				if ((address > 255)  && ! as.IsFirstPass()) {
@@ -462,7 +457,7 @@ namespace MUZ {
 			if (token.type == tokenTypeSTRING) {
 				std::string result;
 				try { parser.EvaluateString(result); }
-				catch (const std::exception & e) {
+				catch (... /*const std::exception & e*/) {
 					return msg.Error(errorInvalidExpression, codeline);
 				}
 				// store each byte off the string
@@ -472,7 +467,7 @@ namespace MUZ {
 			} else if (token.type == tokenTypeDECNUMBER) {
 				ADDRESSTYPE address;
 				try { parser.EvaluateAddress(address); }
-				catch (const std::exception & e) {
+				catch (... /*const std::exception & e*/) {
 					return msg.Error(errorInvalidExpression, codeline);
 				}
 				codeline.AddCode(address & 0xFF, address >> 8);

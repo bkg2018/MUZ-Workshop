@@ -20,6 +20,7 @@ namespace MUZ {
 	/** Source and assembled content for one line of source code. */
 	struct CodeLine
 	{
+	public:
 		// source
 		
 		/** Source file reference for the Assembler (index in SourceFile array). */

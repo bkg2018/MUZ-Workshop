@@ -5,9 +5,8 @@
 //  Created by Francis Pierot on 13/12/2018.
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
-
+#include "pch.h"
 #include "All-Operators.h"
-#include "StrUtils.h"
 #include "Asm-Exceptions.h"
 #include "Expression.h"
 

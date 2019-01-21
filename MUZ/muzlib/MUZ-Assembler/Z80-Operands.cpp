@@ -5,18 +5,13 @@
 //  Created by Francis Pierot on 23/12/2018.
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
-
+#include "pch.h"
 #include "Z80-Operands.h"
 #include "ParseToken.h"
-#include "StrUtils.h"
 #include "Expression.h"
 #include "CodeLine.h"
 #include "Assembler.h"
 #include "All-Directives.h"
-
-#include <string>
-#include <unordered_map>
-#include <map>
 
 namespace MUZ {
 	

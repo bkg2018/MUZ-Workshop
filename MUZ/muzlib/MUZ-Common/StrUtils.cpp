@@ -5,7 +5,7 @@
 //  Created by Francis Pierot on 04/12/2018.
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
-
+#include "pch.h"
 #include "StrUtils.h"
 
 using std::string;

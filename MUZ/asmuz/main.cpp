@@ -5,17 +5,7 @@
 //  Created by Francis Pierot on 20/01/2019.
 //  Copyright © 2019 Francis Pierot. All rights reserved.
 //
-
-#include <string.h>
-#include <string>
-#include "MUZ-Assembler/Assembler.h"
-#include "MUZ-Common/FileUtils.h"
-#ifdef __APPLE__
-#include <QuartzCore/QuartzCore.h>
-#elif _WIN32
-#include <windows.h>
-#include <mmsystem.h>
-#endif
+#include "pch.h"
 
 using std::string;
 

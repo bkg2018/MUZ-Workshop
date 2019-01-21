@@ -204,7 +204,7 @@ namespace MUZ {
 				@param regs flag combination telling which 8-bit registers are accepted
 				@return errOK if one of the accepted registers has been found
 			 */
-			MUZ::OperandError GetReg8(class MUZ::CodeLine& codeline, OperandType& reg, unsigned int regs = 0xFFFFFFFF ) ;
+			MUZ::OperandError GetReg8(struct MUZ::CodeLine& codeline, OperandType& reg, unsigned int regs = 0xFFFFFFFF ) ;
 			
 			/** Tests if current token is recognized as an 16-bit register, and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
@@ -212,37 +212,37 @@ namespace MUZ {
 			 @param regs flag combination telling which 16-bit registers are accepted
 			 @return errOK if one of the accepted registers has been found
 			 */
-			MUZ::OperandError GetReg16(class MUZ::CodeLine& codeline, OperandType& reg, unsigned int regs = 0xFFFFFFFF ) ;
+			MUZ::OperandError GetReg16(struct MUZ::CodeLine& codeline, OperandType& reg, unsigned int regs = 0xFFFFFFFF ) ;
 			
 			/** Tests if current token is recognized as (C), and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @return errOK if (C) has been found
 			 */
-			MUZ::OperandError GetIndC( class MUZ::CodeLine& codeline ) ;
+			MUZ::OperandError GetIndC( struct MUZ::CodeLine& codeline ) ;
 			
 			/** Tests if current token is recognized as (HL), and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @return errOK if (HL) has been found
 			 */
-			MUZ::OperandError GetIndHL( class MUZ::CodeLine& codeline ) ;
+			MUZ::OperandError GetIndHL( struct MUZ::CodeLine& codeline ) ;
 			
 			/** Tests if current token is recognized as (HL), and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @return errOK if (BC) has been found
 			 */
-			MUZ::OperandError GetIndBC( class MUZ::CodeLine& codeline ) ;
+			MUZ::OperandError GetIndBC( struct MUZ::CodeLine& codeline ) ;
 			
 			/** Tests if current token is recognized as (HL), and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @return errOK if (DE) has been found
 			 */
-			MUZ::OperandError GetIndDE( class MUZ::CodeLine& codeline );
+			MUZ::OperandError GetIndDE( struct MUZ::CodeLine& codeline );
 			
 			/** Tests if current token is recognized as (SP), and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @return errOK if (SP) has been found
 			 */
-			MUZ::OperandError GetIndSP( class MUZ::CodeLine& codeline );
+			MUZ::OperandError GetIndSP( struct MUZ::CodeLine& codeline );
 			
 			/** Tests if current token is recognized as (IX+d) or (IY+d), and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
@@ -250,42 +250,42 @@ namespace MUZ {
 			 @param [OUT] value the 8-bit value for "+d" part
 			 @return errOK if (IX+d) or (IY+d) has been found
 			 */
-			MUZ::OperandError GetIndX( class MUZ::CodeLine& codeline, OperandType& regX, int& value );
+			MUZ::OperandError GetIndX( struct MUZ::CodeLine& codeline, OperandType& regX, int& value );
 			
 			/** Tests if current token is recognized as a bit number (0-7), and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @param [OUT] bit the code for bit0 to bit7
 			 @return operrOK if a number between 0 and 7 has been found
 			 */
-			MUZ::OperandError GetBitNumber( class MUZ::CodeLine& codeline, OperandType& bit );
+			MUZ::OperandError GetBitNumber( struct MUZ::CodeLine& codeline, OperandType& bit );
 			
 			/** Tests if current token is recognized as a condition, and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @param [OUT] cond the code for the condition
 			 @return errOK if a conditoin name has been found
 			 */
-			MUZ::OperandError GetCond( class MUZ::CodeLine& codeline, OperandType& cond ) ;
+			MUZ::OperandError GetCond( struct MUZ::CodeLine& codeline, OperandType& cond ) ;
 			
 			/** Tests if current token is recognized as an 8-bit number, and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @param [OUT] value the 8-bit value found
 			 @return operrOK if an 8-bit value has been found
 			 */
-			MUZ::OperandError GetNum8( class MUZ::CodeLine& codeline, int& value );
+			MUZ::OperandError GetNum8( struct MUZ::CodeLine& codeline, int& value );
 			
 			/** Tests if current token is recognized as an 16-bit number, and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @param [OUT] value the 16-bit value found
 			 @return operrOK if an 8-bit value has been found
 			 */
-			MUZ::OperandError GetNum16( class MUZ::CodeLine& codeline, int& value );
+			MUZ::OperandError GetNum16( struct MUZ::CodeLine& codeline, int& value );
 			
 			/** Tests if current token is recognized as an (16-bit) indirect addressing, and go next token. Don't change current token if not found.
 			 @param codeline the code line to assemble, with curtoken set to the start token for analysis
 			 @param [OUT] value the 16-bit value found
 			 @return operrOK if an 16-bit value has been found between parenthesis
 			 */
-			MUZ::OperandError GetInd16( class MUZ::CodeLine& codeline, int& value );
+			MUZ::OperandError GetInd16( struct MUZ::CodeLine& codeline, int& value );
 		}; // struct OperandTools
 	} // namespace Z80
 } // namespace MUZ

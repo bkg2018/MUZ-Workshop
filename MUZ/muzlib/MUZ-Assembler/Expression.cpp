@@ -5,11 +5,9 @@
 //  Created by Francis Pierot on 11/12/2018.
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
-
+#include "pch.h"
 #include "Expression.h"
 #include "Asm-Exceptions.h"
-#include <map>
-#include "StrUtils.h"
 #include "All-Operators.h"
 
 namespace MUZ {
