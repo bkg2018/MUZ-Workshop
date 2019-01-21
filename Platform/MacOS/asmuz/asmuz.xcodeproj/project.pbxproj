@@ -7,10 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		866709FF21F47DD000B2811A /* libmuzlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 866709FE21F47DD000B2811A /* libmuzlib.a */; };
+		86670A0921F5C3EC00B2811A /* libmuzlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 86670A0821F5C3EC00B2811A /* libmuzlib.a */; };
 		86ABFDC721F405F30010245E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDC621F405F30010245E /* main.cpp */; };
 		86ABFE6D21F476A10010245E /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86ABFE6C21F476A10010245E /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		86670A0D21F5CE2800B2811A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 86670A0621F5C3E300B2811A /* muzlib.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 86ABFDDA21F475F20010245E;
+			remoteInfo = muzlib;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		86ABFDC121F405F30010245E /* CopyFiles */ = {
@@ -25,12 +35,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		866709FE21F47DD000B2811A /* libmuzlib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libmuzlib.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		86670A0621F5C3E300B2811A /* muzlib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = muzlib.xcodeproj; path = ../muzlib/muzlib.xcodeproj; sourceTree = "<group>"; };
+		86670A0821F5C3EC00B2811A /* libmuzlib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libmuzlib.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		86ABFDC321F405F30010245E /* asmuz */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = asmuz; sourceTree = BUILT_PRODUCTS_DIR; };
 		86ABFDC621F405F30010245E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		86ABFDCD21F4062D0010245E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		86ABFDCF21F473FC0010245E /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
-		86ABFE6A21F476730010245E /* libasmuzlib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libasmuzlib.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		86ABFE6C21F476A10010245E /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -39,7 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				866709FF21F47DD000B2811A /* libmuzlib.a in Frameworks */,
+				86670A0921F5C3EC00B2811A /* libmuzlib.a in Frameworks */,
 				86ABFE6D21F476A10010245E /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -47,6 +56,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		86670A0A21F5CE2800B2811A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				86670A0E21F5CE2800B2811A /* libmuzlib.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		86ABFDBA21F405F30010245E = {
 			isa = PBXGroup;
 			children = (
@@ -70,16 +87,16 @@
 			children = (
 				86ABFDC621F405F30010245E /* main.cpp */,
 			);
-			path = asmuz;
+			name = asmuz;
+			path = ../../../MUZ/asmuz;
 			sourceTree = "<group>";
 		};
 		86ABFDCE21F473FB0010245E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				866709FE21F47DD000B2811A /* libmuzlib.a */,
 				86ABFE6C21F476A10010245E /* QuartzCore.framework */,
-				86ABFE6A21F476730010245E /* libasmuzlib.a */,
-				86ABFDCF21F473FC0010245E /* CoreFoundation.framework */,
+				86670A0821F5C3EC00B2811A /* libmuzlib.a */,
+				86670A0621F5C3E300B2811A /* muzlib.xcodeproj */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -128,12 +145,28 @@
 			mainGroup = 86ABFDBA21F405F30010245E;
 			productRefGroup = 86ABFDC421F405F30010245E /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 86670A0A21F5CE2800B2811A /* Products */;
+					ProjectRef = 86670A0621F5C3E300B2811A /* muzlib.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				86ABFDC221F405F30010245E /* asmuz */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		86670A0E21F5CE2800B2811A /* libmuzlib.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmuzlib.a;
+			remoteRef = 86670A0D21F5CE2800B2811A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		86ABFDBF21F405F30010245E /* Sources */ = {
@@ -201,7 +234,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../../MUZ\"",
-					"\"$(SRCROOT)/../../../MUZ/MUZ\"",
+					"\"$(SRCROOT)/../../../MUZ/MUZlib\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -259,7 +292,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"\"$(SRCROOT)/../../../MUZ\"",
-					"\"$(SRCROOT)/../../../MUZ/MUZ\"",
+					"\"$(SRCROOT)/../../../MUZ/MUZlib\"",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;

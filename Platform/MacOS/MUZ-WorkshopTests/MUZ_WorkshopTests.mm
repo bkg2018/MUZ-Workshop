@@ -14,14 +14,14 @@
 #include "muz_simz80.h"
 
 // WIP
-#include "AddressZone.h"
+//#include "MUZ-Assembler/AddressZone.h"
 
 // assembling and parsing
-#include "Parser.h"
-#include "Assembler.h"
-#include "Expression.h"
-#include "Z80-Operands.h"
-#include "StrUtils.h"
+#include "MUZ-Assembler/Parser.h"
+#include "MUZ-Assembler/Assembler.h"
+#include "MUZ-Assembler/Expression.h"
+#include "MUZ-Assembler/Z80-Operands.h"
+#include "MUZ-Common/StrUtils.h"
 
 #include <iostream>
 using std::cout;
@@ -101,6 +101,7 @@ std::string SourceFilePath;
 
 }
 
+/** unused
 - (void) testAddressZone {
 	
 	MUZ::AddressZone azone;
@@ -172,7 +173,7 @@ std::string SourceFilePath;
 	XCTAssertEqual(az[0x2FFF], 0);
 	XCTAssertEqual(az[0x3000], 1);
 }
-
+*/
 - (void)testComputer {
 	
 	// the virtual computer
@@ -268,7 +269,7 @@ std::string SourceFilePath;
 	// dump warnings?
 	for (MUZ::ErrorMessage& m : msg) {
 		if (m.type == MUZ::errorTypeWARNING) {
-			printf("%s(%d): %s\n", as.GetFileName(m.file).c_str(), m.line, msg.GetMessage(m.kind).c_str());
+			printf("%s(%d): %s\n", as.GetFileName(m.file).c_str(), (int)m.line, msg.GetMessage(m.kind).c_str());
 		}
 	}
 }
