@@ -177,8 +177,8 @@
     <Image Include="small.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\muzlib\muzlib.vcxproj">
-      <Project>{45632f19-fb65-4eae-837d-8f3d6f59b803}</Project>
+    <ProjectReference Include="..\asmuz\asmuz.vcxproj">
+      <Project>{8036cb55-b084-4302-a352-e51253859d4a}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

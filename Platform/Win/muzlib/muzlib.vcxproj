@@ -19,8 +19,30 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\MUZ\asmuz\main.cpp" />
-    <ClCompile Include="..\..\..\MUZ\asmuz\pch.cpp">
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\All-Directives.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\All-Operators.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Assembler.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\CodeLine.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Errors.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Expression.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\ExpVector.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Operator.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Parser.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Instructions.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Operands.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Common\FileUtils.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Common\Section.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Common\StrUtils.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\Computer.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\CPU.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\MemoryMgr.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\MemoryModule.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\Module.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\Peripheral.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\PortMgr.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\PortModule.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\ROMPagingPort.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -28,42 +50,70 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\MUZ\asmuz\pch.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\muzlib\muzlib.vcxproj">
-      <Project>{45632f19-fb65-4eae-837d-8f3d6f59b803}</Project>
-    </ProjectReference>
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\All-Directives.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\All-Operators.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Asm-Exceptions.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Assembler.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\CodeLine.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\DefSymbol.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Directive.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Errors.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Expression.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\ExpVector.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Instruction.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Label.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Operator.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Parser.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\ParseToken.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\ParsingMode.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\TokenType.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Instructions.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Operands.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\Exceptions.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\FileUtils.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\Section.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\StrUtils.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\Types.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\Computer.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\CPU.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\MemoryMgr.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\MemoryModule.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\Module.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\Peripheral.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\PortMgr.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\PortModule.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\ROMPagingPort.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\pch.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{8036CB55-B084-4302-A352-E51253859D4A}</ProjectGuid>
+    <ProjectGuid>{45632F19-FB65-4EAE-837D-8F3D6F59B803}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>asmuz</RootNamespace>
+    <RootNamespace>muzlib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -105,15 +155,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\MUZ\muzlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -122,15 +171,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\MUZ\muzlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -141,17 +189,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\MUZ\muzlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -162,17 +209,16 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)..\..\MUZ\muzlib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

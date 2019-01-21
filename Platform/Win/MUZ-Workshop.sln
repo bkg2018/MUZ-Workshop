@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28010.2046
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MUZ-Workshop", "MUZ-Workshop\MUZ-Workshop.vcxproj", "{F21DD83B-3C3E-4F4E-ABA4-31D19E955F44}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "muzlib", "..\muzlib\muzlib.vcxproj", "{45632F19-FB65-4EAE-837D-8F3D6F59B803}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "muzlib", "muzlib\muzlib.vcxproj", "{45632F19-FB65-4EAE-837D-8F3D6F59B803}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "asmuz", "asmuz\asmuz.vcxproj", "{8036CB55-B084-4302-A352-E51253859D4A}"
 EndProject
