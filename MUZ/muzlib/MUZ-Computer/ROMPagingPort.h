@@ -24,33 +24,17 @@ public:
 	ROMPagingPort();
 
 	// Store access to computer at construction
-	ROMPagingPort(Computer* computer, bool switchmode) {
-		m_computer = computer;
-		m_switchmode = switchmode;
-	}
+	ROMPagingPort(Computer* computer, bool switchmode);
+
 	virtual ~ROMPagingPort();
 	
 	/** Enable or disable the switching mode.*/
-	void SetSwitchMode(bool yes) {
-		m_switchmode = yes;
-	}
+	void SetSwitchMode(bool yes);
 
 	/** Does the paging depending on the data. The official RC2014 ROM Module does paging by switching at each output access,
 	 * while other boards take 0 to page in and 1 to page out. The working mode is selected at construction.
 	 */
-	virtual void Out(DATATYPE data) {
-		if (!m_computer) throw BUGNoComputerException();
-		if (m_switchmode) {
-			m_computer->PageROMswitch();
-		} else {
-			if (data == 0) {
-				m_computer->PageROMin();
-			} else {
-				m_computer->PageROMout();
-			}
-		}
-	}
-
+	virtual void Out(DATATYPE data) ;
 
 };
 

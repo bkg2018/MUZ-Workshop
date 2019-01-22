@@ -52,7 +52,7 @@ namespace MUZ {
 		}
 		/** Pops and returns the last token on stack. Returns an UNKNOWN type token if the stack is empty. */
 		ParseToken pop_back() {
-			ParseToken token = { "", tokenTypeUNKNOWN };
+			ParseToken token;
 			if (mysize > 0) {
 				token = back();
 				std::vector<ParseToken>::pop_back();

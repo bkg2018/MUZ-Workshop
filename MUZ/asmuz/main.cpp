@@ -6,6 +6,8 @@
 //  Copyright © 2019 Francis Pierot. All rights reserved.
 //
 #include "pch.h"
+#include "MUZ-Common/FileUtils.h"
+#include "MUZ-Assembler/Assembler.h"
 
 using std::string;
 
@@ -68,10 +70,11 @@ int main(int argc, const char * argv[]) {
 
 #ifdef __APPLE__
 	CFTimeInterval elapsedTime = CACurrentMediaTime() - startTime;
+	printf("Assembling took %lf seconds\n", elapsedTime);
 #elif _WIN32
 	double elapsedTime = ((timeGetTime() * 1.0) - startTime) / 1000.0;
-#endif
 	printf("Assembling took %lf seconds\n", elapsedTime);
+#endif
 
 	return 0;
 }

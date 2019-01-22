@@ -7,8 +7,13 @@
 //
 
 #include "pch.h"
+
+#include "MUZ-Common/FileUtils.h"
+#include "MUZ-Common/Section.h"
+#include "Parser.h"
 #include "All-Directives.h"
 #include "Z80-Instructions.h"
+
 using MUZ::BYTE;
 using MUZ::ADDRESSTYPE;
 using std::vector;

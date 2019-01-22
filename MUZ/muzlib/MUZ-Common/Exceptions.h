@@ -10,9 +10,7 @@
 
 #include <exception>
 
-#ifdef _WIN32
-#define _NOEXCEPT
-#endif
+
 
 namespace MUZ {
 

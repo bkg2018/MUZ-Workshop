@@ -13,15 +13,6 @@
 #include <sstream>
 #include <iostream>
 
-/** MUZ headers */
-#include "MUZ-Assembler/Assembler.h"
-#include "MUZ-Common/FileUtils.h"
-#include "MUZ-Common/StrUtils.h"
-#include "MUZ-Assembler/Errors.h"
-#include "MUZ-Assembler/Parser.h"
-#include "MUZ-Common/Section.h"
-
-
 /* OS Timing APIs */
 #ifdef __APPLE__
 #include <QuartzCore/QuartzCore.h>
@@ -31,6 +22,20 @@
 // conflict with ErrorList::GetMessage
 #undef GetMessage
 #endif
+
+/** no exceptions:
+ * _NOEXCEPT is handled by XCode
+ *  it must be neutralized for Visual Studio
+ *  it must be replaced by the deprecated throw() for GCC/Linux even in C++ 11
+ */
+#ifdef _WIN32
+  #define _NOEXCEPT
+#else
+  #ifndef __APPLE__
+  #define _NOEXCEPT noexcept
+  #endif
+#endif
+
 
 #endif
 

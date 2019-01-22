@@ -26,10 +26,6 @@
 		86ABFE3C21F476260010245E /* MemoryMgr.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDFA21F476260010245E /* MemoryMgr.h */; };
 		86ABFE3D21F476260010245E /* PortModule.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDFB21F476260010245E /* PortModule.h */; };
 		86ABFE3E21F476260010245E /* Config.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDFC21F476260010245E /* Config.h */; };
-		86ABFE3F21F476260010245E /* AddressZone.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFDFE21F476260010245E /* AddressZone.h */; };
-		86ABFE4021F476260010245E /* MemoryMgr_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0021F476260010245E /* MemoryMgr_test.cpp */; };
-		86ABFE4121F476260010245E /* MemoryModule_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0121F476260010245E /* MemoryModule_test.cpp */; };
-		86ABFE4221F476260010245E /* Computer_test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0221F476260010245E /* Computer_test.cpp */; };
 		86ABFE4321F476260010245E /* All-Operators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE0421F476260010245E /* All-Operators.cpp */; };
 		86ABFE4421F476260010245E /* DefSymbol.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0521F476260010245E /* DefSymbol.h */; };
 		86ABFE4521F476260010245E /* Assembler.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE0621F476260010245E /* Assembler.h */; };
@@ -68,6 +64,8 @@
 		86ABFE6721F476260010245E /* Section.h in Headers */ = {isa = PBXBuildFile; fileRef = 86ABFE2921F476260010245E /* Section.h */; };
 		86ABFE6821F476260010245E /* Section.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE2A21F476260010245E /* Section.cpp */; };
 		86ABFE6921F476260010245E /* StrUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE2B21F476260010245E /* StrUtils.cpp */; };
+		86D47DE621F72F1C00AC055B /* pch.h in Headers */ = {isa = PBXBuildFile; fileRef = 86D47DE421F72F1B00AC055B /* pch.h */; };
+		86D47DE721F72F1C00AC055B /* pch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86D47DE521F72F1B00AC055B /* pch.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -134,6 +132,8 @@
 		86ABFE2921F476260010245E /* Section.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Section.h; sourceTree = "<group>"; };
 		86ABFE2A21F476260010245E /* Section.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Section.cpp; sourceTree = "<group>"; };
 		86ABFE2B21F476260010245E /* StrUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StrUtils.cpp; sourceTree = "<group>"; };
+		86D47DE421F72F1B00AC055B /* pch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pch.h; path = ../muzlib/pch.h; sourceTree = "<group>"; };
+		86D47DE521F72F1B00AC055B /* pch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pch.cpp; path = ../muzlib/pch.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +176,8 @@
 		86ABFDE821F476260010245E /* MUZlib */ = {
 			isa = PBXGroup;
 			children = (
+				86D47DE521F72F1B00AC055B /* pch.cpp */,
+				86D47DE421F72F1B00AC055B /* pch.h */,
 				86ABFDE921F476260010245E /* MUZ-Computer */,
 				86ABFDFC21F476260010245E /* Config.h */,
 				86ABFDFD21F476260010245E /* unused */,
@@ -269,14 +271,14 @@
 		86ABFE2321F476260010245E /* MUZ-Common */ = {
 			isa = PBXGroup;
 			children = (
-				86ABFE2421F476260010245E /* StrUtils.h */,
-				86ABFE2521F476260010245E /* FileUtils.h */,
-				86ABFE2621F476260010245E /* Types.h */,
 				86ABFE2721F476260010245E /* Exceptions.h */,
 				86ABFE2821F476260010245E /* FileUtils.cpp */,
-				86ABFE2921F476260010245E /* Section.h */,
+				86ABFE2521F476260010245E /* FileUtils.h */,
 				86ABFE2A21F476260010245E /* Section.cpp */,
+				86ABFE2921F476260010245E /* Section.h */,
 				86ABFE2B21F476260010245E /* StrUtils.cpp */,
+				86ABFE2421F476260010245E /* StrUtils.h */,
+				86ABFE2621F476260010245E /* Types.h */,
 			);
 			path = "MUZ-Common";
 			sourceTree = "<group>";
@@ -302,7 +304,6 @@
 				86ABFE3B21F476260010245E /* Peripheral.h in Headers */,
 				86ABFE6221F476260010245E /* StrUtils.h in Headers */,
 				86ABFE4821F476260010245E /* Label.h in Headers */,
-				86ABFE3F21F476260010245E /* AddressZone.h in Headers */,
 				86ABFE3421F476260010245E /* CPU.h in Headers */,
 				86ABFE2D21F476260010245E /* PortMgr.h in Headers */,
 				86ABFE5821F476260010245E /* Expression.h in Headers */,
@@ -312,6 +313,7 @@
 				86ABFE6521F476260010245E /* Exceptions.h in Headers */,
 				86ABFE5D21F476260010245E /* Instruction.h in Headers */,
 				86ABFE3521F476260010245E /* ROMPagingPort.h in Headers */,
+				86D47DE621F72F1C00AC055B /* pch.h in Headers */,
 				86ABFE4D21F476260010245E /* Asm-Exceptions.h in Headers */,
 				86ABFE3621F476260010245E /* MemoryModule.h in Headers */,
 				86ABFE6421F476260010245E /* Types.h in Headers */,
@@ -383,10 +385,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				86ABFE5321F476260010245E /* CodeLine.cpp in Sources */,
-				86ABFE4121F476260010245E /* MemoryModule_test.cpp in Sources */,
 				86ABFE3821F476260010245E /* CPU.cpp in Sources */,
-				86ABFE4021F476260010245E /* MemoryMgr_test.cpp in Sources */,
 				86ABFE5421F476260010245E /* Assembler.cpp in Sources */,
+				86D47DE721F72F1C00AC055B /* pch.cpp in Sources */,
 				86ABFE3721F476260010245E /* Peripheral.cpp in Sources */,
 				86ABFE5C21F476260010245E /* Errors.cpp in Sources */,
 				86ABFE5E21F476260010245E /* Expression.cpp in Sources */,
@@ -400,7 +401,6 @@
 				86ABFE6821F476260010245E /* Section.cpp in Sources */,
 				86ABFE5F21F476260010245E /* Parser.cpp in Sources */,
 				86ABFE5021F476260010245E /* Operator.cpp in Sources */,
-				86ABFE4221F476260010245E /* Computer_test.cpp in Sources */,
 				86ABFE4E21F476260010245E /* All-Directives.cpp in Sources */,
 				86ABFE2F21F476260010245E /* PortModule.cpp in Sources */,
 				86ABFE4F21F476260010245E /* Z80-Operands.cpp in Sources */,

@@ -19,7 +19,7 @@ public:
 	virtual ~CPU();
 
 	/** Displays on a given peripheral. */
-	virtual void DisplayOn(Peripheral* /*peripheral*/) {}
+	virtual void DisplayOn(Peripheral* /*peripheral*/) ;
 };
 
 } /* namespace MUZ */

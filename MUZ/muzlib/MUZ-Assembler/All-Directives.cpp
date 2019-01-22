@@ -6,6 +6,8 @@
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
 #include "pch.h"
+#include "MUZ-Common/Section.h"
+#include "Parser.h"
 #include "All-Directives.h"
 
 namespace MUZ {

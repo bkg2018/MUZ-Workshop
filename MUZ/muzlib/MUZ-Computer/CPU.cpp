@@ -14,5 +14,8 @@ namespace MUZ {
 
 	CPU::~CPU() {
 	}
-
+	/** Displays on a given peripheral. */
+	void CPU::DisplayOn(Peripheral* /*peripheral*/) {
+		
+	}
 } /* namespace MUZ */
