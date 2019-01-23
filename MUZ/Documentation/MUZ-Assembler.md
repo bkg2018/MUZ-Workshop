@@ -49,7 +49,7 @@ The general format for a source line is one of the following forms:
 * `[label name[:]]  [<directive> [<directive operands>]] [;[<comment>]]`
 * `[label name[:]]  [<instruction> [<instruction operands>]] [;[<comment>]]`
 
-The directives can be preprocessor directives like `#INCLUDE` or `#DEFINE` (see above in **Preprocessor Directives**), or assembler directives like `.EQU` or `.DB`, which are descripted below in **Assembler Directives**. Instructions are Z-80 instruction mnemonics like `LD` or `CALL`. 
+The directives can be preprocessor directives like `#INCLUDE` or `#DEFINE` (see below in **Preprocessor Directives**), or assembler directives like `.EQU` or `.DB`, which are descripted below in **Assembler Directives**. Instructions are Z-80 instruction mnemonics like `LD` or `CALL`. 
 
 Directives and instructions names are not case sensitive (`ld` is the same as `LD`), but the labels are.
 
@@ -93,7 +93,8 @@ The preprocessor has been made compatible with *Steve Cousins Workshop* assemble
 |`#INSERTHEX <hexfile>`               |                                                    |Inserts an Intel Hex File in code. Each Intel HEX record has its own fixed address and will update the current assembling address counter. MUZ Assembler only processes the type-0 (16-bit address and up to 255 bytes) and type-1 (end of file) records. The file path follows the same rules as for `#INCLUDE` directive (see above.)|
 |`#INSERTBIN <binfile>`               |                                                    |Inserts the content of a file byte by byte at current address of current section. The file path follows the same rules as for `#INCLUDE` directive (see above.)|
 |`#NOLIST` ||Disables listing from now on, until `#LIST` is used. 
-|`#LIST [ON|OFF]`||Enables or disables listing from now on. `#LIST` alone acts as `#LIST ON`.
+|`#LIST [ON]`||Enables listing from now on. `#LIST` alone acts as `#LIST ON`.
+|`#LIST OFF`||Disables listing from now on. Same as `NOLIST`.
 
 **Remark: ** `COND` is a synonym to `#IF` and `ENDC` is a synonym of  `#ENDIF`. 
 
@@ -168,7 +169,7 @@ Positive integer numbers from 0 to 65535 can be used and combined in expressions
 
 All numbers are masked out by the 0xFFFF value to fit in 16 bits. Expressions can exceed this limit during calculations, but the end result will be masked out to 16 bits. If a string is used where a number is expected, it will be converted to a numeric value, eg. `"0x7FFF"`will be converted to `32767`.
 
-To use a negative number, put the unary '-' operator in front of the number. All numbers are positive in MUZ-Assembler, eg: `0xFFFF` will be `65535` and not `-1`.
+To use a negative number in the Z-80 sense, put the unary `-` operator in front of the number. All numbers are are converted to positive values in MUZ-Assembler, eg: `0xFFFF` will eventually be `65535` and not `-1`. The `-1` expression will also be interpreted as `65535`.
 
 ### Character Constants
 
@@ -235,24 +236,24 @@ Operators in expressions follow the hierarchy from the following table, similar 
 |  \      | 1          | 2 | number  | number  | integer division only: `49 \ 3`  computes `16`
 |  %      | 1          | 2 | number  | number  | modulo: `255 % 8`  computes `7`
 |  +      | 2          | 2 | number  | number  | addition: `2 + 5` computes `7`
-|  +      | 2          | 2 | string and number  | number  | adds the number to each character code in the string or character: `'A' + 1` will be evaluated to `66`, and `"BC" + 2` will compute as `"DE"`. 
+|  +      | 2          | 2 | string and number  | string or number  | adds the number to each character code in the string or character: `'A' + 1` will be evaluated to `66`, and `"BC" + 2` will compute as `"DE"`. 
 |  +      | 2          | 2 | string  | string  | string concatenation: `"R" + "4"` is `"R4"`
-|  -      | 2          | 1 | number  | number  | unary sign change: `-2`
+|  -      | 2          | 1 | number  | number  | unary sign change: `-2`. Generates 2's complement of the positive value, and then uses it as a positive value.
 |  -      | 2          | 2 | number  | number  | subtraction: `256 - 0x80` computes as `128`
 |  <<     | 3          | 2 | number  | number  | binary left shift: `1 << 4` is `16`
 |  >>     | 3          | 2 | number  | number  | binary right shift: `256 >> 3` is `32`
 |  <      | 4          | 2 | number  | boolean | less than: `1 < 2` is true
-|  <      | 4          | 2 | string  | boolean | less than: `"PLANE" < "QUESTION"` is true. Lowercase characters are inferior to uppercase characters.
+|  <      | 4          | 2 | string  | boolean | less than: `"PLANE" < "QUESTION"` is true. Lowercase characters are superior to uppercase characters: `'a'` is greater than `'A'`
 |  >      | 4          | 2 | number  | boolean | greater than: `256 > 128` is true
-|  >      | 4          | 2 | string  | boolean | greater than: `"v" > "V"` is false (equality)
+|  >      | 4          | 2 | string  | boolean | greater than: `"v" > "v"` is false
 |  <=     | 4          | 2 | number  | boolean | less than or equal: `127 <= 0x7F` is true (equal)
 |  <=     | 4          | 2 | string  | boolean | less than or equal: `"alpha" <= "beta"` is true
-|  >=     | 4          | 2 | number  | boolean | greater than or equal: `0x200 >= 0x1FF` is true
-|  >=     | 4          | 2 | string  | boolean | greater than or equal: ` "" >= ""` is true
-|  !=  <> | 5          | 2 | number  | boolean | different than: `3 != 5` is true
-|  !=  <> | 5          | 2 | string  | boolean | different than: ` "R0" != "R1"` is true
-|  = ==   | 5          | 2 | number  | boolean | equal: `128 = 0x80` is true
-|  = ==   | 5          | 2 | string  | boolean | equal: `"alpha" = "alpha"` is true
+|  >=     | 4          | 2 | number  | boolean | greater than or equal: `0x200 >= 0x1FF` is true. All values are evaluated as positive before comparison, so `0x8000 > 0x7FFF` is true.
+|  >=     | 4          | 2 | string  | boolean | greater than or equal: ` "z80" >= "z80"` is true
+|  != or <> | 5          | 2 | number  | boolean | different than: `3 != 5` is true
+|  != or <> | 5          | 2 | string  | boolean | different than: ` "R0" != "R1"` is true
+|  = or ==   | 5          | 2 | number  | boolean | equal: `128 = 0x80` is true
+|  = or ==   | 5          | 2 | string  | boolean | equal: `"alpha" = "alpha"` is true
 |  &      | 6          | 2 | number  | number  | binary AND: `0x5746 & 0x7FFF` is `22342` (which is 0x5746)
 |  ^      | 7          | 2 | number  | number  | binary XOR:`0xAA ^ 0xFF` is `85` (which is 0x55)
 |  \|     | 8          | 2 | number  | number  | binary OR: `0x44 | 0x8F` is `207` (which is 0xCF)
@@ -305,8 +306,7 @@ The assembler directives all start with a `'.'`character.
 |`<symbol>: .EQU <expression>` |`kData: .EQU 0xFC00` `LF .EQU 0AH`|Defines a label with a given numeric or string value. The symbol will be replaced by its value during further assembling. Notice that *the symbols defined with `.EQU` don't have an address* and are normally not interacting with the current code or data section. However, you can use the `$` special symbol to refer to the current section current address in the expression.|
 |`[<label>:] .DB <expression> [[, <expression>] ...]` or `[<label>:] .BYTE <expression> [[, <expression>] ...]`|`szStartup: .DB "Custom",kNull` `iHwFlags: .DB 0x00`|Inserts a sequence of 8-Bit numbers in the assembled code at the current address in the current section. This is generally preceded by a label or other DB lines. Strings can be used and will generate one byte for each character. Strings and numbers can be separated with a comma. If a label is provided it will represent the address where this directive stores the data.| 
 |`[<label>:] .DW <expression> [[, <expression>] ...]` or `[<label>:] .WORD <expression> [[, <expression>] ...]`|`.DW 0xAA55`  `.DW EndOfMonitor-StartOfMonitor`|Insert a sequence of 16-Bit numbers in the assembled code at the current address in the current section. This is generally preceded by a label or other DW lines. Strings can be used but for each character they will generate an 8-bit zero followed by the byte value of each character. Strings and numbers can be separated with a comma. If a label is provided it will represent the address where this directive stores the data.|   
-|`.PROC <processor code>`|`.PROC Z80`|Defines the processor instruction set to use. Ignored for now, should be defined as `Z80` for SCWorkshop compatibility.|
-|`.HEXBYTES <expression>`||Ignored|
+|`.PROC <processor code>`|`.PROC Z80`|Defines the processor instruction set to use. Should be defined as `Z80` for SCWorkshop compatibility. If no processor is set, the Assembler will set the Z-80 instructions by default the first time it tries to identify an instruction.
 
 
 ### EQU Symbols
@@ -518,19 +518,26 @@ Here are some of the contexts where an HEX file can be used:
 
 ## Command Line Shell
 
-MUZ-Assembler has a simple command-line shell utility which allows compilation of an HEX output file from a main ASM source ffile.
+MUZ-Assembler has a simple command-line shell utility called `asmuz` which allows compilation of an HEX output file from a main ASM source ffile.
 
+  `asmuz` MUZ-Assembler Command Line Utility
 
+The `asmuz` tool is a simple command line utility to compile assembler source files from a shell.
+
+Syntax :
+
+    asmuz [command [...]] [--input|-f] inputfile
 
 Parameters for this utility are:
 
-| option | Details | C++ equivalent |
+| option | Details | C++ equivalent|
 |---------|--------|-------------------|
-|  | Sets the output directory where files will be written. | as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
-| | Sets the file name for the assembly listing |  as.SetListingFilename("testErrors.LST");
-| | Sets the file name for the memory dump | as.SetMemoryFilename("testErrorsMemory.LST");
-| | Sets the file name for the Intel HEX output | as.SetIntelHexFilename("testErrorsIntelHex.HEX");
-| | Sets the file name for the warnings/errors log | as.SetLogFilename("testErrors.LOG");
-| | Enables full byte sequences in listing, by default byte sequences are limited to 7 bytes (on 2 lines) with ellipsis "..." | as.EnableFullListing(true);
-| | Sets the file name of the main input source file | as.AssembleFile(SourcesRootDir + "Errors.asm", msg); 
+| `--outputdir <path>` or `-od <path>`| Sets the output directory where files will be written. | as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+| `--listing <filename>` or `-l <path>` | Sets the file name for the assembly listing |  as.SetListingFilename("testErrors.LST");
+| `--memory <filename>` or `-m <path>` | Sets the file name for the memory dump | as.SetMemoryFilename("testErrorsMemory.LST");
+| `--hex <filename>` or `-h <path>` | Sets the file name for the Intel HEX output | as.SetIntelHexFilename("testErrorsIntelHex.HEX");
+| `--log <filename>` | Sets the file name for the warnings/errors log | as.SetLogFilename("testErrors.LOG");
+| `--allbytes` or | Enables full byte sequences in listing, by default byte sequences are limited to 7 bytes (on 2 lines) with ellipsis "..." | as.EnableFullListing(true);
+| `[--input|-f] <inputfile>`| Sets the file path of the main input source file | as.AssembleFile(SourcesRootDir + "Errors.asm", msg); 
+
 
