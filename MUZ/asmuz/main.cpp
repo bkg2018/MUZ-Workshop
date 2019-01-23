@@ -8,6 +8,7 @@
 #include "pch.h"
 #include "MUZ-Common/FileUtils.h"
 #include "MUZ-Assembler/Assembler.h"
+#include <chrono>
 
 using std::string;
 
@@ -53,7 +54,8 @@ int main(int argc, const char * argv[]) {
 
 	// do assembling
 #ifdef __APPLE__
-	CFTimeInterval startTime = CACurrentMediaTime();
+	std::chrono::high_resolution_clock Clock;
+	auto startTime = Clock.now();
 #elif _WIN32
 	DWORD startTime = timeGetTime();
 #endif
@@ -69,7 +71,7 @@ int main(int argc, const char * argv[]) {
 		}
 
 #ifdef __APPLE__
-	CFTimeInterval elapsedTime = CACurrentMediaTime() - startTime;
+	double elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(Clock.now() - startTime).count() / 1000.0;
 	printf("Assembling took %lf seconds\n", elapsedTime);
 #elif _WIN32
 	double elapsedTime = ((timeGetTime() * 1.0) - startTime) / 1000.0;
