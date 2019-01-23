@@ -8,7 +8,8 @@
 
 #import <XCTest/XCTest.h>
 #import <QuartzCore/QuartzCore.h>
-
+#include <chrono>
+#include <thread>
 // emulation
 #include "MUZ-Computer/ROMPagingPort.h"
 #include "muz_simz80.h"
@@ -649,10 +650,13 @@ std::string SourceFilePath;
 
 - (void)testAssembler {
 
-	CFTimeInterval startTime = CACurrentMediaTime();
+//	CFTimeInterval startTime = CACurrentMediaTime();
+	std::chrono::high_resolution_clock Clock;
+	auto startTime = Clock.now();
+
 	int nbloops = 1;
 	for (int i = 0 ; i < nbloops ; i++) {
-		printf("%d : start time %f\n", i+1, CACurrentMediaTime()-startTime);
+		//printf("%d : start time %f\n", i+1, CACurrentMediaTime()-startTime);
 		MUZ::Assembler as;
 		MUZ::ErrorList msg;
 		as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
@@ -667,7 +671,8 @@ std::string SourceFilePath;
 			perror(e.what());
 		}
 	}
-	CFTimeInterval elapsedTime = CACurrentMediaTime() - startTime;
+	// CFTimeInterval elapsedTime = CACurrentMediaTime() - startTime;
+	double elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(Clock.now() - startTime).count() / 1000.0;
 	printf("Time per assembly: %f\n", elapsedTime / nbloops);
 
 }
