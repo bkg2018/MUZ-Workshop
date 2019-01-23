@@ -10,45 +10,42 @@
 #define Asm_Exceptions_h
 
 #include <exception>
-#ifdef _WIN32
-#define _NOEXCEPT
-#endif
 
 namespace MUZ {
 	// wrong type for an operator in an expression
 	class ASMOperandTypeException: public std::exception {
-		virtual const char* what() const _NOEXCEPT{ return "ASM: wrong operand type for operator"; }
+		virtual const char* what() const noexcept{ return "ASM: wrong operand type for operator"; }
 	};
 	
 	class PARSERNotInitialized: public std::exception {
-		virtual const char *what() const _NOEXCEPT{ return "PARSER not initialized"; }
+		virtual const char *what() const noexcept{ return "PARSER not initialized"; }
 	};
 	
 	class PARSERInvalidTokenIndex: public std::exception {
-		virtual const char *what() const _NOEXCEPT{ return "PARSER invalid token index"; }
+		virtual const char *what() const noexcept{ return "PARSER invalid token index"; }
 	};
 
 	class PARSERDivisionByZero: public std::exception {
-		virtual const char *what() const _NOEXCEPT{ return "PARSER division by zero"; }
+		virtual const char *what() const noexcept{ return "PARSER division by zero"; }
 	};
 	
 	class EXPRESSIONOpenParenthesisTooMuch: public std::exception {
-		virtual const char *what() const _NOEXCEPT{ return "too much opening parenthesis in expression"; }
+		virtual const char *what() const noexcept{ return "too much opening parenthesis in expression"; }
 	};
 	class EXPRESSIONCloseParenthesisTooMuch: public std::exception {
-		virtual const char *what() const _NOEXCEPT{ return "too much closing parenthesis in expression"; }
+		virtual const char *what() const noexcept{ return "too much closing parenthesis in expression"; }
 	};
 	class EXPRESSIONNotAddress: public std::exception {
-		virtual const char *what() const _NOEXCEPT{ return "expression doesn't compute as an address"; }
+		virtual const char *what() const noexcept{ return "expression doesn't compute as an address"; }
 	};
 	class EXPRESSIONNotBoolean: public std::exception {
-		virtual const char *what() const _NOEXCEPT{ return "expression doesn't compute as a boolean"; }
+		virtual const char *what() const noexcept{ return "expression doesn't compute as a boolean"; }
 	};
 	class EXPRESSIONNotString: public std::exception {
-		virtual const char *what() const _NOEXCEPT{ return "expression doesn't compute as a string"; }
+		virtual const char *what() const noexcept{ return "expression doesn't compute as a string"; }
 	};
 	class EXPRESSIONLeftOperandMissing: public std::exception {
-		virtual const char *what() const _NOEXCEPT{ return "2-operands operator is missing left operand"; }
+		virtual const char *what() const noexcept{ return "2-operands operator is missing left operand"; }
 	};
 
 }

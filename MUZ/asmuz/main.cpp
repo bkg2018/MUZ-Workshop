@@ -53,12 +53,8 @@ int main(int argc, const char * argv[]) {
 	}
 
 	// do assembling
-#ifdef __APPLE__
 	std::chrono::high_resolution_clock Clock;
 	auto startTime = Clock.now();
-#elif _WIN32
-	DWORD startTime = timeGetTime();
-#endif
 	if ( ! ExistFile(inputFile) ) {
 		printf("Error 2: missing file %s\n", inputFile.c_str());
 		exit(2);
@@ -70,13 +66,8 @@ int main(int argc, const char * argv[]) {
 			perror(e.what());
 		}
 
-#ifdef __APPLE__
 	double elapsedTime = std::chrono::duration_cast<std::chrono::milliseconds>(Clock.now() - startTime).count() / 1000.0;
 	printf("Assembling took %lf seconds\n", elapsedTime);
-#elif _WIN32
-	double elapsedTime = ((timeGetTime() * 1.0) - startTime) / 1000.0;
-	printf("Assembling took %lf seconds\n", elapsedTime);
-#endif
 
 	return 0;
 }

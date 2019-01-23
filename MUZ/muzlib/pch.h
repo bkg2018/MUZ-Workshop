@@ -23,19 +23,6 @@
 #undef GetMessage
 #endif
 
-/** no exceptions:
- * _NOEXCEPT is handled by XCode
- *  it must be neutralized for Visual Studio
- *  it must be replaced by the deprecated throw() for GCC/Linux even in C++ 11
- */
-#ifdef _WIN32
-  #define _NOEXCEPT
-#else
-  #ifndef __APPLE__
-  #define _NOEXCEPT noexcept
-  #endif
-#endif
-
 
 #endif
 
