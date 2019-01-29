@@ -585,7 +585,7 @@ namespace MUZ {
 				// prepare up to 16 bytes
 				nbbytes = 16;
 				if (dumpaddress + 15 > range.end) {
-					nbbytes = range.end - dumpaddress;
+					nbbytes = range.end - dumpaddress + 1;
 				}
 				// get the assembled section it comes from
 				asmsection = FindSection(dumpaddress, dumpaddress + nbbytes - 1);
