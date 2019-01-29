@@ -31,7 +31,7 @@
 
 @interface MuzBridge : NSObject
 
-// store a pointer to the C++ instance of a memory module
+// store pointersto the C++ instance of the computer module
 @property (nonatomic) void* _Nullable computer;
 @property (nonatomic) void* _Nullable pagingport;
 

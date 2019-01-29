@@ -45,6 +45,7 @@ namespace MUZ {
 				{ errorNotRegister, "expected register name was not found"},
 				{ errorWrongComma, "unexpected comma"},
 				{ errorLeftOperandMissing, "left operand missing in expression"},
+				{ errorMissingToken, "missing operands or punctuation"},
 				{ errorDefine, "#DEFINE could not define a symbol"},
 				{ errorInvalidSymbol,	 "invalid symbol name after DEFINE"},
 				{ errorInvalidExpression, "invalid expression after symbol"},
@@ -88,25 +89,25 @@ namespace MUZ {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeABOUTFILE, kind, codeline.file, codeline.line, file, codeline.curtoken});
 	}
-	bool ErrorList::Error( ErrorKind kind, struct CodeLine& codeline, int pass) {
+	ErrorType ErrorList::Error( ErrorKind kind, struct CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeERROR, kind, codeline.file, codeline.line, "", codeline.curtoken});
-		return false;
+		return errorTypeERROR;
 	}
-	bool ErrorList::Error( ErrorKind kind, struct CodeLine& codeline, std::string file, int pass) {
+	ErrorType ErrorList::Error( ErrorKind kind, struct CodeLine& codeline, std::string file, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeERROR, kind, codeline.file, codeline.line, file, codeline.curtoken});
-		return false;
+		return errorTypeERROR;
 	}
-	bool ErrorList::Fatal( ErrorKind kind, struct CodeLine& codeline, int pass) {
+	ErrorType ErrorList::Fatal( ErrorKind kind, struct CodeLine& codeline, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeFATAL, kind, codeline.file, codeline.line, "", codeline.curtoken});
-		return false;
+		return errorTypeFATAL;
 	}
-	bool ErrorList::Fatal( ErrorKind kind, struct CodeLine& codeline, std::string file, int pass) {
+	ErrorType ErrorList::Fatal( ErrorKind kind, struct CodeLine& codeline, std::string file, int pass) {
 		if (TestPass(codeline,pass))
 			push_back({ errorTypeFATAL, kind, codeline.file, codeline.line, file, codeline.curtoken});
-		return false;
+		return errorTypeFATAL;
 	}
 
 	/** Close the list by sorting it and setting message references into codelines. */

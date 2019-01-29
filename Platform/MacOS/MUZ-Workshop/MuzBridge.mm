@@ -32,7 +32,7 @@
 	// store as a void*, because swift cannot  accept a .H using a C++ class pointer
 	self.computer = computer;
 	
-	// create the paging port and store as void* for later
+	// create a memory paging port and store as void* for later
 	MUZ::ROMPagingPort* pagingport = new MUZ::ROMPagingPort(computer, true);
 	self.pagingport = pagingport;
 	

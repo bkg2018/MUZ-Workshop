@@ -85,6 +85,9 @@ namespace MUZ {
 	{
 		Assembler::ListingLine ll;
 
+		ll.file = file;
+		ll.line = line;
+
 		// Is there any code?
 		if (code.empty()) {
 			// no code: any #DEFINE symbol?
@@ -218,14 +221,13 @@ namespace MUZ {
 	}
 	
 	/** Lets a SourceFile set itself from a given file path and a parent specification. */
-	bool Assembler::SourceFile::Set(std::string file, SourceFile *parentsourcefile) {
+	ErrorType Assembler::SourceFile::Set(std::string file, SourceFile *parentsourcefile) {
 		// included files may be relative to the path of their parent, check this
 		included = (parentsourcefile != nullptr);
 		if (included) {
 			bool absolute = false;
 #ifdef WIN32
-			// Separate the possible prefixes on Windows
-			
+			// Separate any possible prefix on Windows
 			// UNC long names on Windows
 			if (file.substr(0,4) == "\\\\?\\") {
 				fileprefix = "\\\\?\\";
@@ -238,18 +240,19 @@ namespace MUZ {
 			}
 			// Windows server pathes starting with \\ are absolute and not prefixed
 #else
-			// UNIX-like pathes start with / or ~ when absolute
+			// UNIX-like pathes (Linux, MacOS) start with / or ~ when absolute
 #endif
+
 			// split into non-prefixed absolute or relative path and name
 			splitpath(file, filepath, filename);
-			parent = parentsourcefile;
-			SourceFile* root = parent->Root();
+			parent = parentsourcefile;			// Immediate parent file (the one with a #INCLUDE/#INSERTBIN/#INSERTHEX)
+			SourceFile* root = parent->Root();	// Main source file (the very first assembled file)
 			if (filepath.size() == 0) {
-				// no path 1: try to find in parent directory
+				// no path 1: try to find in parent directory (parent relative)
 				if (ExistFile(parent->filepath + NORMAL_DIR_SEPARATOR + filename)) {
 					filepath = parent->filepath;
 				} else {
-					// no path 2: try to find file in root
+					// no path 2: try to find file in root (main source relative)
 					if (ExistFile(root->filepath + NORMAL_DIR_SEPARATOR + filename)) {
 						filepath = root->filepath;
 					} else {
@@ -262,7 +265,6 @@ namespace MUZ {
 				absolute = (filepath[0] == NORMAL_DIR_SEPARATOR) || (filepath[0] == ALTERNATE_ROOTDIR);
 				// if absolute, keep it this way
 				if (!absolute) {
-					
 					// not absolute: try relative to parent
 					if (ExistFile(parent->filepath + NORMAL_DIR_SEPARATOR + filepath + NORMAL_DIR_SEPARATOR + filename)) {
 						filepath = parent->filepath + NORMAL_DIR_SEPARATOR + filepath;
@@ -281,7 +283,7 @@ namespace MUZ {
 			splitpath(file, filepath, filename);
 		}
 		
-		return true;
+		return errorTypeOK;
 	}
 	
 	
@@ -291,7 +293,7 @@ namespace MUZ {
 	 fill the rest. Notice that running conditionnal directive conditions can make the line to be unassembled
 	 and ignored. In this case, the "assembled" flag is not set.
 	 */
-	bool Assembler::AssembleCodeLine(CodeLine& codeline, ErrorList& msg)
+	ErrorType Assembler::AssembleCodeLine(CodeLine& codeline, ErrorList& msg)
 	{
 		// cut the source line into a vector of tokens
 		Parser parser(*this); // give reference of the assembbler to the parser
@@ -302,25 +304,27 @@ namespace MUZ {
 		if (parser.Test(hasIF)) {
 			if ((curmode == parsingModeSKIPTOEND) || (curmode == parsingModeSKIPTOELSE)) {
 				EnterMode(parsingModeSKIPTOEND);
-				return false;
+				return errorTypeFALSE;
 			}
 			// Compute the result of the IF directive
-			EnterMode(parser.LastDirective(codeline, msg) ? parsingModeDOTOELSE : parsingModeSKIPTOELSE);
+			ErrorType result = parser.LastDirective(codeline, msg);
+			if (result == errorTypeFATAL) return result; // breaks assembly
+			EnterMode( (result == errorTypeOK) || (result == errorTypeTRUE) ? parsingModeDOTOELSE : parsingModeSKIPTOELSE);
 			// Create label if there is one
 			ScanLabel(codeline, msg);
-			return true;
+			return errorTypeOK;
 		}
 		if (parser.Test(hasELSE)) {
 			switch (curmode) {
 					
 				case parsingModeROOT:
 					if (! IsFirstPass()) msg.ForceWarning(errorElseNoIf, codeline);
-					return false;
+					return errorTypeFALSE;
 				case parsingModeSKIPTOEND:
-					return false; // ignore
+					return errorTypeFALSE; // ignore
 				case parsingModeDOTOEND:
 					if (! IsFirstPass()) msg.ForceWarning(errorElseNoIf, codeline);
-					return false;
+					return errorTypeFALSE;
 					
 				case parsingModeSKIPTOELSE:
 					ExitMode(curmode);
@@ -333,21 +337,21 @@ namespace MUZ {
 					ScanLabel(codeline, msg);
 					break;
 			}
-			return true;
+			return errorTypeOK;
 		}
 		else if (parser.Test(hasENDIF)) {
 			if (curmode == parsingModeROOT) {
 				if (! IsFirstPass()) msg.ForceWarning(errorEndifNoIf, codeline);
-				return false;
+				return errorTypeFALSE;
 			}
 			ExitMode(curmode);
 			ScanLabel(codeline, msg);
-			return true;
+			return errorTypeOK;
 		}
 		
 		// IF/ELSE/ENDIF already returned, here we handle conditionnal skipping modes
 		if ((curmode == parsingModeSKIPTOEND) || (curmode == parsingModeSKIPTOELSE)) {
-			return false; // ignore everything in SKIP modes
+			return errorTypeFALSE; // ignore everything in SKIP modes
 		}
 		
 		// If we reach here, all conditions have been managed
@@ -371,11 +375,11 @@ namespace MUZ {
 					return msg.Error(errorUnknownDirective, codeline);
 				}
 				// Let the directive do further parsing and symbols resolving
-				bool result = directive->Parse(*this, parser, codeline, label, msg);
+				ErrorType result = directive->Parse(*this, parser, codeline, label, msg);
 				// replace last code line label
 				codeline.label = label;
 				return result;
-				
+
 				// anything else can be an instruction
 			} else if (token.type == tokenTypeLETTERS) {
 				
@@ -406,7 +410,7 @@ namespace MUZ {
 		}
 		// replace last code line label
 		codeline.label = label;
-		return true;
+		return errorTypeOK;
 	}
 
 	/** Initializes listing file, close previous if any.
@@ -443,7 +447,7 @@ namespace MUZ {
 	{
 		if (codeline.listing) {
 			// Full address/code details for assembled lines, simple line source for non assembled
-			if (codeline.assembled) {
+			if (codeline.assembled == errorTypeOK) {
 				Listing lines = buildListingLineStructures(codeline, msg, m_status.allcodelisting);
 				for (auto & line: lines) listing.push_back(line);
 			} else {
@@ -453,6 +457,7 @@ namespace MUZ {
 		// always add warning/errors
 		if (codeline.message >= 0) {
 			ListingLine line;
+			line.file = codeline.file;
 			line.parts.message = 1;
 			line.message = codeline.message;
 			line.token = codeline.curtoken;
@@ -620,10 +625,10 @@ namespace MUZ {
 
 		// work variable
 		ListingLine fileline;
-		fileline.parts.file = 1;
-		fileline.file = file;
 
 		// add the file path to listing
+		fileline.parts.file = 1;
+		fileline.file = file;
 		listing.push_back(fileline);
 
 		// List all lines and included files
@@ -828,9 +833,11 @@ namespace MUZ {
 		// count warnings and errors
 		int nbWarnings = 0;
 		int nbErrors = 0;
+		int nbFatals = 0;
 		for (MUZ::ErrorMessage& m : msg) {
 			if (m.type == MUZ::errorTypeWARNING) nbWarnings++;
 			if (m.type == MUZ::errorTypeERROR) nbErrors++;
+			if (m.type == MUZ::errorTypeFATAL) nbFatals ++;
 		}
 
 		if (nbWarnings == 0) {
@@ -852,22 +859,24 @@ namespace MUZ {
 			}
 		}
 
-		if (nbErrors == 0) {
+		if (nbErrors+nbFatals == 0) {
 			fprintf(logfile, "%s\n", "No Errors");
 			if (m_status.trace) printf("%s\n", "No Errors");
 		} else {
 			fprintf(logfile, "%s\n", "ERRORS:");
 			if (m_status.trace) printf("%s\n", "ERRORS:");
 			for (MUZ::ErrorMessage& m : msg) {
-				if (m.type == MUZ::errorTypeERROR) {
-					CodeLine* codeline = GetCodeLine(m.file, m.line);
-					if (m.token >= 0 && m.token < codeline->tokens.size()) {
-						fprintf(logfile, "\t%5d: E%04d: '%s': %s\n", (int)m.line, m.kind, codeline->tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
-					} else {
-						fprintf(logfile, "\t%5d: E%04d: %s\n", (int)m.line, m.kind, msg.GetMessage(m.kind).c_str());
-					}
-					if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), (int)m.line, msg.GetMessage(m.kind).c_str());
+				if (m.type != MUZ::errorTypeERROR && m.type != MUZ::errorTypeFATAL)
+					continue;
+				std::string prefix = "";
+				if (m.type == MUZ::errorTypeFATAL) prefix = "(FATAL) ";
+				CodeLine* codeline = GetCodeLine(m.file, m.line);
+				if (m.token >= 0 && m.token < codeline->tokens.size()) {
+					fprintf(logfile, "\t%5d: E%04d: '%s': %s\n", (int)m.line, m.kind, codeline->tokens[m.token].source.c_str(), (prefix + msg.GetMessage(m.kind)).c_str());
+				} else {
+					fprintf(logfile, "\t%5d: E%04d: %s\n", (int)m.line, m.kind, (prefix + msg.GetMessage(m.kind)).c_str());
 				}
+				if (m_status.trace) printf("%s(%d): %s\n", GetFileName(m.file).c_str(), (int)m.line, (prefix + msg.GetMessage(m.kind)).c_str());
 			}
 		}
 		fclose(logfile);
@@ -1077,14 +1086,14 @@ namespace MUZ {
 	 @param file the file path to the source to assemble, can be relative to parent file path if included
 	 @param msg the stack of error and warnings returned by the assembler
 	 
-	 @return true if assembly was correctly done
+	 @return errorTypeOK if assembly was correctly done, other value if not
 	 
-	 @throw MUZ::NoFileExceptionif file not found
+	 @throw MUZ::OutOfMemoryException
 	 */
-	bool Assembler::AssembleMainFilePassOne(string file, ErrorList& msg)
+	ErrorType Assembler::AssembleMainFilePassOne(string file, ErrorList& msg)
 	{
 		// basic security
-		if (file.size() < 2) return false;
+		if (file.size() < 1) return errorTypeFATAL;
 
 		// clear sections
 		for (auto & section: m_sections) {
@@ -1092,30 +1101,30 @@ namespace MUZ {
 		}
 		m_status.cursection = nullptr;
 		
+		size_t filenum = m_files.size();
+		BYTE* buffer = nullptr;
+		int linesize = 0;
+		Label* lastLabel = nullptr;
+		FILE* f = nullptr;
 		// Prepare the path and name for file
 		SourceFile* sourcefile = new SourceFile;
 		if (sourcefile == nullptr) throw MUZ::OutOfMemoryException();
-		if (!sourcefile->Set(file, nullptr)) return false;
+		if (errorTypeOK != sourcefile->Set(file, nullptr)) {
+			goto FatalNonOpening;
+		}
 		
 		// try to open the source file
 		file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
-		FILE* f = fopen(file.c_str(), "r");
+		f = fopen(file.c_str(), "r");
 		if (!f) {
-			CodeLine codeline;
-			msg.Fatal(errorOpeningSource, codeline, file);
-			throw MUZ::NoFileException();
+			goto FatalNonOpening;
 		}
 		
 		// Store this file definition
-		size_t filenum = m_files.size();
 		m_files.push_back(sourcefile);
 		m_status.curfile = filenum;
 		
 		// now explore the file line by line
-		BYTE* buffer = nullptr;
-		int linesize = 0;
-		//long offset = ftell(f);
-		Label* lastLabel = nullptr;
 		while (fgetline(&buffer, &linesize, f)) {
 			
 			// debug
@@ -1125,7 +1134,7 @@ namespace MUZ {
 			CodeLine cl;
 			cl.address = GetAddress();
 			cl.section = GetSection();
-			cl.assembled = false;
+			cl.assembled = errorTypeFALSE;
 			cl.as = this;
 			cl.file = filenum;
 			//cl.offset = offset;
@@ -1137,13 +1146,19 @@ namespace MUZ {
 			// Assemble this line, will include another file if #INCLUDE is met
 			cl.as = this;
 			cl.assembled = AssembleCodeLine(cl, msg);
-			if (cl.assembled) {
+			if (cl.assembled == errorTypeOK) {
 				cl.address = GetAddress();// useless?
 				cl.section = GetSection();
 				lastLabel = cl.label;
 			}
 			// Store assembly result
 			sourcefile->lines.push_back(cl);
+			// Exit if fatal error
+			if (cl.assembled == errorTypeFATAL) {
+				fclose(f);
+				free(buffer);
+				return errorTypeFATAL;
+			}
 			// update current address and file position
 			//offset = ftell(f);
 			AdvanceAddress((ADDRESSTYPE)cl.code.size());
@@ -1153,10 +1168,15 @@ namespace MUZ {
 		fclose(f);
 		free(buffer);
 
-		return true;
+		return errorTypeOK;
+
+	FatalNonOpening:
+		if (sourcefile) delete sourcefile;
+		CodeLine codeline;
+		return msg.Fatal(errorOpeningSource, codeline, file);
 	}
 
-	bool Assembler::AssembleMainFilePassTwo(string file, ErrorList& msg)
+	ErrorType Assembler::AssembleMainFilePassTwo(string file, ErrorList& msg)
 	{
 		
 		// reset sections
@@ -1170,28 +1190,29 @@ namespace MUZ {
 		codeline.includefile = 0;
 		codeline.file = 0;
 		codeline.as = this;
-		AssembleIncludedFilePassTwo(file, codeline, msg);
-
-		return true;
+		return AssembleIncludedFilePassTwo(file, codeline, msg);
 	}
 	
-	bool Assembler::AssembleIncludedFilePassOne(string file, CodeLine& codeline, ErrorList& msg)
+	ErrorType Assembler::AssembleIncludedFilePassOne(string file, CodeLine& codeline, ErrorList& msg)
 	{
 		// basic security
-		if (file.size() < 2) return false;
-		if (codeline.file >= m_files.size()) return false;
+		if (file.size() < 2) return errorTypeFATAL;
+		if (codeline.file >= m_files.size()) return errorTypeFATAL;
 		
 		// Prepare the path and name for file
 		SourceFile* sourcefile = new SourceFile;
 		if (sourcefile == nullptr) throw MUZ::OutOfMemoryException();
-		if (!sourcefile->Set(file, (codeline.file >= 0) ? m_files[codeline.file] : nullptr)) return false;
+		if (errorTypeOK != sourcefile->Set(file, (codeline.file >= 0) ? m_files[codeline.file] : nullptr)) {
+			delete sourcefile;
+			return msg.Fatal(errorOpeningSource, codeline, file);
+		}
 		
 		// try to open the source file
 		file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
 		FILE* f = fopen(file.c_str(), "r");
 		if (!f) {
-			msg.Fatal(errorOpeningSource, codeline, file);
-			throw MUZ::NoFileException();
+			delete sourcefile;
+			return msg.Fatal(errorOpeningSource, codeline, file);
 		}
 		
 		// Store this file definition
@@ -1206,8 +1227,7 @@ namespace MUZ {
 		// now explore the file line by line
 		BYTE* buffer = nullptr;
 		int linesize = 0;
-		//long offset = ftell(f);
-		Label* lastLabel = nullptr;
+			Label* lastLabel = nullptr;
 		while (fgetline(&buffer, &linesize, f)) {
 			
 			// debug
@@ -1217,39 +1237,43 @@ namespace MUZ {
 			CodeLine cl;
 			cl.address = GetAddress();
 			cl.section = GetSection();
-			cl.assembled = false;
+			cl.assembled = errorTypeFALSE;
 			cl.file = filenum;
-			//cl.offset = offset;
-			//cl.size = linesize;
 			cl.source = string((char*)buffer);
 			cl.line = sourcefile->lines.size() + 1;
 			cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
 			// Assemble this line, will include another file if #INCLUDE is met
 			cl.as = this;
 			cl.assembled = AssembleCodeLine(cl, msg);
-			if (cl.assembled) {
+			if (cl.assembled == errorTypeOK) {
 				cl.address = GetAddress();// act up possible ORG
 				cl.section = GetSection();
 				lastLabel = cl.label;
 			}
 			// Store assembly result
 			sourcefile->lines.push_back(cl);
-			// update current address and file position
-			//offset = ftell(f);
+			// Exit if fatal error
+			if (cl.assembled == errorTypeFATAL) {
+				fclose(f);
+				free(buffer);
+				return errorTypeFATAL;
+			}
+			// update current address
 			AdvanceAddress((ADDRESSTYPE)cl.code.size());
 		}
 		
 		// close main source and release IO buffer
 		fclose(f);
 		free(buffer);
-		return true;
+		return errorTypeOK;
 	}
 	
-	bool Assembler::AssembleIncludedFilePassTwo(string file, CodeLine& codeline, ErrorList& msg)
+	ErrorType Assembler::AssembleIncludedFilePassTwo(string file, CodeLine& codeline, ErrorList& msg)
 	{
 		// basic security
-		if (file.size() < 2) return false;
-		if (codeline.file >= m_files.size()) return false;
+		if (file.size() < 2) return errorTypeFATAL;
+		if (codeline.file >= m_files.size()) return errorTypeFATAL;
+		if (codeline.includefile >= m_files.size()) return errorTypeFATAL;
 
 		SourceFile* sourcefile = m_files.at(codeline.includefile);
 		m_status.curfile = codeline.includefile;
@@ -1260,13 +1284,13 @@ namespace MUZ {
 			cl.code.clear();
 			cl.as = this;
 			cl.assembled = AssembleCodeLine(cl, msg);
-			if (cl.assembled) {
+			if (cl.assembled == errorTypeOK) {
 				cl.address = GetAddress();
 				cl.section = GetSection();
 			}
 			AdvanceAddress((ADDRESSTYPE)cl.code.size()) ;
 		}
-		return true;
+		return errorTypeOK;
 	}
 	
 	/** Assembled an HEX included file.
@@ -1274,11 +1298,11 @@ namespace MUZ {
 	 @param msg the list of message and warnings returned by the assembler
 	 @return true if the file was included
 	 */
-	bool Assembler::AssembleHexFile(std::string file, CodeLine& codeline, ErrorList& msg)
+	ErrorType Assembler::AssembleHexFile(std::string file, CodeLine& codeline, ErrorList& msg)
 	{
 		// basic security
-		if (file.size() < 2) return false;
-		if (codeline.file >= m_files.size()) return false;
+		if (file.size() < 2) return errorTypeFATAL;
+		if (codeline.file >= m_files.size()) return errorTypeFATAL;
 		
 		// first pass?
 		if (m_status.firstpass) {
@@ -1286,14 +1310,17 @@ namespace MUZ {
 			// Prepare the path and name for file
 			SourceFile* sourcefile = new SourceFile;
 			if (sourcefile == nullptr) throw MUZ::OutOfMemoryException();
-			if (!sourcefile->Set(file, codeline.file >= 0 ? m_files[codeline.file] : nullptr)) return false;
+			if (errorTypeOK != sourcefile->Set(file, codeline.file >= 0 ? m_files[codeline.file] : nullptr)) {
+				delete sourcefile;
+				return msg.Fatal(errorOpeningSource, codeline, file);
+			}
 			
 			// try to open the source file
 			file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
 			FILE* f = fopen(file.c_str(), "r");
 			if (!f) {
-				msg.Fatal(errorOpeningSource, codeline, file);
-				throw MUZ::NoFileException();
+				delete sourcefile;
+				return msg.Fatal(errorOpeningSource, codeline, file);
 			}
 			
 			// Store this file definition
@@ -1328,10 +1355,8 @@ namespace MUZ {
 					CodeLine cl;
 					cl.address = GetAddress();
 					cl.section = GetSection();
-					cl.assembled = false;
+					cl.assembled = errorTypeFALSE;
 					cl.file = filenum;
-					//cl.offset = offset;
-					//cl.size = linesize;
 					cl.source = source;
 					cl.line = sourcefile->lines.size()  + 1;
 					cl.label = lastLabel;	// send previous label so a possible .EQU directive will change its value
@@ -1346,7 +1371,6 @@ namespace MUZ {
 					// Store assembly result
 					sourcefile->lines.push_back(cl);
 					// update current address and file position
-					//offset = ftell(f);
 					AdvanceAddress((ADDRESSTYPE)cl.code.size());
 				}
 			}
@@ -1356,18 +1380,18 @@ namespace MUZ {
 			free(buffer);
 			free(binbuffer);
 		} else {
-			AssembleIncludedFilePassTwo(file, codeline, msg);
+			return AssembleIncludedFilePassTwo(file, codeline, msg);
 		}
-		return true;
+		return errorTypeOK;
 	}
 	
 	/** Assembled an BIN included file.
 	 */
-	bool Assembler::AssembleBinFile(std::string file, CodeLine& codeline, ErrorList& msg)
+	ErrorType Assembler::AssembleBinFile(std::string file, CodeLine& codeline, ErrorList& msg)
 	{
 		// basic security
-		if (file.size() < 2) return false;
-		if (codeline.file >= m_files.size()) return false;
+		if (file.size() < 2) return errorTypeFATAL;
+		if (codeline.file >= m_files.size()) return errorTypeFATAL;
 		
 		// first pass?
 		if (m_status.firstpass) {
@@ -1375,18 +1399,17 @@ namespace MUZ {
 			// Prepare the path and name for file
 			SourceFile* sourcefile = new SourceFile;
 			if (sourcefile == nullptr) throw MUZ::OutOfMemoryException();
-			if (!sourcefile->Set(file, codeline.file >= 0 ? m_files[codeline.file] : nullptr)) {
+			if (errorTypeOK != sourcefile->Set(file, codeline.file >= 0 ? m_files[codeline.file] : nullptr)) {
 				delete sourcefile;
-				return false;
+				return msg.Fatal(errorOpeningSource, codeline, file);
 			}
 			
 			// try to open the source file
 			file = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
 			FILE* f = fopen(file.c_str(), "r");
 			if (!f) {
-				msg.Fatal(errorOpeningSource, codeline, file);
 				delete sourcefile;
-				throw MUZ::NoFileException();
+				return msg.Fatal(errorOpeningSource, codeline, file);
 			}
 			
 			// Store this file definition
@@ -1413,7 +1436,7 @@ namespace MUZ {
 				CodeLine cl;
 				cl.address = GetAddress();
 				cl.section = GetSection();
-				cl.assembled = false;
+				cl.assembled = errorTypeFALSE;
 				cl.file = filenum;
 				//cl.offset = ftell(f);;
 				//cl.size = nbbytes;
@@ -1439,9 +1462,9 @@ namespace MUZ {
 			fclose(f);
 			free(binbuffer);
 		} else {
-			AssembleIncludedFilePassTwo(file, codeline, msg);
+			return AssembleIncludedFilePassTwo(file, codeline, msg);
 		}
-		return true;
+		return errorTypeOK;
 	}
 	
 	//MARK: - PUBLIC API
@@ -1770,7 +1793,7 @@ namespace MUZ {
 	{
 		CodeLine codeline;
 		codeline.address = 0;
-		codeline.assembled = false;
+		codeline.assembled = errorTypeFALSE;
 		codeline.file = 0;
 		//codeline.offset = 0;
 		//codeline.size = 0;
@@ -1787,19 +1810,25 @@ namespace MUZ {
 	 
 	 @return true if assembly was correctly done
 	 */
-	bool Assembler::AssembleFile(string file, ErrorList& msg)
+	ErrorType Assembler::AssembleFile(string file, ErrorList& msg)
 	{
 		SetFirstPass(true);
 		msg.Clear();							// clear warnings
 		if (m_status.trace)	printf("Pass 1: %s\n", file.c_str());
-		if (AssembleMainFilePassOne(file, msg)) {
-			SetFirstPass(false);
-			if (m_status.trace) printf("Pass 2: %s\n", file.c_str());
-			if (AssembleMainFilePassTwo(file, msg)) {
+		ErrorType result;
+		try {
+			result = AssembleMainFilePassOne(file, msg);
+			if (result == errorTypeOK) {
+				SetFirstPass(false);
+				if (m_status.trace) printf("Pass 2: %s\n", file.c_str());
+				result = AssembleMainFilePassTwo(file, msg);
+			}
 
-				Listing listing = GetListing(msg);
-				SaveListing(listing, m_listingfilename, msg);
+			// output listings anyway
+			Listing listing = GetListing(msg);
+			SaveListing(listing, m_listingfilename, msg);
 
+			if (result != errorTypeFATAL) {
 				// first build memory image and a section with all the written address ranges
 				DATATYPE* memory = (DATATYPE*)calloc(MEMMAXSIZE, 1);
 				Section section;
@@ -1808,19 +1837,21 @@ namespace MUZ {
 
 				// dump in memory listing
 				GenerateMemoryDump(memory, section, mergingMsg);
-				
+
 				// Output Intel Hex format
 				GenerateIntelHex(memory, section, mergingMsg);
 
 				// clean memory work image
 				free(memory);
-
-				// Output errors and warnings
-				GenerateLog(msg);
-
 			}
-		}
-		return false;
+
+		} catch (std::exception& e) {
+			perror(e.what());
+		};
+
+		// Output errors and warnings
+		GenerateLog(msg);
+		return result;
 	}
 
 	/** Get the name of a file from its index. */
@@ -1968,18 +1999,20 @@ namespace MUZ {
 		m_listingfilename = filename;
 		FILE* file = PrepareListing(msg);
 		if (file) {
-			SaveListing(listing,file,msg);
-			SaveTables(file);
+			if (SaveListing(listing,file,msg) == errorTypeOK) {
+				SaveTables(file);
+			}
 			CloseListing(file);
 		}
 	}
 
 	/** Save a memory listing to a text file. Use "stdout" to just print on standard output. */
-	void Assembler::SaveListing( Listing & listing, FILE* file, ErrorList& msg )
+	ErrorType Assembler::SaveListing( Listing & listing, FILE* file, ErrorList& msg )
 	{
 		FILE* output = (file == nullptr ? stdout : file);
 
-		// TODO: write listing to file
+		// when this flag is set, finish listing by writing only the line.parts.file lines
+		ErrorType error = errorTypeOK;
 		for (auto & line : listing) {
 
 			SourceFile* sourcefile = m_files[line.file];
@@ -1987,24 +2020,33 @@ namespace MUZ {
 			// display a file path?
 			if (line.parts.file ) {
 				string mainfile = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
-				s ="\n" + spaces(20) + mainfile + "\n\n";
+				// condense if following a fatal error
+				if (error == errorTypeFATAL) {
+					s = spaces(20) + mainfile + "\n";
+				} else {
+					s ="\n" + spaces(20) + mainfile + "\n\n";
+				}
 				fprintf(output, "%s", s.c_str());
-			} else if (line.parts.message) {
+			} else if ((error != errorTypeFATAL) && line.parts.message) {
 				// display a warning or error
 				ErrorMessage & m =  msg.at((size_t)line.message);
 				CodeLine& codeline = sourcefile->lines.at(m.line - 1);
 				string prefix = spaces(20);
 				if (m.type == MUZ::errorTypeWARNING) {
-					prefix += "  ??  Warning W";
+					prefix += "      Warning W";
 				} else if (m.type == MUZ::errorTypeERROR) {
-					prefix += "  ??  Error E";
+					prefix += "      Error E";
+				} else if (m.type == MUZ::errorTypeFATAL) {
+					prefix += "      FATAL F";
 				}
 				if (m.token >= 0 && m.token < codeline.tokens.size()) {
 					fprintf(output, "%s%04d: '%s': %s\n", prefix.c_str(), m.kind, codeline.tokens[m.token].source.c_str(), msg.GetMessage(m.kind).c_str());
 				} else {
 					fprintf(output, "%s%04d: %s\n", prefix.c_str(), m.kind, msg.GetMessage(m.kind).c_str());
 				}
-			} else {
+				// carry the error type
+				error = m.type;
+			} else if (error != errorTypeFATAL) {
 				if ( ! line.defsymbol.empty()) {
 					if (ExistSymbol(line.defsymbol)) {
 						DefSymbol* defsymbol = m_defsymbols[line.defsymbol];
@@ -2056,6 +2098,7 @@ namespace MUZ {
 			}
 
 		}
+		return error;
 
 	}
 

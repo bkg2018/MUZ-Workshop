@@ -39,11 +39,15 @@ namespace MUZ {
 	
 	/** Error type for the errors/warnings list. */
 	enum ErrorType {
+		errorTypeOK,		// no error
 		errorTypeINFO,		// warmless informations
 		errorTypeWARNING,	// doesn't break assembly
 		errorTypeABOUTFILE,	// Warning or error about a filename (#include, #insertbin, #inserthex)
 		errorTypeERROR,		// doesn't generate code but can continue assembly with possibly wrong addresses
-		errorTypeFATAL		// breaks assembly
+		errorTypeFATAL,		// breaks assembly
+		// Parser boolean equivalents for IF family Parse() returns
+		errorTypeTRUE,
+		errorTypeFALSE,
 	};
 	
 	/** Error codes for the errors/warnings list. */
@@ -74,6 +78,7 @@ namespace MUZ {
 		errorNotRegister,				// expected register name was not found
 		errorWrongComma,				// unexpected comma
 		errorLeftOperandMissing,		// left operand missing in expression
+		errorMissingToken,				// token missing
 
 		// errors detected by directives
 		errorDefine,					// #DEFINE could not define a symbol
@@ -120,13 +125,13 @@ namespace MUZ {
 		/** Stores a message about a file name if the Assembler is doing Pass 1. */
 		void AboutFile( ErrorKind kind, struct CodeLine& codeline, std::string filename, int pass = 1);
 		/** Stores an error message if the Assembler is doing Pass 1. */
-		bool Error( ErrorKind kind, struct CodeLine& codeline, int pass = 1);
+		ErrorType Error( ErrorKind kind, struct CodeLine& codeline, int pass = 1);
 		/** Stores an error message if the Assembler is doing Pass 1. */
-		bool Error( ErrorKind kind, struct CodeLine& codeline, std::string filename, int pass = 1) ;
+		ErrorType Error( ErrorKind kind, struct CodeLine& codeline, std::string filename, int pass = 1) ;
 		/** Stores a fatal error message if the Assembler is doing Pass 1. */
-		bool Fatal( ErrorKind kind, struct CodeLine& codeline, int pass = 1);
+		ErrorType Fatal( ErrorKind kind, struct CodeLine& codeline, int pass = 1);
 		/** Stores a fatal error message if the Assembler is doing Pass 1. */
-		bool Fatal( ErrorKind kind, struct CodeLine& codeline, std::string filename, int pass = 1) ;
+		ErrorType Fatal( ErrorKind kind, struct CodeLine& codeline, std::string filename, int pass = 1) ;
 
 
 		/** Close the list by sorting it and setting message references into codelines. */

@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  RegistersViewController.swift
 //  MUZ-Workshop
 //
 //  Created by Francis Pierot on 26/11/2018.

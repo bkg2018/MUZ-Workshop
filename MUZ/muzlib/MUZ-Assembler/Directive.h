@@ -29,7 +29,7 @@ namespace MUZ {
 	{
 	public:
 		virtual ~Directive() {}
-		virtual bool Parse(class Assembler& ,
+		virtual ErrorType Parse(class Assembler& ,
 						   class Parser& ,
 						   struct CodeLine& codeline,
 						   class Label* ,				// nullptr or label found in line

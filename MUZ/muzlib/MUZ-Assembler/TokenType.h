@@ -13,32 +13,55 @@ namespace MUZ {
 
 	/** ParseToken type for parser. */
 	enum TokenType {
+
 		// transitionnal parsing token types
-		tokenTypeUNKNOWN,	/// No token of this type can be stored
+
+		/** Token type for unparsed token. No token of this type is stored. */
+		tokenTypeUNKNOWN,
 		
-		// convertible token types
+		/** Not an actual type: this value preceeds all the convertible token types. */
 		tokenTypeFIRSTCONVERTIBLE,
+		  /** Not an actual type: value preceeding all the numeric token types. */
 		  tokenTypeFIRSTNUMERIC,
-		    tokenTypeHEXNUMBER,	/// a "0x" prefixed, "$" prefixed or "h" suffixed number (- )before decimal translation)
-		    tokenTypeBINNUMBER,	/// a "b" suffixed binary number (- )before decimal translation)
-		    tokenTypeOCTNUMBER,	/// a "0" prefixed octal number - followed by at least one 0-7 digit (before decimal translation)
-		    tokenTypeDECNUMBER,	/// a non prefixed and non suffixed decimal number
+		    /** Token type for an hexadecimal number prefixed with 0x or $, or suffixed with H. */
+		    tokenTypeHEXNUMBER,
+		    /** Token type for a b sufffixxed binary number. */
+		    tokenTypeBINNUMBER,
+		    /** Token type for a 0 prefixed octal number. */
+		    tokenTypeOCTNUMBER,
+		    /** Token type for all number after conversion. */
+		    tokenTypeDECNUMBER,
+		  /** Value following the last numeric token type. */
 		  tokenTypeLASTNUMERIC,
-		  tokenTypeLETTERS,	/// during parsing of a characters string but not knowing what king of token it will be
-		  tokenTypeSTRING,	/// a " delimited string
-		  tokenTypeBOOL,		/// for boolean values - this can only be written by expression evaluator
-		  tokenTypeCHAR,		/// a ' delimited character
+		  /** Token type for a sequence of letters during parsing. */
+		  tokenTypeLETTERS,
+		  /** Token type for a " delimited character string. */
+		  tokenTypeSTRING,
+		  /** Token type for a boolean value. This is internally used by expression evaluator. */
+		  tokenTypeBOOL,
+		  /** Token type for a ' delimited character. */
+		  tokenTypeCHAR,
+		/** Value affter the last convertible token type. */
 		tokenTypeLASTCONVERTIBLE,
 
 		// final stored tokens
-		tokenTypeFILENAME,	/// a filename after an #INCLUDE, #INSERTHEX, #INSERTBIN directive
-		tokenTypeCOMMENT,	/// ';' and all that follows on line
-		tokenTypeDIRECTIVE,	/// a '.' or '#' directive
-		tokenTypeCOMMA,		/// a ','
-		tokenTypePAROPEN,	/// (
-		tokenTypePARCLOSE,	/// )
-		tokenTypeDOLLAR,	/// $ alone (not an hex number prefix)
-		tokenTypeCOLON,		/// ':' ending a label definition
+
+		/** Type for a filename in an including directive. */
+		tokenTypeFILENAME,
+		/** Type for a comment starting by ';'. */
+		tokenTypeCOMMENT,
+		/** Type for a directive. */
+		tokenTypeDIRECTIVE,
+		/** Type for the comma. */
+		tokenTypeCOMMA,
+		/** Type for an opening parenthesis. */
+		tokenTypePAROPEN,
+		/** Type for a closing parenthesis. */
+		tokenTypePARCLOSE,
+		/** Type for a '$' alone, not used as hexadecimal prefix. */
+		tokenTypeDOLLAR,
+		/** Type ffor a ':' ending a label name. */
+		tokenTypeCOLON,
 		
 		// stored operators
 		tokenTypeOP_LSHIFT,	/// <<

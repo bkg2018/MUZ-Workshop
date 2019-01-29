@@ -438,6 +438,15 @@ The lines which are assembled following a test directive are listed with address
                         0329  #IFDEF      IncludeRomFS
     012A: CD E3 1A      0330              CALL RomInitialise  ;Initialise ROM filing system
                         0331  #ENDIF
+                        
+The lines which define a symbol are marked with an asterisk `*` before the line number:
+
+                      * 0094  #DEFINE     ROMFS_Monitor_EXE   ;Monitor.EXE
+
+If the defined symbol has a value, it is listed after anb asterisk `*`at the beginning of the line:
+
+    *R0               * 0015  #DEFINE    BUILD R0            ;custom RC2014
+
 
 After all lines have been listed, the file receives a list of each section with their name and all the separate address ranges it contains:
 

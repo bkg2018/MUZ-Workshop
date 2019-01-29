@@ -25,15 +25,15 @@ In almost all the places where a number or a string is awaited, MUZ-Assembler ac
 
 **Operations:**
 
-A string expression can concatenate two strings, or add a number to each character of a string.
+A string expression can concatenate two strings, or *add a number to each character of a string*.
 
 A boolean expression can use other boolean operands with logical operators, or compare strings and numbers sub expressions.
 
-A numerical expresison can use binary, octal, decimal or hexadecimal numbers with arithmetical and binary operators.
+A numerical expression can use binary, octal, decimal or hexadecimal numbers with arithmetical and binary operators.
 
 **Comparisons**
 
-Equality and Inequality between strings can use the `*` character as a joker ending comparison. If the strings match until this character is met, there are considered equal. This joker can be disabled using the `\` backslah escape character.
+Equality and Inequality between strings can use the `*` character as a joker ending comparison. If the strings match until this character is met, there are considered equal. *This joker can be disabled using the `\` backslah escape character*.
 
 **Expressions in Directives**
 
@@ -50,13 +50,13 @@ Labels can use any number of characters. The ending semi-colon is optional.
 
 The characters which can be identified as operators or separators should be avoided: colon, semi colon, comma, parenthesis, dash etc.
 
-A label cannot use the name of a directive or instruction, as it would be identified as such.
+A label cannot use the name of a directive or instruction: it would be identified as such and not as a label.
 
 A label must not start with a digit.
 
-Avoid single and double quotes as they are used to surround strings and characters.
+Avoid single and double quotes in label names as they are used to surround strings and characters.
 
-A label starting with the `@` character is local to the last global label.
+A label starting with the `@` character is local to the code between the last global label and the next global label.
 
 A label alone on its line will take the current assembling address of the current section, unless the next assembled line is an .ORG directive which will reprogramm the label address.
 
@@ -140,7 +140,7 @@ MUZ-Assembler:
 
 ### Equates
 
-La  valeur du label est indiquée à l'emplacement des adresses.
+The value of labels defined by EQU is put at the beginning of listing instead of current address.
 
 SCWorkshop:
 
@@ -155,7 +155,7 @@ MUZ-Assembler:
 
 ### Labels longs
 
-Les labels sont placés sur une seule ligne.
+Labels appear on only one line.
 
  SCWorkshop: 
 
@@ -170,7 +170,7 @@ MUZ-Assembler:
 
 ### Séquences DB
 
-Les séquences .DB de plus de 4 octets n'indiquent le numéro de ligne que pour la première ligne du listing.
+Code sequences with more than 4 bytes only show the source line number on first line. 
 
 SCWorkshop :
 
@@ -186,5 +186,5 @@ MUZ-Assembler :
     185E: CE FF 31 23   0134  	.DB  0xCE,0xFF,0x31,0x23,0x02    ;Opcode: 0xCE - ADC  A   ,n   
     1862: 02                  
 
-
+The listing can be set to display all bytes of the code sequence instead of the default mode which displays up to 7 bytes with an ellipsis "...".
 

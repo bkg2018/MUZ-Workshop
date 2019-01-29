@@ -184,7 +184,7 @@ namespace MUZ {
 		
 		/** Execute the last directive and returns its result: this is used by IF directives called from CodeLine.Assemble() to choose
 		 the parsing mode. */
-		bool LastDirective(CodeLine& codeline, ErrorList& msg);
+		ErrorType LastDirective(CodeLine& codeline, ErrorList& msg);
 		
 	}; // class Parser
 }//namespace MUZ

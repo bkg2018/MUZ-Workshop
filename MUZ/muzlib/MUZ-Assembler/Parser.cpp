@@ -794,9 +794,9 @@ namespace MUZ {
 
 	/** Execute the last directive and returns its result: this is used by IF directives called from CodeLine.Assemble() to choose
 	 the parsing mode, or INCLUDE to asssemble a child source file. */
-	bool Parser::LastDirective(CodeLine& codeline, ErrorList& msg)
+	ErrorType Parser::LastDirective(CodeLine& codeline, ErrorList& msg)
 	{
-		if (!lastDirective) return false;
+		if (!lastDirective) return errorTypeFALSE;
 		// set curtoken on the directive token so the directive have access to its arguments
 		*curtoken = 0;
 		while (*curtoken < tokens->size()) {

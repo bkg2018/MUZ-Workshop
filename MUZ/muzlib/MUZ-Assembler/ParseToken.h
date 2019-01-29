@@ -20,20 +20,37 @@ namespace MUZ {
 	struct ParseToken
 	{
 		~ParseToken() {}
+
+		/** Original source line. */
 		std::string source;
+
+		/** Type of token. Can be a transitional during parsing, or final before code generation.
+		    Instructions and directives are responsible for the interpretation or each token type. */
 		TokenType 	type = tokenTypeUNKNOWN;
-		bool 		unsolved=false;// original source for unsolved labels at pass 1
-		
+
+		/** Flag during parsing pass 1 for this token if it contains a LETTER type which has not been identified
+		 	as a directiven an instruction, or a symbol. It is normal for symbols which appear later in assembly
+		    to have this flag set.*/
+		bool 		unsolved = false;
+
+		/** Returns true if this token is one of the including file directive. */
 		bool isIncludingDirective() {
 			return (type == tokenTypeDIRECTIVE) && ((source == "#INCLUDE") || (source == "#INSERTHEX") || (source == "#INSERTBIN"));
+		}
+
+		/** Returns true if the token type is one of the given vector. */
+		bool isType(std::vector<TokenType> types) {
+			for (auto& theType : types) {
+				if (theType == type) return true;
+			}
+			return false;
 		}
 
 		/** Convert to a number depending on type and value.
 		 	Empty and non-convertible tokens will return 0.
 		 	Character will return its first character code.
 		 	Hexa, decimal, binary and octal numbers will return their value
-		 	String will return the appropriate values for accepptable prefixes (0x, 0b, 0) and suffixes (H, B)
-		 */
+		 	String will return the appropriate values for accepptable prefixes (0x, 0b, 0) and suffixes (H, B)  */
 		ADDRESSTYPE asNumber() {
 			if (source.empty()) return 0;
 			if (type <= tokenTypeFIRSTCONVERTIBLE || type >= tokenTypeLASTCONVERTIBLE) return 0;

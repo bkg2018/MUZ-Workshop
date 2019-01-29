@@ -35,12 +35,10 @@ using std::cout;
 
 const std::string SourcesRootDir = "/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/MUZ-GIT/MUZ/TestSources/";
 std::string RomHexFilePath ;
-std::string SourceFilePath;
 
 - (void)setUp {
 	
 	RomHexFilePath = "/Users/bkg2018/Desktop/IntelHex.hex";
-	SourceFilePath = "/Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm";
 }
 
 - (void)tearDown {
@@ -654,18 +652,23 @@ std::string SourceFilePath;
 	std::chrono::high_resolution_clock Clock;
 	auto startTime = Clock.now();
 
+	MUZ::Assembler as;
+	MUZ::ErrorList msg;
+
 	int nbloops = 1;
 	for (int i = 0 ; i < nbloops ; i++) {
+		as.Reset();
+		msg.Clear();
 		//printf("%d : start time %f\n", i+1, CACurrentMediaTime()-startTime);
-		MUZ::Assembler as;
-		MUZ::ErrorList msg;
 		as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
-		as.SetListingFilename("testAssembler.LST");
-		as.SetMemoryFilename("testAssemblerMemory.LST");
-		as.SetIntelHexFilename("testAssemblerIntelHex.HEX");
-		as.SetLogFilename("testAssembler.LOG");
+		as.SetListingFilename("testAssembler20190124.LST");
+		as.SetMemoryFilename("testAssemblerMemory20190124.LST");
+		as.SetIntelHexFilename("testAssemblerIntelHex20190124.HEX");
+		as.SetLogFilename("testAssembler20190124.LOG");
 		as.EnableFullListing(false); // limit .DB/.DS/.DW sequences to 8 bytes
 		try {
+			//std::string SourceFilePath = "/Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm";
+			std::string SourceFilePath = "/Users/bkg2018/Desktop/SCW020_SCM100_20190124/SCMonitor/Source/!Main.asm";
 			as.AssembleFile(SourceFilePath, msg);
 		} catch (std::exception &e) {
 			perror(e.what());

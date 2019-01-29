@@ -9,6 +9,7 @@
 #ifndef All_Directives_h
 #define All_Directives_h
 
+#include "Errors.h"
 #include "Directive.h"
 #include "CodeLine.h"
 #include "Assembler.h"
@@ -33,32 +34,32 @@ namespace MUZ {
 	
 	/** Handles #DEFINE directive. */
 	class DirectiveDEFINE : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	public:
 		/** Returns true if the given string qualifies for an #DEFINE directive. */
 		static bool Identify( std::string source );
 	};
 	/** Handles #UNDEF directive. */
 	class DirectiveUNDEFINE : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** Handles #IF. */
 	class DirectiveIF : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	public:
 		/** Returns true if the given string qualifies for an #IF directive. */
 		static bool Identify( std::string source );
 	};
 	/** Handles #IFDEF. */
 	class DirectiveIFDEF : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	public:
 		/** Returns true if the given string qualifies for an #IFDEF directive. */
 		static bool Identify( std::string source );
 	};
 	/** Handles #IFNDEF. */
 	class DirectiveIFNDEF : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	public:
 		/** Returns true if the given string qualifies for an #IFNDEF directive. */
 		static bool Identify( std::string source );
@@ -77,23 +78,23 @@ namespace MUZ {
 	};
 	/** #INCLUDE */
 	class DirectiveINCLUDE : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** #INSERTHEX */
 	class DirectiveINSERTHEX : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** #INSERTBIN */
 	class DirectiveINSERTBIN : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** #NOLIST */
 	class DirectiveLISTOFF : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** #LIST */
 	class DirectiveLIST : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 
 
@@ -103,38 +104,38 @@ namespace MUZ {
 	
 	/** The .PROC drective only checks that its followed by Z80. */
 	class DirectivePROC : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** .CODE */
 	class DirectiveCODE : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** .DATA */
 	class DirectiveDATA : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** .ORG */
 	class DirectiveORG : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** Handles .EQU directive. */
 	class DirectiveEQU : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	public:
 		/** Returns true if the given string qualifies for an EQU directive. */
 		static bool Identify( std::string source );
 	};
 	/** .DB */
 	class DirectiveBYTE : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** .DW */
 	class DirectiveWORD : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 	/** .DS */
 	class DirectiveSPACE : public Directive {
-		virtual bool Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 
 

@@ -99,7 +99,7 @@ namespace MUZ {
 			SourceFile* Root();
 			
 			/** Sets this SourceFile from the given filename and parent. Set parent to NULL to set a main source file. */
-			bool Set(std::string file, SourceFile* parent);
+			ErrorType Set(std::string file, SourceFile* parent);
 		};
 		
 		// The #INCLUDE directive uses Assembler::AssembleFile private function
@@ -167,7 +167,7 @@ namespace MUZ {
 
 		//MARK: - Private Assembler functions
 		/** Assembles a prepared code line. */
-		bool AssembleCodeLine(CodeLine& codeline, ErrorList& msg);
+		ErrorType AssembleCodeLine(CodeLine& codeline, ErrorList& msg);
 		/** Initializes listing file, closes previous if any. */
 		FILE* PrepareListing(ErrorList& msg);
 		/** Closes the listing file, ignore if the name is "stdout". */
@@ -232,15 +232,15 @@ namespace MUZ {
 		//MARK: - Private ASM, HEX and binary assembling/including
 
 		/** Assembles a main source file. */
-		bool AssembleMainFilePassOne(std::string file, ErrorList& msg);
-		bool AssembleMainFilePassTwo(std::string file, ErrorList& msg);
+		ErrorType AssembleMainFilePassOne(std::string file, ErrorList& msg);
+		ErrorType AssembleMainFilePassTwo(std::string file, ErrorList& msg);
 		/** Assembles an included source file. */
-		bool AssembleIncludedFilePassOne(std::string file, CodeLine& codeline, ErrorList& msg);
-		bool AssembleIncludedFilePassTwo(std::string file, CodeLine& codeline, ErrorList& msg);
+		ErrorType AssembleIncludedFilePassOne(std::string file, CodeLine& codeline, ErrorList& msg);
+		ErrorType AssembleIncludedFilePassTwo(std::string file, CodeLine& codeline, ErrorList& msg);
 		/** Assembles an HEX included file. */
-		bool AssembleHexFile(std::string file, CodeLine& codeline, ErrorList& msg);
+		ErrorType AssembleHexFile(std::string file, CodeLine& codeline, ErrorList& msg);
 		/** Assembles a binary included file. */
-		bool AssembleBinFile(std::string file, CodeLine& codeline, ErrorList& msg);
+		ErrorType AssembleBinFile(std::string file, CodeLine& codeline, ErrorList& msg);
 
 	public:
 		//MARK: - PUBLIC API
@@ -278,7 +278,7 @@ namespace MUZ {
 		/** Save a memory listing to a text file. Use "stdout" to print on standard output. */
 		void SaveListing( Listing & listing, std::string file, ErrorList& msg);
 		/** Save a memory listing to an opened file. */
-		void SaveListing( Listing & listing, FILE* file, ErrorList& msg);
+		ErrorType SaveListing( Listing & listing, FILE* file, ErrorList& msg);
 
 		/** Enable/Disable the listings. */
 		void EnableListing(bool yes);
@@ -312,7 +312,7 @@ namespace MUZ {
 		/** Assemble a single line and return a codeline */
 		CodeLine AssembleLine(std::string sourceline, ErrorList& msg);
 		/** Assembles a main source file. */
-		bool AssembleFile(std::string file, ErrorList& msg);
+		ErrorType AssembleFile(std::string file, ErrorList& msg);
 		/** Get the name of a file from its index. */
 		std::string GetFileName(size_t index);
 

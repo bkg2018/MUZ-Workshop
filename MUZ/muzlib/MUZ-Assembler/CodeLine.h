@@ -11,7 +11,7 @@
 
 #include <string>
 #include <vector>
-
+#include "Errors.h"
 #include "MUZ-Common/Types.h"
 #include "ExpVector.h"
 
@@ -44,8 +44,9 @@ namespace MUZ {
 		
 		// assembled code
 		
-		/** Flag to tell if the line has been assembled or not (also happens for disabled #IF blocks). */
-		bool				assembled = false;
+		/** Flag to tell if the line has been assembled (errorTypeOK) or not (any other value). non-assembled lines
+		 in conditionnal blocks are flagged as errorTypeFALSE */
+		ErrorType			assembled = errorTypeFALSE;
 		/** Array of code bytes once assembled. May be empty. */
 		std::vector<BYTE>	code;
 		/** Minimum clock cycles spent in the code. */

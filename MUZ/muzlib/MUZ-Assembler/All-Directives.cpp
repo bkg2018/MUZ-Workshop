@@ -39,9 +39,9 @@ namespace MUZ {
 	 	#DEFINE <symbol>
 	 	returns true if the new symbol has been defined
 	 */
-	bool DirectiveDEFINE::Parse( Assembler& as, Parser& parser, CodeLine& codeline, Label* , ErrorList& msg) {
+	ErrorType DirectiveDEFINE::Parse( Assembler& as, Parser& parser, CodeLine& codeline, Label* , ErrorList& msg) {
 
-		if (!parser.ExistMoreToken(1)) return false;
+		if (!parser.ExistMoreToken(1)) return msg.Error(errorMissingToken, codeline);
 		ParseToken& symbol = parser.NextToken();
 		if (symbol.type != tokenTypeLETTERS) {
 			return msg.Error(errorInvalidSymbol, codeline);
@@ -66,7 +66,7 @@ namespace MUZ {
 		DefSymbol* defsymbol = as.CreateDefSymbol(symbol.source, value);
 		if (defsymbol) {
 			codeline.defsymbol = symbol.source;
-			return true;
+			return errorTypeOK;
 		}
 		return msg.Error(errorDefine, codeline);
 	}
@@ -81,8 +81,8 @@ namespace MUZ {
 	/** #UNDEF <symbol>
 	 	returns true if an existing symbol has been undefined
 	 */
-	bool DirectiveUNDEFINE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
-		if (!parser.ExistMoreToken(1)) return false;
+	ErrorType DirectiveUNDEFINE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		ParseToken& symbol = parser.NextToken();
 		if (symbol.type != tokenTypeLETTERS) {
 			return msg.Error(errorInvalidSymbol, codeline);
@@ -90,22 +90,22 @@ namespace MUZ {
 		// Delete the symbol : no symbol resolving or the symbol to undefine would be replaced by its value
 		as.DeleteDefSymbol(symbol.source);
 		parser.JumpTokens(1);
-		return true;
+		return errorTypeOK;
 	}
 	
 	/** #IFDEF <symbol>
 	 	returns true if the symbol is defined
 	 */
-	bool DirectiveIFDEF::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+	ErrorType DirectiveIFDEF::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
 		// and now check existence of the symbol
-		if (!parser.ExistMoreToken(1)) return false;
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		std::string symbol;
 		parser.JumpNextToken();
 		try { parser.EvaluateString(symbol); }
 		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
-		return as.ExistSymbol(symbol);
+		return as.ExistSymbol(symbol) ? errorTypeTRUE : errorTypeFALSE;
 	}
 	/** Identifies a source string as self. */
 	bool DirectiveIFDEF::Identify( std::string source )
@@ -118,15 +118,15 @@ namespace MUZ {
 	/** #IFNDEF <symbol>
 	 	returns true if the symbol is not defined
 	 */
-	bool DirectiveIFNDEF::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
-		if (!parser.ExistMoreToken(1)) return false;
+	ErrorType DirectiveIFNDEF::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		std::string symbol;
 		parser.JumpNextToken();
 		try { parser.EvaluateString(symbol); }
 		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
-		return ! as.ExistSymbol(symbol);
+		return as.ExistSymbol(symbol) ? errorTypeFALSE : errorTypeTRUE;
 	}
 	/** Identifies a source string as self. */
 	bool DirectiveIFNDEF::Identify( std::string source )
@@ -139,8 +139,8 @@ namespace MUZ {
 	/** #IF <expression>
 	 returns true if the expression is true (or not "" and not 0)
 	 */
-	bool DirectiveIF::Parse(class Assembler& , Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
-		if ( ! parser.ExistMoreToken(1) ) return false;
+	ErrorType DirectiveIF::Parse(class Assembler& , Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+		if ( ! parser.ExistMoreToken(1) )  return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(true); // use '*' joker
 		parser.JumpTokens(1);
 		bool b = false;
@@ -148,7 +148,7 @@ namespace MUZ {
 		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
-		return b;
+		return b ? errorTypeTRUE : errorTypeFALSE;
 	}
 	/** Identifies a source string as self. */
 	bool DirectiveIF::Identify( std::string source )
@@ -179,34 +179,30 @@ namespace MUZ {
 	/** #INCLUDE <file>
 	 	returns true if a file must be included
 	 */
-	bool DirectiveINCLUDE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
-		if (!parser.ExistMoreToken(1)) return false;
+	ErrorType DirectiveINCLUDE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(false);
-		ParseToken& filetoken = parser.NextToken();
+		ParseToken& filetoken = parser.JumpNextToken();
 		// and include new file
 		if ((filetoken.type != tokenTypeSTRING) && (filetoken.type != tokenTypeFILENAME)) {
 			return msg.Error(errorInvalidSymbol, codeline);
 		}
 		// trim spaces at the end of filename
 		strtrimright(filetoken.source);
+		ErrorType result = errorTypeFALSE;
 		if (as.IsFirstPass()) {
 			codeline.includefile = as.m_files.size();
-			if (as.AssembleIncludedFilePassOne(filetoken.source, codeline, msg)) {
-			}
+			result = as.AssembleIncludedFilePassOne(filetoken.source, codeline, msg);
 		} else {
-			if (as.AssembleIncludedFilePassTwo(filetoken.source, codeline, msg)) {
-			}
+			result = as.AssembleIncludedFilePassTwo(filetoken.source, codeline, msg);
 		}
-		
-		// tells the parser that the file must be included
-		parser.JumpTokens(1);
-		return true;
+		return result;
 	}
 
 	/** #INSERTHEX <file>
 	  */
-	bool DirectiveINSERTHEX::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
-		if (!parser.ExistMoreToken(1)) return false;
+	ErrorType DirectiveINSERTHEX::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(false);
 		ParseToken& filetoken = parser.NextToken();
 		// and include new file
@@ -223,12 +219,12 @@ namespace MUZ {
 		
 		// tells the parser that the file must be included
 		parser.JumpTokens(1);
-		return true;
+		return errorTypeOK;
 	}
 	/** #INSERTBIN <file>
 	 */
-	bool DirectiveINSERTBIN::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
-		if (!parser.ExistMoreToken(1)) return false;
+	ErrorType DirectiveINSERTBIN::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(false);
 		ParseToken& filetoken = parser.NextToken();
 		// and include new file
@@ -245,18 +241,18 @@ namespace MUZ {
 		
 		// tells the parser that the file must be included
 		parser.JumpTokens(1);
-		return true;
+		return errorTypeOK;
 	}
 
 	/** #NOLIST
 	 */
-	bool DirectiveLISTOFF::Parse(class Assembler& as, Parser& , CodeLine& , class Label* , ErrorList& ) {
+	ErrorType DirectiveLISTOFF::Parse(class Assembler& as, Parser& , CodeLine& , class Label* , ErrorList& ) {
 		as.EnableListing(false);
-		return true;
+		return errorTypeOK;
 	}
 	/** #LIST [ON|OFF]
 	 */
-	bool DirectiveLIST::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+	ErrorType DirectiveLIST::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
 		bool enable = true;
 		if (parser.ExistMoreToken(1)) {
 			std::string value;
@@ -270,7 +266,7 @@ namespace MUZ {
 		as.EnableListing(enable);
 		// always list this line if it is not #LIST OFF
 		if (enable) codeline.listing = true;
-		return true;
+		return errorTypeOK;
 	}
 
 	//MARK: - Assembler directives (.)
@@ -279,8 +275,8 @@ namespace MUZ {
 	 	Sets the instructions set for the Z80 processor.
 	 	returns true if Z80 has been specified
 	 */
-	bool DirectivePROC::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
-		if (!parser.ExistMoreToken(1)) return false;
+	ErrorType DirectivePROC::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(false);// allow string expressions
 		ParseToken& proc = parser.NextToken();
 		if (proc.source != "Z80") {
@@ -289,12 +285,12 @@ namespace MUZ {
 		// sets the instructions set into the assembler
 		as.SetInstructions(proc.source);
 		parser.JumpTokens(1);
-		return true;
+		return errorTypeOK;
 	}
 	
 	/** [label:] .CODE [name]
 	 */
-	bool DirectiveCODE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+	ErrorType DirectiveCODE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
 		std::string name;
 		if (parser.ExistMoreToken(1)) {
 			parser.JumpNextToken();
@@ -304,12 +300,12 @@ namespace MUZ {
 			}
 		}
 		as.SetCodeSection( name );
-		return true;
+		return errorTypeOK;
 	}
 	
 	/** [label:] .DATA [name] [,SAVE]
 	 */
-	bool DirectiveDATA::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+	ErrorType DirectiveDATA::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
 		std::string name;
 		bool save = false;
 		if (parser.ExistMoreToken(1)) {
@@ -333,15 +329,15 @@ namespace MUZ {
 			}
 		}
 		as.SetDataSection( name, save );
-		return true;
+		return errorTypeOK;
 	}
 	
 	/** Sets the current address in the current section.
 	 [label:] .ORG <value>
 	 	returns true if the assembling address must be changed
 	 */
-	bool DirectiveORG::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
-		if (!parser.ExistMoreToken(1)) return false;
+	ErrorType DirectiveORG::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg) {
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		/*std::vector<size_t> unsolved =*/ parser.ResolveNextSymbols(false);
 		ADDRESSTYPE address = 0;
 		parser.JumpTokens(1); // skip after .EQU
@@ -359,15 +355,15 @@ namespace MUZ {
 		if (section) {
 			section->SetOrg(address);
 		}
-		return true;
+		return errorTypeOK;
 	}
 	
 	/** label[:]  [.]EQU <expression>
 	 	returns true if the label has been created with the value as a decimal number
 	 */
-	bool DirectiveEQU::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg)
+	ErrorType DirectiveEQU::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg)
 	{
-		if (!parser.ExistMoreToken(1)) return false;
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		std::vector<size_t> unsolved = parser.ResolveNextSymbols(false);
 		ADDRESSTYPE address = 0;
 		if (unsolved.size() > 0 && ! as.IsFirstPass()) {
@@ -386,7 +382,7 @@ namespace MUZ {
 		if (label) {
 			label->Equate(address);
 			codeline.label = label;
-			return true;
+			return errorTypeOK;
 		}
 		return msg.Error(errorEquate, codeline);
 	}
@@ -395,17 +391,17 @@ namespace MUZ {
 	bool DirectiveEQU::Identify( std::string source )
 	{
 		std::string upper = std::to_upper(source);
-		if (upper==".EQU") return true;
-		if (upper=="EQU") return true;
+		if (upper==".EQU") return errorTypeOK;
+		if (upper=="EQU") return errorTypeOK;
 		return false;
 	}
 	
 	/** .DB <num8> [, <num8> [...]]
 	 	encode the given bytes into the codeline.
 	 */
-	bool DirectiveBYTE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg)
+	ErrorType DirectiveBYTE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg)
 	{
-		if (!parser.ExistMoreToken(1)) return false;
+		if (!parser.ExistMoreToken(1)) return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(false);
 
 		while (parser.ExistMoreToken(1)) {
@@ -446,12 +442,12 @@ namespace MUZ {
 		}
 
 		
-		return true;
+		return errorTypeOK;
 	}
 	
-	bool DirectiveWORD::Parse(class Assembler& , Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg)
+	ErrorType DirectiveWORD::Parse(class Assembler& , Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg)
 	{
-		if (!parser.ExistMoreToken(1)) return false;
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(false);
 		
 		while (parser.ExistMoreToken(1)) {
@@ -486,20 +482,20 @@ namespace MUZ {
 		}
 
 		
-		return true;
+		return errorTypeOK;
 	}
 	
 	
-	bool DirectiveSPACE::Parse(class Assembler& , Parser& parser, CodeLine& codeline, class Label* , ErrorList& )
+	ErrorType DirectiveSPACE::Parse(class Assembler& , Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg)
 	{
-		if (!parser.ExistMoreToken(1)) return false;
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(false);
 		ParseToken& token = parser.NextToken();
 		int size = token.asNumber();
 		for (int i = 0 ; i < size ; i++) {
 			codeline.AddCode(0xFF);
 		}
-		return true;
+		return errorTypeOK;
 	}
 
 } // namespace MUZ
