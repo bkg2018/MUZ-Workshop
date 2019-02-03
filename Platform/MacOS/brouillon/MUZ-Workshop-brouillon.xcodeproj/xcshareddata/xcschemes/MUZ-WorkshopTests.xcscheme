@@ -17,9 +17,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "869B4C5A21AD8B3F00E65FE7"
-               BuildableName = "MUZ-WorkshopTests.xctest"
-               BlueprintName = "MUZ-WorkshopTests"
-               ReferencedContainer = "container:MUZ-Workshop.xcodeproj">
+               BuildableName = "MUZ-Workshop-brouillonTests.xctest"
+               BlueprintName = "MUZ-Workshop-brouillonTests"
+               ReferencedContainer = "container:MUZ-Workshop-brouillon.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>

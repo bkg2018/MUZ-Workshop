@@ -12,7 +12,7 @@
 #include <thread>
 // emulation
 #include "MUZ-Computer/ROMPagingPort.h"
-#include "muz_simz80.h"
+#include "YAZE/muz_simz80.h"
 
 // WIP
 //#include "MUZ-Assembler/AddressZone.h"

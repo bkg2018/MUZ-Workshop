@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "869B4C0521AC4F8000E65FE7"
-               BuildableName = "MUZ-Workshop.app"
-               BlueprintName = "MUZ-Workshop"
-               ReferencedContainer = "container:MUZ-Workshop.xcodeproj">
+               BuildableName = "MUZ-Workshop-brouillon.app"
+               BlueprintName = "MUZ-Workshop-brouillon"
+               ReferencedContainer = "container:MUZ-Workshop-brouillon.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -37,9 +37,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "869B4C5A21AD8B3F00E65FE7"
-               BuildableName = "MUZ-WorkshopTests.xctest"
-               BlueprintName = "MUZ-WorkshopTests"
-               ReferencedContainer = "container:MUZ-Workshop.xcodeproj">
+               BuildableName = "MUZ-Workshop-brouillonTests.xctest"
+               BlueprintName = "MUZ-Workshop-brouillonTests"
+               ReferencedContainer = "container:MUZ-Workshop-brouillon.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -47,9 +47,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "869B4C0521AC4F8000E65FE7"
-            BuildableName = "MUZ-Workshop.app"
-            BlueprintName = "MUZ-Workshop"
-            ReferencedContainer = "container:MUZ-Workshop.xcodeproj">
+            BuildableName = "MUZ-Workshop-brouillon.app"
+            BlueprintName = "MUZ-Workshop-brouillon"
+            ReferencedContainer = "container:MUZ-Workshop-brouillon.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -80,9 +80,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "869B4C0521AC4F8000E65FE7"
-            BuildableName = "MUZ-Workshop.app"
-            BlueprintName = "MUZ-Workshop"
-            ReferencedContainer = "container:MUZ-Workshop.xcodeproj">
+            BuildableName = "MUZ-Workshop-brouillon.app"
+            BlueprintName = "MUZ-Workshop-brouillon"
+            ReferencedContainer = "container:MUZ-Workshop-brouillon.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -99,9 +99,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "869B4C0521AC4F8000E65FE7"
-            BuildableName = "MUZ-Workshop.app"
-            BlueprintName = "MUZ-Workshop"
-            ReferencedContainer = "container:MUZ-Workshop.xcodeproj">
+            BuildableName = "MUZ-Workshop-brouillon.app"
+            BlueprintName = "MUZ-Workshop-brouillon"
+            ReferencedContainer = "container:MUZ-Workshop-brouillon.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
