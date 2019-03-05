@@ -80,7 +80,6 @@ namespace MUZ {
 			// contains all lines
 		};
 
-	private:
 		//MARK: - Private management structures
 		/** Definition for one source file. */
 		struct SourceFile

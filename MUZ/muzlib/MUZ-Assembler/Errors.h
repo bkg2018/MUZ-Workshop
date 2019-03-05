@@ -109,9 +109,11 @@ namespace MUZ {
 	
 	class ErrorList : public std::vector<ErrorMessage>
 	{
-		static std::map<ErrorKind,std::string> & messageText;
+		static std::map<ErrorKind,const char*> * messageText ;
+		static int arc;
 	public:
 		ErrorList();
+		~ErrorList();
 		/** Clears the message list. */
 		void Clear();
 		/** Returns a message text for an error code (kind). */

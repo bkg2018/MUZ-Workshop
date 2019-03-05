@@ -16,57 +16,68 @@ namespace MUZ {
 
 	bool TestPass(CodeLine& codeline, int pass);
 
-	std::map<MUZ::ErrorKind,std::string>& MUZ::ErrorList::messageText = *new std::map<MUZ::ErrorKind,std::string>;
+
+	// This construction avoids the "requires exit-time destructor" warning
+	//MessageTextMap & messageText = *new MessageTextMap;
+	std::map<ErrorKind,const char*> * MUZ::ErrorList::messageText = nullptr;
+	int MUZ::ErrorList::arc = 0;
 
 	ErrorList::ErrorList() {
-		if (messageText.empty()) {
-			 messageText = {
-				{ errorOK, "no error"},
-				{ errorUnknown, "unknown error"},
-				{ errorNonDerivedInstruction, "SHOULD NOT OCCUR: Non derived Instruction class used (fatal)"},
-				{ errorNonDerivedDirective, "SHOULD NOT OCCUR: Non derived Directive class used (fatal)"},
-				{ errorWritingListing, "Cannot write listing file (about file) "},
-				{ errorOpeningSource, "Cannot open source file: asm, hex or binary file not found"},
-				{ errorElseNoIf, "#ELSE without corresponding #IF/#IFDEF/#IFNDEF"},
-				{ errorEndifNoIf, "#ENDIF without #ELSE or #IF"},
-				{ errorLabelExists,	 "label re-defined later"},
-				{ errorUnknownSyntax, "line does not start with a label, a directive or an instruction"},
-				{ errorUnknownDirective, "directive starting with '.' or '#' is unknown"},
-				{ errorUknownInstruction, "an instruction should have been found, probable wrong syntax"},
-				{ errorMUZNoSection, "SHOULD NOT OCCUR: assembled code has no section"},
-				{ warningMisplacedChar, "a '.' or '#' was found in an unsusual place"},
-				{ errorMissingComma, "a ',' is missing in instruction operands"},
-				{ errorWrongOperand1, "first operand is wrong type"},
-				{ errorWrongOperand2, "second operand is wrong type"},
-				{ errorWrongOperand3, "third operand is wrong type"},
-				{ errorWrongRegister, "register name is not valid"},
-				{ errorMissingParenthesisClose, "a ')' is missing"},
-				{ errorWrongCondition, "A condition is invalid (e.g. JR PO,nn)"},
-				{ errorNotRegister, "expected register name was not found"},
-				{ errorWrongComma, "unexpected comma"},
-				{ errorLeftOperandMissing, "left operand missing in expression"},
-				{ errorMissingToken, "missing operands or punctuation"},
-				{ errorDefine, "#DEFINE could not define a symbol"},
-				{ errorInvalidSymbol,	 "invalid symbol name after DEFINE"},
-				{ errorInvalidExpression, "invalid expression after symbol"},
-				{ errorFileSyntax, "invalid syntax for file name"},
-				{ errorProcessor, "unsupported processor in .PROC"},
-				{ warningUnsolvedExpression, "a symbol was unsolved in an expression"},
-				{ errorEquate, ".EQU could not create label or assign value"},
-				{ errorTooBigValue, "number too big for accepted values"},
-				{ errorTooBigBit,	 "number too big for a bit number (0-7)"},
-				{ warningTooBig8, "number too big for 8 bits"},
-				{ warningTooBig16, "number too big for 16 bits"},
-				{ warningTooFar, "DJNZ or JR target is too far"},
-			};
+		if (messageText == nullptr) {
+			messageText = new std::map<ErrorKind,const char*>;
+			(*messageText)[errorOK] = "no error";
+			(*messageText)[errorUnknown] = "unknown error";
+			(*messageText)[errorNonDerivedInstruction] = "SHOULD NOT OCCUR: Non derived Instruction class used (fatal)";
+			(*messageText)[errorNonDerivedDirective] = "SHOULD NOT OCCUR: Non derived Directive class used (fatal)";
+			(*messageText)[errorWritingListing] = "Cannot write listing file (about file) ";
+			(*messageText)[errorOpeningSource] = "Cannot open source file: asm, hex or binary file not found";
+			(*messageText)[errorElseNoIf] = "#ELSE without corresponding #IF/#IFDEF/#IFNDEF";
+			(*messageText)[errorEndifNoIf] = "#ENDIF without #ELSE or #IF";
+			(*messageText)[errorLabelExists] = "label re-defined later";
+			(*messageText)[errorUnknownSyntax] = "line does not start with a label, a directive or an instruction";
+			(*messageText)[errorUnknownDirective] = "directive starting with '.' or '#' is unknown";
+			(*messageText)[errorUknownInstruction] = "an instruction should have been found, probable wrong syntax";
+			(*messageText)[errorMUZNoSection] = "SHOULD NOT OCCUR: assembled code has no section";
+			(*messageText)[warningMisplacedChar] = "a '.' or '#' was found in an unsusual place";
+			(*messageText)[errorMissingComma] = "a ',' is missing in instruction operands";
+			(*messageText)[errorWrongOperand1] = "first operand is wrong type";
+			(*messageText)[errorWrongOperand2] = "second operand is wrong type";
+			(*messageText)[errorWrongOperand3] = "third operand is wrong type";
+			(*messageText)[errorWrongRegister] = "register name is not valid";
+			(*messageText)[errorMissingParenthesisClose] = "a ')' is missing";
+			(*messageText)[errorWrongCondition] = "A condition is invalid (e.g. JR PO,nn)";
+			(*messageText)[errorNotRegister] = "expected register name was not found";
+			(*messageText)[errorWrongComma] = "unexpected comma";
+			(*messageText)[errorLeftOperandMissing] = "left operand missing in expression";
+			(*messageText)[errorMissingToken] = "missing operands or punctuation";
+			(*messageText)[errorDefine] = "#DEFINE could not define a symbol";
+			(*messageText)[errorInvalidSymbol] = "invalid symbol name after DEFINE";
+			(*messageText)[errorInvalidExpression] = "invalid expression after symbol";
+			(*messageText)[errorFileSyntax] = "invalid syntax for file name";
+			(*messageText)[errorProcessor] = "unsupported processor in .PROC";
+			(*messageText)[warningUnsolvedExpression] = "a symbol was unsolved in an expression";
+			(*messageText)[errorEquate] = ".EQU could not create label or assign value";
+			(*messageText)[errorTooBigValue] = "number too big for accepted values";
+			(*messageText)[errorTooBigBit] = "number too big for a bit number (0-7)";
+			(*messageText)[warningTooBig8] = "number too big for 8 bits";
+			(*messageText)[warningTooBig16] = "number too big for 16 bits";
+			(*messageText)[warningTooFar] = "DJNZ or JR target is too far";
+		}
+		arc += 1;
+	}
+
+	ErrorList::~ErrorList() {
+		arc -= 1;
+		if (arc <= 0) {
+			delete messageText;
+			messageText = nullptr;
 		}
 	}
 
 	void ErrorList::Clear() {
-		clear();
 	}
 	std::string ErrorList::GetMessage( ErrorKind kind ) {
-		return messageText[kind];
+		return (*messageText)[kind];
 	}
 	bool TestPass(CodeLine& codeline, int pass)
 	{

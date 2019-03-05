@@ -10,6 +10,8 @@ import Cocoa
 
 class MainWindowController: NSWindowController {
 
+	
+
 	@IBOutlet weak var panelDisplayControl: NSToolbarItem!
 	@IBAction func selectPanelDisplay(_ sender: Any) {
 		

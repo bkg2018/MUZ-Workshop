@@ -20,6 +20,10 @@
 
 @end
 
+@implementation MuzSourceFile
+
+@end
+
 @implementation MuzBridge:NSObject
 
 -(id)init
@@ -104,19 +108,67 @@
 	return regs;
 }
 
--(void) assemble
+
+
+/** Assembler. The bridge has a global Assembler instance which does all work. The functions are only
+  interfaces to the Assembler class API. */
+MUZ::Assembler as;
+
+/** Global errors and warnings list. This is filled by the Assembler::Assemble() APIs. */
+MUZ::ErrorList msg;
+
+
+/** Sets the output directory. */
+-(void) setOutputDirectory:(NSString*)directory
 {
-	MUZ::Assembler as;
-	MUZ::ErrorList msg;
-	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
-	as.SetListingFilename("testAssembler.LST");
-	as.EnableFullListing(true);
-	as.EnableTrace(false);
+	as.SetOutputDirectory([directory cStringUsingEncoding:NSUnicodeStringEncoding]);
+}
+
+/** Sets the listing filename. */
+-(void) setListingFilename:(NSString*)filename fullListing:(Boolean)fullListing trace:(Boolean)trace
+{
+	as.SetListingFilename([filename cStringUsingEncoding:NSUnicodeStringEncoding]);
+	as.EnableFullListing(fullListing);
+	as.EnableTrace(trace);
+}
+
+// "/Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm"
+-(void) assemble:(NSString*)mainSource
+{
+//	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+//	as.SetListingFilename("testAssembler.LST");
+//	as.EnableFullListing(true);
+//	as.EnableTrace(false);
+	as.Reset();
+	msg.Clear();
 	try {
-		as.AssembleFile("/Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm", msg);
+		as.AssembleFile([mainSource cStringUsingEncoding:NSUnicodeStringEncoding], msg);
 	} catch (std::exception &e) {
 		perror(e.what());
 	}
-
 }
+
+
+// Get the number of source files
+-(int) filesNumber
+{
+	return (int)as.m_files.size();
+}
+
+// Get specification for one source file
+-(nonnull MuzSourceFile*) getSourceFile:(int)index
+{
+	MuzSourceFile* sourcefile = [[MuzSourceFile alloc] init];
+	size_t nbfiles = as.m_files.size();
+	if (index < nbfiles) {
+		MUZ::Assembler::SourceFile* sf = as.m_files.at(index);
+		sourcefile.filename = [NSString stringWithCString:sf->filename.c_str() encoding:NSUnicodeStringEncoding];
+		sourcefile.filepath = [NSString stringWithCString:sf->filepath.c_str() encoding:NSUnicodeStringEncoding];
+		sourcefile.parentfile = sf->parentfile;
+		sourcefile.parentline = sf->parentline;
+	}
+	return sourcefile;
+}
+
+
 @end

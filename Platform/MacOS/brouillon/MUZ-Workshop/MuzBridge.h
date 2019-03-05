@@ -11,7 +11,7 @@
 
 #import <Foundation/Foundation.h>
 
-// structure to hold registers
+/** Structure to hold the Z-80 registers. */
 @interface MuzRegisters  : NSObject
 	@property (nonatomic) uint16_t		af;
 	@property (nonatomic) uint16_t		afprime;
@@ -29,9 +29,51 @@
 	@property (nonatomic) uint16_t		iff;
 @end
 
+/** Structure to return a file specification. */
+@interface MuzSourceFile : NSObject
+	@property (nonatomic) bool		    included; 		// true for #INCLUDEd files
+	@property (nonatomic) uint16_t		parentfile;		// if included, parent file reference
+	@property (nonatomic) uint16_t		parentline;		// if included, line number in parent file
+	@property (nonnull) NSString*		filepath;		// path part of the file
+	@property (nonnull) NSString*		filename;		// filename part of the file
+// std::vector<CodeLine> lines;	// parsed/assembled content, matches the source file lines
+// LabelMap	labels;				// local labels
+@end
+
+
+/** Structure to hold a recursive files list.
+@interface MuzFiles = NSObject
+	@property NSString name;
+	@property MuzFiles content; //$$ must return an array-> how to do this?
+@end
+*/
+
+/** The bridge interface for swift calls. */
 @interface MuzBridge : NSObject
 
-// store pointersto the C++ instance of the computer module
+
+// MARK: - MUZ-Assembler interface
+
+/** Sets the output directory. */
+-(void) setOutputDirectory:(nonnull NSString*)directory;
+
+/** Sets the listing filename. */
+-(void) setListingFilename:(nonnull NSString*)filename fullListing:(Boolean)fullListing trace:(Boolean)trace;
+
+/** Assembles a main source. */
+// "/Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/!Main.asm"
+-(void) assemble:(nonnull NSString*)mainSource;
+
+/** Gets the number of source files after assembling. */
+-(int) filesNumber;
+
+/** Gets the specification for one source file after assembling. */
+-(nonnull MuzSourceFile*) getSourceFile: (int)index;
+
+
+// MARK: - MUZ-Computer interface
+
+// store pointers to the C++ instance of the computer module
 @property (nonatomic) void* _Nullable computer;
 @property (nonatomic) void* _Nullable pagingport;
 
@@ -43,9 +85,6 @@
 
 // do a step from current program counter
 -(void) step;
-
-// Assemble a source file
--(void) assemble;
 
 // get current values for registers
 -(nonnull MuzRegisters*) registers;
