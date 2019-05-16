@@ -77,6 +77,9 @@
 @property (nonatomic) void* _Nullable computer;
 @property (nonatomic) void* _Nullable pagingport;
 
+// registers copy
+@property MuzRegisters* _Nonnull registers;
+
 // current program counter
 @property (nonatomic) int PC;
 
@@ -87,7 +90,7 @@
 -(void) step;
 
 // get current values for registers
--(nonnull MuzRegisters*) registers;
+-(nonnull MuzRegisters*) getRegisters;
 
 @end
 

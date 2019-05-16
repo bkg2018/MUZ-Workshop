@@ -26,10 +26,7 @@ class RegistersViewController: NSViewController {
 	@IBOutlet weak var registerIY: NSTextField!
 	@IBOutlet var buttonStep: NSButton!
 	
-	
-	
 	//MARK: MUZ bridge instance
-
 	var bridge = MuzBridge()
 
 	// MARK: Functions
@@ -45,7 +42,7 @@ class RegistersViewController: NSViewController {
 
 	@IBAction func hitStep(_ sender: Any) {
 		self.bridge.step()
-		let reg = self.bridge.registers()
+		let reg = self.bridge.registers
 		registerSP.stringValue = String(format:"%04X", reg.sp & 0xFFFF)
 		registerPC.stringValue = String(format:"%04X", reg.pc & 0xFFFF)
 		registerAF.stringValue = String(format:"%04X", reg.af & 0xFFFF)

@@ -15,7 +15,7 @@
 
 /* OS Timing APIs */
 #ifdef __APPLE__
-#include <QuartzCore/QuartzCore.h>
+//#include <QuartzCore/QuartzCore.h>
 #elif _WIN32
 #include <windows.h>
 #include <mmsystem.h>

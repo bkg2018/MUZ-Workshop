@@ -53,6 +53,9 @@
 	computer->Assign(0x82, port);	// SIO2 SIOB-Control
 	computer->Assign(0x83, port);	// SIO2 SIOB-Data
 
+	// Create the registers copy
+	self.registers = [[ MuzRegisters alloc] init];
+
 	return self;
 }
 
@@ -85,27 +88,27 @@
 	YazeZ80* computer = (YazeZ80*)self.computer;
 	computer->simz80(self.PC, true); // true -> step
 	self.PC = computer->pc;
+	[self getRegisters];// copy from computer
 }
 
--(MuzRegisters*) registers
+-(MuzRegisters*) getRegisters
 {
-	MuzRegisters* regs = [[MuzRegisters alloc] init];
 	YazeZ80* computer = (YazeZ80*)self.computer;
-	regs.af = computer->af[0];
-	regs.afprime = computer->af[1];
-	regs.bc = computer->regs[0].bc;
-	regs.de = computer->regs[0].de;
-	regs.hl = computer->regs[0].hl;
-	regs.bcprime = computer->regs[1].bc;
-	regs.deprime = computer->regs[1].de;
-	regs.hlprime = computer->regs[1].hl;
-	regs.ix = computer->ix;
-	regs.iy = computer->iy;
-	regs.sp = computer->sp;
-	regs.pc = computer->pc;
-	regs.ir = computer->ir;
-	regs.iff = computer->IFF;
-	return regs;
+	self.registers.af = computer->af[0];
+	self.registers.afprime = computer->af[1];
+	self.registers.bc = computer->regs[0].bc;
+	self.registers.de = computer->regs[0].de;
+	self.registers.hl = computer->regs[0].hl;
+	self.registers.bcprime = computer->regs[1].bc;
+	self.registers.deprime = computer->regs[1].de;
+	self.registers.hlprime = computer->regs[1].hl;
+	self.registers.ix = computer->ix;
+	self.registers.iy = computer->iy;
+	self.registers.sp = computer->sp;
+	self.registers.pc = computer->pc;
+	self.registers.ir = computer->ir;
+	self.registers.iff = computer->IFF;
+	return self.registers;
 }
 
 
@@ -116,7 +119,6 @@ MUZ::Assembler as;
 
 /** Global errors and warnings list. This is filled by the Assembler::Assemble() APIs. */
 MUZ::ErrorList msg;
-
 
 /** Sets the output directory. */
 -(void) setOutputDirectory:(NSString*)directory
