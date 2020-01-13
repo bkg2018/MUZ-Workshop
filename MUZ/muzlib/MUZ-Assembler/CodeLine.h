@@ -38,9 +38,9 @@ namespace MUZ {
 		/** Array of tokens prepared by the Parser::Split() function. */
 		ExpVector			tokens;
 		/** Index for the instruction token in the tokens array.*/
-		size_t				instructiontoken;
+		size_t				instructiontoken = 0;
 		/** current position for Reset/Next functions. */
-		size_t				curtoken;
+		size_t				curtoken = 0;
 		
 		// assembled code
 		
@@ -50,9 +50,9 @@ namespace MUZ {
 		/** Array of code bytes once assembled. May be empty. */
 		std::vector<BYTE>	code;
 		/** Minimum clock cycles spent in the code. */
-		int					cyclesmin;
+		int					cyclesmin = 0 ;
 		/** Maximum clock cycles, generally when a jump happens because a condition is met. */
-		int					cyclesmax;
+		int					cyclesmax = 0;
 		/** Starting address for this line. */
 		ADDRESSTYPE			address = 0;
 		/** Pointer to the code or data section where this line is stored iff it contains code. */
@@ -67,9 +67,9 @@ namespace MUZ {
 		int 				message = -1;
 		/** Enable/disable listing. */
 		bool				listing = true;
-		/** DefSymbol reference for listing. */
+		/** DefSymbol reference for listing. Valid for #define and #requires*/
 		std::string			defsymbol;
-	
+
 		/** Resets the token exploration system to the first token after the instruction. */
 		void ResetInstruction(size_t start);
 		

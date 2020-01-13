@@ -57,6 +57,7 @@ namespace MUZ {
 			(*messageText)[errorProcessor] = "unsupported processor in .PROC";
 			(*messageText)[warningUnsolvedExpression] = "a symbol was unsolved in an expression";
 			(*messageText)[errorEquate] = ".EQU could not create label or assign value";
+			(*messageText)[errorSet] = ".SET could not create label or assign value";
 			(*messageText)[errorTooBigValue] = "number too big for accepted values";
 			(*messageText)[errorTooBigBit] = "number too big for a bit number (0-7)";
 			(*messageText)[warningTooBig8] = "number too big for 8 bits";

@@ -7,7 +7,7 @@
 //
 
 #include "pch.h"
-
+#include <direct.h>
 #include "MUZ-Common/FileUtils.h"
 #include "MUZ-Common/Section.h"
 #include "Parser.h"
@@ -93,19 +93,19 @@ namespace MUZ {
 			// no code: any #DEFINE symbol?
 			if (!defsymbol.empty()) {
 				ll.defsymbol = defsymbol;
-				ll.parts.defsymbol = 1;
+				ll.parts.defsymbol = -1;
 			}
 			// no code: any label on this line?
 			else if ((label != nullptr) && label->isAt(file, line)) {
 				ll.address = label->AddressFrom(address);
-				ll.parts.address = 1;
+				ll.parts.address = -1;
 			}
 		} else {
 			ll.address = address;
-			ll.parts.address = 1;
+			ll.parts.address = -1;
 		}
 		if (message >= 0) {
-			ll.parts.warnaddress = 1;
+			ll.parts.warnaddress = -1;
 		}
 
 		string instr = source;
@@ -142,7 +142,7 @@ namespace MUZ {
 		// for no-code and for first line of code, include line number source and comment
 		if (code.empty() || (firstcode == 0)) {
 			ll.line = line;
-			ll.parts.line = 1;
+			ll.parts.line = -1;
 			ll.source = instr;
 			ll.parts.source = instr.empty() ? 0 : 1;
 			ll.comment = comment;
@@ -151,7 +151,7 @@ namespace MUZ {
 		// for all lines of code, include byte codes
 		if (! code.empty()) {
 			ll.codebytes = buildCodes(code, firstcode, nbcodes);
-			ll.parts.code = 1;
+			ll.parts.code = -1;
 		}
 
 		return ll;
@@ -168,7 +168,7 @@ namespace MUZ {
 		Assembler::ListingLine ll;
 		ll.file = file;
 		ll.line = line;
-		ll.parts.line = 1;
+		ll.parts.line = -1;
 		ll.source = source;
 		ll.parts.source = source.empty() ? 0 : 1;
 		return ll;
@@ -458,7 +458,7 @@ namespace MUZ {
 		if (codeline.message >= 0) {
 			ListingLine line;
 			line.file = codeline.file;
-			line.parts.message = 1;
+			line.parts.message = -1;
 			line.message = codeline.message;
 			line.token = codeline.curtoken;
 			listing.push_back(line);
@@ -582,9 +582,9 @@ namespace MUZ {
 			// for each address in the range
 			for (ADDRESSTYPE dumpaddress = range.start ; dumpaddress <= range.end ; dumpaddress += 16) {
 				
-				// prepare up to 16 bytes
-				nbbytes = 16;
-				if (dumpaddress + 15 > range.end) {
+				// prepare up to <m_hexbytes>
+				nbbytes = m_hexbytes;
+				if (dumpaddress + m_hexbytes - 1 > range.end) {
 					nbbytes = range.end - dumpaddress + 1;
 				}
 				// get the assembled section it comes from
@@ -627,7 +627,7 @@ namespace MUZ {
 		ListingLine fileline;
 
 		// add the file path to listing
-		fileline.parts.file = 1;
+		fileline.parts.file = -1;
 		fileline.file = file;
 		listing.push_back(fileline);
 
@@ -689,6 +689,30 @@ namespace MUZ {
 				sleft = defsymbol.first.substr(0,29);
 				sleft += spaces(30 - (int)sleft.length());
 				sleft += " :" + defsymbol.second->value;
+				s = string("\t") + sleft + "\n";
+				fprintf(file, "%s", s.c_str());
+				if (m_status.trace) printf("%s", s.c_str());
+			}
+		}
+	}
+
+	/** Generates the #REQUIRES symbols list in an opened file. */
+	void Assembler::GenerateReqSymbolsList( FILE* file )
+	{
+		// list DEFINEs
+		if (m_reqsymbols.size()) {
+			std::string s = "\nRequires:\n------------------------------------------------------------------------------------\n";
+			fprintf(file, "%s", s.c_str());
+			if (m_status.trace) printf("%s", s.c_str());
+			std::map<string, DefSymbol*> sortedSymbols;
+			for (auto symbol: m_reqsymbols) {
+				sortedSymbols[symbol.first] = symbol.second;
+			}
+			for (auto reqsymbol: sortedSymbols) {
+				string sleft;
+				sleft = reqsymbol.first.substr(0,29);
+				sleft += spaces(30 - (int)sleft.length());
+				sleft += " :" + reqsymbol.second->value;
 				s = string("\t") + sleft + "\n";
 				fprintf(file, "%s", s.c_str());
 				if (m_status.trace) printf("%s", s.c_str());
@@ -776,6 +800,7 @@ namespace MUZ {
 	{
 		GenerateSectionsList( file );
 		GenerateDefSymbolsList( file );
+		GenerateReqSymbolsList( file );
 		GenerateEquatesList( file );
 		GenerateLabelsList( file );
 	}
@@ -934,8 +959,8 @@ namespace MUZ {
 			if (codeline.tokens[1].type == tokenTypeCOLON) {
 				// neutralize colon for parser
 				codeline.tokens[1].type = tokenTypeIGNORE;
-				// store as last global label iff not followed by .EQU
-				if ((nbtokens <= 2) || !DirectiveEQU::Identify(codeline.tokens[2].source)) {
+				// store as last global label if not followed by .EQU
+				if ((nbtokens <= 2) || (!DirectiveEQU::Identify(codeline.tokens[2].source) && !DirectiveSET::Identify(codeline.tokens[2].source))) {
 					SetLastLabelName(labelName) ;
 				}
 				return CreateLabel(labelName, codeline, msg);
@@ -943,7 +968,7 @@ namespace MUZ {
 			// <letters> <directive> ?
 			if (GetDirective(codeline.tokens[1].source)) {
 				// store as last global label unless it is an .EQU or local label
-				if (!DirectiveEQU::Identify(codeline.tokens[1].source)) {
+				if (!DirectiveEQU::Identify(codeline.tokens[2].source) && !DirectiveSET::Identify(codeline.tokens[2].source)) {
 					SetLastLabelName(labelName) ;
 				}
 				return CreateLabel(labelName, codeline, msg);
@@ -962,7 +987,7 @@ namespace MUZ {
 	 global label name, else the label is global. */
 	Label* Assembler::CreateLabel(std::string name, CodeLine& codeline, ErrorList& msg)
 	{
-		if (name.empty()) return nullptr;				// warning if this label already exists
+		if (name.empty()) return nullptr;
 		Label* label = GetLabel(name);
 		// Existing label?
 		if (label) {
@@ -1124,8 +1149,8 @@ namespace MUZ {
 		m_files.push_back(sourcefile);
 		m_status.curfile = filenum;
 		
-		// now explore the file line by line
-		while (fgetline(&buffer, &linesize, f)) {
+		// now explore the file line by line (until .END directive at most)
+		while (fgetline(&buffer, &linesize, f) && (! m_status.finished)) {
 			
 			// debug
 			if (m_status.trace) printf("%04X: [%4d] %s\n", GetAddress(),(int)sourcefile->lines.size()  + 1, buffer);
@@ -1184,6 +1209,7 @@ namespace MUZ {
 			section.second->Reset();
 		}
 		m_status.cursection = nullptr;
+		m_status.finished = false;
 
 		// Execute pass 2
 		CodeLine codeline;
@@ -1228,7 +1254,7 @@ namespace MUZ {
 		BYTE* buffer = nullptr;
 		int linesize = 0;
 			Label* lastLabel = nullptr;
-		while (fgetline(&buffer, &linesize, f)) {
+		while (fgetline(&buffer, &linesize, f) && (! m_status.finished)) {
 			
 			// debug
 			if (m_status.trace) printf("%04X: [%4d] %s\n", GetAddress(),(int)sourcefile->lines.size()  + 1, buffer);
@@ -1476,41 +1502,41 @@ namespace MUZ {
 		Reset();
 		
 		// Preprocessor directives
-		m_directives["#DEFINE"] = new DirectiveDEFINE();
-		m_directives["#UNDEF"] = new DirectiveUNDEFINE();
-		m_directives["#IF"] = new DirectiveIF();
+		m_directives["DEFINE"] = new DirectiveDEFINE();
+		m_directives["UNDEF"] = new DirectiveUNDEFINE();
+		m_directives["IF"] = new DirectiveIF();
 		m_directives["COND"] = new DirectiveIF();
-		m_directives["#IFDEF"] = new DirectiveIFDEF();
-		m_directives["#ELSE"] = new DirectiveELSE();
-		m_directives["#IFNDEF"] = new DirectiveIFNDEF();
-		m_directives["#ENDIF"] = new DirectiveENDIF();
+		m_directives["IFDEF"] = new DirectiveIFDEF();
+		m_directives["ELSE"] = new DirectiveELSE();
+		m_directives["IFNDEF"] = new DirectiveIFNDEF();
+		m_directives["ENDIF"] = new DirectiveENDIF();
 		m_directives["ENDC"] = new DirectiveENDIF();
-		m_directives["#INCLUDE"] = new DirectiveINCLUDE();
-		m_directives["#INSERTHEX"] = new DirectiveINSERTHEX();
-		m_directives["#INSERTBIN"] = new DirectiveINSERTBIN();
-		m_directives["#NOLIST"] = new DirectiveLISTOFF();
-		m_directives["#LIST"] = new DirectiveLIST();
+		m_directives["INCLUDE"] = new DirectiveINCLUDE();
+		m_directives["INSERTHEX"] = new DirectiveINSERTHEX();
+		m_directives["INSERTBIN"] = new DirectiveINSERTBIN();
+		m_directives["NOLIST"] = new DirectiveLISTOFF();
+		m_directives["LIST"] = new DirectiveLIST();
+		m_directives["REQUIRES"] = new DirectiveREQUIRES();
+		m_directives["IFREQUIRED"] = new DirectiveIFREQUIRED();
 
 		// Assembler directives
-		m_directives[".PROC"] = new DirectivePROC();
-		m_directives[".ORG"] = new DirectiveORG();
+		m_directives["PROC"] = new DirectivePROC();
 		m_directives["ORG"] = new DirectiveORG();
-		m_directives[".DATA"] = new DirectiveDATA();
-		m_directives[".CODE"] = new DirectiveCODE();
-		m_directives[".EQU"] = new DirectiveEQU();
+		m_directives["DATA"] = new DirectiveDATA();
+		m_directives["CODE"] = new DirectiveCODE();
+		m_directives["END"] = new DirectiveEND();
 		m_directives["EQU"] = new DirectiveEQU();
-		m_directives[".BYTE"] = new DirectiveBYTE();
-		m_directives[".DB"] = new DirectiveBYTE();
+		m_directives["SET"] = new DirectiveSET();
+		m_directives["BYTE"] = new DirectiveBYTE();
 		m_directives["DB"] = new DirectiveBYTE();
 		m_directives["DEFB"] = new DirectiveBYTE();
-		m_directives[".WORD"] = new DirectiveWORD();
-		m_directives[".DW"] = new DirectiveWORD();
+		m_directives["WORD"] = new DirectiveWORD();
 		m_directives["DW"] = new DirectiveWORD();
 		m_directives["DEFW"] = new DirectiveWORD();
-		m_directives[".SPACE"] = new DirectiveSPACE();
-		m_directives[".DS"] = new DirectiveSPACE();
+		m_directives["SPACE"] = new DirectiveSPACE();
 		m_directives["DS"] = new DirectiveSPACE();
 		m_directives["DEFS"] = new DirectiveSPACE();
+		m_directives["HEXBYTES"] = new DirectiveHEXBYTES();
 	}
 	
 	Assembler::~Assembler()
@@ -1522,6 +1548,9 @@ namespace MUZ {
 			delete d.second;
 		}
 		for (auto &d : m_defsymbols) {
+			delete d.second;
+		}
+		for (auto &d : m_reqsymbols) {
 			delete d.second;
 		}
 		for (auto &d : labels) {
@@ -1616,11 +1645,13 @@ namespace MUZ {
 	/** Resets the assembler. */
 	void Assembler::Reset() {
 		m_defsymbols.clear();
+		m_reqsymbols.clear();
 		labels.clear();
 		m_files.clear();
 		for (auto &section : m_sections) delete section.second;
 		m_sections.clear();
 		m_status.cursection = nullptr;
+		m_status.finished = false;
 		m_modes = ParsingModeStack();// resets
 	}
 	
@@ -1640,6 +1671,9 @@ namespace MUZ {
 	void Assembler::SetOutputDirectory(std::string directory)
 	{
 		m_outputdir = directory;
+		if (!ExistDir(directory)) {
+			_mkdir(directory.c_str());
+		}
 	}
 	
 	/** Sets the listing filename. */
@@ -1660,6 +1694,12 @@ namespace MUZ {
 		m_hexfilename = filename;
 	}
 	
+	/** Sets the number of bytes in hex output lines */
+	void Assembler::SetHexBytes(ADDRESSTYPE nbbytes)
+	{
+		m_hexbytes = nbbytes;
+	}
+
 	/** Sets the Memory listing filename. */
 	void Assembler::SetMemoryFilename(std::string filename)
 	{
@@ -1699,6 +1739,12 @@ namespace MUZ {
 	bool Assembler::isListingEnabled()
 	{
 		return m_status.listing;
+	}
+
+	/** Terminates assembly at next line */
+	void Assembler::Terminate()
+	{
+		m_status.finished = true;
 	}
 
 
@@ -1808,14 +1854,14 @@ namespace MUZ {
 	 @param file the file path to the source to assemble, can be relative to parent file path if included
 	 @param msg the stack of error and warnings returned by the assembler
 	 
-	 @return true if assembly was correctly done
+	 @return errorTypeOK if assembly was correctly done
 	 */
 	ErrorType Assembler::AssembleFile(string file, ErrorList& msg)
 	{
 		SetFirstPass(true);
 		msg.Clear();							// clear warnings
 		if (m_status.trace)	printf("Pass 1: %s\n", file.c_str());
-		ErrorType result;
+		ErrorType result = errorTypeFALSE;
 		try {
 			result = AssembleMainFilePassOne(file, msg);
 			if (result == errorTypeOK) {
@@ -1909,9 +1955,9 @@ namespace MUZ {
 		if (m_defsymbols.count(name)) {
 			defsymbol = m_defsymbols[name];
 		}
-		// check if the value is empty and if so, define the symbol as an empty but true defsymbol
 		if (!defsymbol) defsymbol = new DefSymbol();
 		if (!defsymbol) throw OutOfMemoryException();
+		// check if the value is empty and if so, define the symbol as an empty but true defsymbol
 		if (value.empty()) {
 			defsymbol->value.clear();
 			defsymbol->singledefine = true;
@@ -1935,13 +1981,50 @@ namespace MUZ {
 	}
 	
 	/** Check if a symbol is #DEFINEd.*/
-	bool Assembler::ExistSymbol(std::string name)
+	bool Assembler::ExistDefSymbol(std::string name)
 	{
 		if (m_defsymbols.count(name))
 			return true;
 		return false;
 	}
 	
+	/** Create a #REQUIRES symbol
+	 */
+	DefSymbol* Assembler::CreateReqSymbol(std::string name)
+	{
+		// Check if the name exists
+		DefSymbol* reqsymbol = nullptr;
+		if (m_reqsymbols.count(name)) {
+			reqsymbol = m_reqsymbols[name];
+		}
+		if (!reqsymbol) reqsymbol = new DefSymbol();
+		if (!reqsymbol) throw OutOfMemoryException();
+		reqsymbol->value.clear();
+		reqsymbol->singledefine = true;
+		// do the assignment
+		m_reqsymbols[name] = reqsymbol;
+		return reqsymbol;
+	}
+	
+	/** Delete a #REQUIRES symbol. */
+	bool Assembler::DeleteReqSymbol(std::string name)
+	{
+		if (m_reqsymbols.count(name)) {
+			m_reqsymbols.erase(name);
+			return true;
+		}
+		return false;
+	}
+	
+	/** Check if a symbol is #REQUIREd.*/
+	bool Assembler::ExistReqSymbol(std::string name)
+	{
+		if (m_reqsymbols.count(name))
+			return true;
+		return false;
+	}
+
+
 	/** Try to replace a symbol from the #DEFINE table.
 	 Symbols associated to nothing are considered as a boolean true, while the other symbols are replaced by their string value.
 	 @param token [IN/OUT] the token to check, if its value exists as a symbol it will be replaced by the symbol value if it has a value or by a boolean set to true if the symbol is empty
@@ -2048,7 +2131,7 @@ namespace MUZ {
 				error = m.type;
 			} else if (error != errorTypeFATAL) {
 				if ( ! line.defsymbol.empty()) {
-					if (ExistSymbol(line.defsymbol)) {
+					if (ExistDefSymbol(line.defsymbol)) {
 						DefSymbol* defsymbol = m_defsymbols[line.defsymbol];
 						if (defsymbol->singledefine) {
 							s = spaces(18) + "* ";
@@ -2057,6 +2140,8 @@ namespace MUZ {
 							if (s.length() < 18) s += spaces(18 - (int)s.length());
 							s += "* ";
 						}
+					} else if (ExistReqSymbol(line.defsymbol)) {
+						s = spaces(18) + "* ";
 					}
 				} else {
 					if (line.parts.address) {

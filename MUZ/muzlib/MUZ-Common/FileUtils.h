@@ -12,5 +12,6 @@
 #include <string>
 
 bool ExistFile(std::string file);
+bool ExistDir(std::string dir);
 
 #endif /* FileUtils_h */

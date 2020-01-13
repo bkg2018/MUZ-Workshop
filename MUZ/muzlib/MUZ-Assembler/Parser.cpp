@@ -225,7 +225,9 @@ namespace MUZ {
 			if (token.type == tokenTypeDIRECTIVE) {
 				resultFlag = hasNOTHING;
 				lastDirective = directive;
-				if (DirectiveIF::Identify(token.source) || DirectiveIFDEF::Identify(token.source) || DirectiveIFNDEF::Identify(token.source)) resultFlag = hasIF;
+				if (DirectiveIF::Identify(token.source) || DirectiveIFREQUIRED::Identify(token.source) || DirectiveIFDEF::Identify(token.source) || DirectiveIFNDEF::Identify(token.source)) {
+					resultFlag = hasIF;
+				}
 				else if (DirectiveELSE::Identify(token.source)) resultFlag = hasELSE;
 				else if (DirectiveENDIF::Identify(token.source)) resultFlag = hasENDIF;
 				else if (DirectiveDEFINE::Identify(token.source)) resultFlag = hasDEFINE;
@@ -566,7 +568,8 @@ namespace MUZ {
 				if (word.empty()) {
 					// nothing stored yet, start a directive
 					status = inDirective;
-					word = c;
+					//$$ word = c;
+					word = ""; // don't store prefix
 					type = tokenTypeDIRECTIVE;
 					continue;
 				}

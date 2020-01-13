@@ -4,3 +4,14 @@ Platform/Win/asmuz/x64/
 Platform/Win/MUZ-Workshop/Release/
 Platform/Win/MUZ-Workshop/x64/
 Platform/Win/MUZ-Workshop/Debug/MUZ-Workshop.res
+*.pdb
+*.ilk
+Platform/Win/x64/Debug
+Platform/Win/muzlib/x64/Debug
+*.ipch
+*.db
+MUZ/TestSources/Output
+MUZ/TestSources/SCWorkshop-2019-09-07
+*.suo
+Platform/Win/.vs/MUZ-Workshop/v15
+*.user

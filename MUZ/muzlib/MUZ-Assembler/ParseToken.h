@@ -35,7 +35,8 @@ namespace MUZ {
 
 		/** Returns true if this token is one of the including file directive. */
 		bool isIncludingDirective() {
-			return (type == tokenTypeDIRECTIVE) && ((source == "#INCLUDE") || (source == "#INSERTHEX") || (source == "#INSERTBIN"));
+			//return (type == tokenTypeDIRECTIVE) && ((source == "#INCLUDE") || (source == "#INSERTHEX") || (source == "#INSERTBIN"));
+			return (type == tokenTypeDIRECTIVE) && ((source == "INCLUDE") || (source == "INSERTHEX") || (source == "INSERTBIN"));
 		}
 
 		/** Returns true if the token type is one of the given vector. */
@@ -59,8 +60,9 @@ namespace MUZ {
 				case tokenTypeBINNUMBER:	return (ADDRESSTYPE)(ADDRESSMASK & bin_to_unsigned(source));
 				case tokenTypeOCTNUMBER:	return (ADDRESSTYPE)(ADDRESSMASK & oct_to_unsigned(source));
 				case tokenTypeDECNUMBER:	return (ADDRESSTYPE)(ADDRESSMASK & dec_to_unsigned(source));
-				case tokenTypeBOOL:			return source.empty() ? !0 : 0;
+				case tokenTypeBOOL:			return (ADDRESSTYPE)(source.empty() ? !0 : 0);
 				case tokenTypeCHAR:			return (ADDRESSTYPE)(source[0]);
+				case tokenTypeUNKNOWN:
 				default:
 					// 0x or 0b prefix?
 					if (source.size() > 2 && source[0]=='0') {

@@ -88,7 +88,8 @@ namespace MUZ {
 		errorProcessor,					// unsupported processor in .PROC
 		warningUnsolvedExpression,		// a symbol was unsolved in an expression
 		errorEquate,					// .EQU could not create label or assign value
-		
+		errorSet,						// .SET could not create label or assign value
+
 		// errors on numbers
 		errorTooBigValue,				// number too big for accepted values
 		errorTooBigBit,					// number too big for a bit number (0-7)

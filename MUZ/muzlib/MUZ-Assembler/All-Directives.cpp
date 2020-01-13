@@ -74,7 +74,7 @@ namespace MUZ {
 	bool DirectiveDEFINE::Identify( std::string source )
 	{
 		std::string upper = std::to_upper(source);
-		if (upper=="#DEFINE") return true;
+		if (upper=="DEFINE") return true;
 		return false;
 	}
 
@@ -105,13 +105,13 @@ namespace MUZ {
 		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
-		return as.ExistSymbol(symbol) ? errorTypeTRUE : errorTypeFALSE;
+		return as.ExistDefSymbol(symbol) ? errorTypeTRUE : errorTypeFALSE;
 	}
 	/** Identifies a source string as self. */
 	bool DirectiveIFDEF::Identify( std::string source )
 	{
 		std::string upper = std::to_upper(source);
-		if (upper=="#IFDEF") return true;
+		if (upper=="IFDEF") return true;
 		return false;
 	}
 
@@ -126,13 +126,13 @@ namespace MUZ {
 		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
-		return as.ExistSymbol(symbol) ? errorTypeFALSE : errorTypeTRUE;
+		return as.ExistDefSymbol(symbol) ? errorTypeFALSE : errorTypeTRUE;
 	}
 	/** Identifies a source string as self. */
 	bool DirectiveIFNDEF::Identify( std::string source )
 	{
 		std::string upper = std::to_upper(source);
-		if (upper=="#IFNDEF") return true;
+		if (upper=="IFNDEF") return true;
 		return false;
 	}
 
@@ -154,7 +154,7 @@ namespace MUZ {
 	bool DirectiveIF::Identify( std::string source )
 	{
 		std::string upper = std::to_upper(source);
-		if (upper=="#IF") return true;
+		if (upper=="IF") return true;
 		if (upper=="COND") return true;
 		return false;
 	}
@@ -163,7 +163,7 @@ namespace MUZ {
 	bool DirectiveELSE::Identify( std::string source )
 	{
 		std::string upper = std::to_upper(source);
-		if (upper=="#ELSE") return true;
+		if (upper=="ELSE") return true;
 		return false;
 	}
 
@@ -171,7 +171,7 @@ namespace MUZ {
 	bool DirectiveENDIF::Identify( std::string source )
 	{
 		std::string upper = std::to_upper(source);
-		if (upper=="#ENDIF") return true;
+		if (upper=="ENDIF") return true;
 		if (upper=="ENDC") return true;
 		return false;
 	}
@@ -393,6 +393,46 @@ namespace MUZ {
 		std::string upper = std::to_upper(source);
 		if (upper==".EQU") return errorTypeOK;
 		if (upper=="EQU") return errorTypeOK;
+
+		return false;
+	}
+
+	/** label[:]  [.]SET <expression>
+		returns true if the label has been updated with the value as a decimal number
+	 */
+	ErrorType DirectiveSET::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg)
+	{
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
+		std::vector<size_t> unsolved = parser.ResolveNextSymbols(false);
+		ADDRESSTYPE address = 0;
+		if (unsolved.size() > 0 && !as.IsFirstPass()) {
+			msg.ForceWarning(warningUnsolvedExpression, codeline);
+		}
+		// compute address, unsolved symbols have been replaced by "0"
+		parser.JumpTokens(1); // skip after .EQU
+		try { parser.EvaluateAddress(address); }
+		catch (... /*const std::exception & e*/) {
+			return msg.Error(errorInvalidExpression, codeline);
+		}
+		// use previous label if none on this line
+		if (label == nullptr)
+			label = codeline.label;
+		// set label address/value
+		if (label) {
+			label->Equate(address);
+			codeline.label = label;
+			return errorTypeOK;
+		}
+		return msg.Error(errorSet, codeline);
+	}
+
+	/** Identifies a source string as self. */
+	bool DirectiveSET::Identify(std::string source)
+	{
+		std::string upper = std::to_upper(source);
+		if (upper == ".SET") return errorTypeOK;
+		if (upper == "SET") return errorTypeOK;
+
 		return false;
 	}
 	
@@ -495,6 +535,85 @@ namespace MUZ {
 		for (int i = 0 ; i < size ; i++) {
 			codeline.AddCode(0xFF);
 		}
+		return errorTypeOK;
+	}
+
+	/** .END
+	 */
+	ErrorType DirectiveEND::Parse(class Assembler& as, Parser& , CodeLine& , class Label*, ErrorList& ) {
+		as.Terminate();
+		return errorTypeOK;
+	}
+	/** Small Computer Workshop 2019-09-07 and LCD alphanumeric sample compatibility */
+
+	/** #REQUIRES <symbol>
+	returns true if the new symbol has been stored in required symbols
+ */
+	ErrorType DirectiveREQUIRES::Parse(Assembler& as, Parser& parser, CodeLine& codeline, Label*, ErrorList& msg) {
+
+		if (!parser.ExistMoreToken(1)) return msg.Error(errorMissingToken, codeline);
+		ParseToken& symbol = parser.NextToken();
+		if (symbol.type != tokenTypeLETTERS) {
+			return msg.Error(errorInvalidSymbol, codeline);
+		}
+		// skip directive
+		parser.JumpTokens(1);
+		// resolve expression parts
+		parser.ResolveNextSymbols(false); // skips next symbol before resolving
+
+		// undefine the symbol if it exists
+		as.DeleteReqSymbol(symbol.source);
+		// create the #REQUIRES symbol
+		DefSymbol* reqsymbol = as.CreateReqSymbol(symbol.source);
+		if (reqsymbol) {
+			codeline.defsymbol = symbol.source;
+			return errorTypeOK;
+		}
+		return msg.Error(errorDefine, codeline);
+	}
+	/** Identifies a source string as self. */
+	bool DirectiveREQUIRES::Identify(std::string source)
+	{
+		std::string upper = std::to_upper(source);
+		if (upper == "REQUIRES") return true;
+		return false;
+	}
+
+	/** #IFREQUIRED <symbol>
+	returns true if the symbol is required
+ */
+	ErrorType DirectiveIFREQUIRED::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label*, ErrorList& msg) {
+		// and now check existence of the symbol
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
+		std::string symbol;
+		parser.JumpNextToken();
+		try { parser.EvaluateString(symbol); }
+		catch (... /*const std::exception & e*/) {
+			return msg.Error(errorInvalidExpression, codeline);
+		}
+		return as.ExistReqSymbol(symbol) ? errorTypeTRUE : errorTypeFALSE;
+	}
+	/** Identifies a source string as self. */
+	bool DirectiveIFREQUIRED::Identify(std::string source)
+	{
+		std::string upper = std::to_upper(source);
+		if (upper == "IFREQUIRED") return true;
+		return false;
+	}
+
+	/** .HEXBYTES <n>
+	Sets the number of bytes in HEX output lines.
+	 */
+	ErrorType DirectiveHEXBYTES::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg) {
+		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
+		/*std::vector<size_t> unsolved =*/ parser.ResolveNextSymbols(false);
+		ADDRESSTYPE address = 0;
+		parser.JumpTokens(1); // skip after .HEXBYTES
+		try { parser.EvaluateAddress(address); }
+		catch (... /*const std::exception & e*/) {
+			return msg.Error(errorInvalidExpression, codeline);
+		}
+		as.SetHexBytes(address & 0xFF);
 		return errorTypeOK;
 	}
 

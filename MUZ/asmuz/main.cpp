@@ -5,6 +5,16 @@
 //  Created by Francis Pierot on 20/01/2019.
 //  Copyright © 2019 Francis Pierot. All rights reserved.
 //
+// Test on SCousins alphanumeric example ans small computer monitor:
+
+// lcd sample:
+//  -l Listing.txt  -m memory.txt  -h IntelHex.hex -od E:\Users\Francis\Desktop\RETROCOMPUTING\SCousins\SCWorkshop-2019-09-07\Output -f E:\Users\Francis\Desktop\RETROCOMPUTING\SCousins\SCWorkshop-2019-09-07\SCMonitor\Apps\Alphanumeric_LCD\SCMon_alphanumeric_LCD.asm
+//
+// scmonitor:
+//  -l Listing.txt  -m memory.txt  -h IntelHex.hex -od E:\Users\Francis\Desktop\RETROCOMPUTING\SCousins\SCWorkshop-2019-09-07\Output -f E:\Users\Francis\Desktop\RETROCOMPUTING\SCousins\SCWorkshop-2019-09-07\SCMonitor\Source\!Main.asm
+//
+// test double définition de .EQU
+// -l Listing.txt  -m memory.txt  -h IntelHex.hex -od E:\Users\Francis\Desktop\RETROCOMPUTING\MUZ-Workshop\MUZ\TestSources\Output -f E:\Users\Francis\Desktop\RETROCOMPUTING\MUZ-Workshop\MUZ\TestSources\DoubleEqu.asm
 #include "pch.h"
 #include "MUZ-Common/FileUtils.h"
 #include "MUZ-Assembler/Assembler.h"

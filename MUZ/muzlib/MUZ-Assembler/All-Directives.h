@@ -97,6 +97,22 @@ namespace MUZ {
 		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 
+	/** Small Computer Workshop 2019-09-07 and LCD alphanumeric sample compatibility */
+	
+	/** Handles #REQUIRES directive. */
+	class DirectiveREQUIRES : public Directive {
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	public:
+		/** Returns true if the given string qualifies for an #DEFINE directive. */
+		static bool Identify(std::string source);
+	};
+	/** Handles #IFREQUIRED. */
+	class DirectiveIFREQUIRED : public Directive {
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	public:
+		/** Returns true if the given string qualifies for an #REQUIRES directive. */
+		static bool Identify(std::string source);
+	};
 
 
 	// Assembler directives (.xxx)
@@ -122,7 +138,12 @@ namespace MUZ {
 	class DirectiveEQU : public Directive {
 		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	public:
-		/** Returns true if the given string qualifies for an EQU directive. */
+		static bool Identify( std::string source );
+	};
+	/** Handles .SET directive. */
+	class DirectiveSET : public Directive {
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	public:
 		static bool Identify( std::string source );
 	};
 	/** .DB */
@@ -138,6 +159,13 @@ namespace MUZ {
 		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
 	};
 
-
+	/** .HEXBYTES */
+	class DirectiveHEXBYTES: public Directive {
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	};
+	/** .END */
+	class DirectiveEND : public Directive {
+		virtual ErrorType Parse(class Assembler& as, class Parser& parser, CodeLine& codeline, class Label* label, ErrorList& msg);
+	};
 }
 #endif /* All_Directives_h */

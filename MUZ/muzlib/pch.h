@@ -2,6 +2,8 @@
 #ifndef __PCH_H
 #define __PCH_H
 
+#pragma warning(push,3)
+
 /** Standard headers used a lot */
 #include <string.h>
 #include <stdio.h>
@@ -23,6 +25,7 @@
 #undef GetMessage
 #endif
 
+#pragma warning(pop)
 
 #endif
 

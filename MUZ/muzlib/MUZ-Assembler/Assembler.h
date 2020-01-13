@@ -116,9 +116,11 @@ namespace MUZ {
 
 		/** Table for all the #DEFINE symbols. */
 		DefSymbolsMap				m_defsymbols;
+		/** Table for all the #REQUIRES symbols. */
+		DefSymbolsMap				m_reqsymbols;
 		/** Table for all the global labels. */
 		LabelMap					labels;
-		/** Table for each fils, [0] is the main file, following are the included files in their inclusion order. */
+		/** Table for each files, [0] is the main file, following are the included files in their inclusion order. */
 		std::vector<SourceFile*>	m_files;
 		/** Map of all sections. Default names are CODE and DATA for the .CODE and .DATA section. */
 		std::unordered_map<std::string, Section*> m_sections;
@@ -146,6 +148,8 @@ namespace MUZ {
 			bool 		allcodelisting=false;
 			/** Flag to enable listings (directives #LIST ON/OFF and #NOLIST). */
 			bool		listing    = true;
+			/** flag to terminate assembly (.END directive) */
+			bool		finished = false;
 		} m_status;
 		
 		//MARK: - Private Output directory and file names
@@ -163,6 +167,8 @@ namespace MUZ {
 		std::string					m_symbolsfilename;
 		/** file name for errors/warnings log */
 		std::string					m_logfilename;
+		/** Number of bytes in HEX output */
+		ADDRESSTYPE					m_hexbytes;
 
 		//MARK: - Private Assembler functions
 		/** Assembles a prepared code line. */
@@ -183,6 +189,8 @@ namespace MUZ {
 		void GenerateSectionsList( FILE* file );
 		/** Generates the #DEFINE symbols list in an opened file. */
 		void GenerateDefSymbolsList( FILE* file );
+		/** Generates the #REQUIRES symbols list in an opened file. */
+		void GenerateReqSymbolsList( FILE* file );
 		/** Generates the .EQU equate symbols list in an opened file. */
 		void GenerateEquatesList( FILE* file );
 		/** Generates the global labels in an opened file. */
@@ -265,6 +273,8 @@ namespace MUZ {
 		void SetBinaryFilename(std::string filename);
 		/** Sets the IntelHex filename. */
 		void SetIntelHexFilename(std::string filename);
+		/** Sets the number of bytes in hex output lines */
+		void SetHexBytes(ADDRESSTYPE nbbytes);
 		/** Sets the Memory listing filename. */
 		void SetMemoryFilename(std::string filename);
 		/** Sets the Symbols filename. */
@@ -273,6 +283,8 @@ namespace MUZ {
 		void SetLogFilename(std::string filename);
 		/** Gets the full listing from current assembling. */
 		Listing GetListing(ErrorList& msg);
+		/** Terminates assembly at next line */
+		void Terminate();
 
 		/** Save a memory listing to a text file. Use "stdout" to print on standard output. */
 		void SaveListing( Listing & listing, std::string file, ErrorList& msg);
@@ -331,11 +343,17 @@ namespace MUZ {
 		/** Delete a #DEFINE symbol. */
 		bool DeleteDefSymbol(std::string name);
 		/** Check if a symbol is #DEFINEd.*/
-		bool ExistSymbol(std::string name);
+		bool ExistDefSymbol(std::string name);
 		/** Try to replace a symbol from the #DEFINE table. */
 		bool ReplaceDefSymbol(ParseToken& token);
 		/** try to replace a symbol from the Label table */
 		bool ReplaceLabel(std::string& source);
+		/** Create a #REQUIRES symbol. */
+		DefSymbol* CreateReqSymbol(std::string name);
+		/** Delete a #REQUIRES symbol. */
+		bool DeleteReqSymbol(std::string name);
+		/** Check if a symbol is #REQUIREd.*/
+		bool ExistReqSymbol(std::string name);
 
 		/** Interface to files and lines. */
 		CodeLine* GetCodeLine(size_t file, size_t line);

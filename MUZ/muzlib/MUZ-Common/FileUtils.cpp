@@ -8,12 +8,22 @@
 #include "pch.h"
 #include "FileUtils.h"
 #include <stdio.h>
+#include <sys/stat.h>
 
 bool ExistFile(std::string file)
 {
 	FILE* f = fopen(file.c_str(), "r");
 	if (f) {
 		fclose(f);
+		return true;
+	}
+	return false;
+}
+bool ExistDir(std::string dir)
+{
+	struct _stat st;
+	int result = _stat(dir.c_str(), &st);
+	if (result == 0 && (st.st_mode & S_IFDIR)){
 		return true;
 	}
 	return false;
