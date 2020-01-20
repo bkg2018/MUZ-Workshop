@@ -1,0 +1,507 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		86599F5A23CDEC1C00D723C0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86599F5923CDEC1C00D723C0 /* AppDelegate.swift */; };
+		86599F5C23CDEC1C00D723C0 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86599F5B23CDEC1C00D723C0 /* ViewController.swift */; };
+		86599F5E23CDEC1D00D723C0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 86599F5D23CDEC1D00D723C0 /* Assets.xcassets */; };
+		86599F6123CDEC1D00D723C0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 86599F5F23CDEC1D00D723C0 /* Main.storyboard */; };
+		86599F7B23CDF1FF00D723C0 /* MuzBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 86599F7A23CDF1FF00D723C0 /* MuzBridge.mm */; };
+		86599F7E23CDFB6900D723C0 /* libmuzlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 86599F7D23CDFB6900D723C0 /* libmuzlib.a */; };
+		86FF6C6C23CE488200A70A77 /* libYAZE.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 86FF6C6B23CE488200A70A77 /* libYAZE.a */; };
+		86FF6C7723CE4A7A00A70A77 /* MUZ_Workshop_roughTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 86FF6C7623CE4A7A00A70A77 /* MUZ_Workshop_roughTests.mm */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		86FF6C7923CE4A7A00A70A77 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 86599F4E23CDEC1C00D723C0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 86599F5523CDEC1C00D723C0;
+			remoteInfo = "MUZ-Workshop-rough";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		86599F5623CDEC1C00D723C0 /* MUZ-Workshop-rough.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MUZ-Workshop-rough.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		86599F5923CDEC1C00D723C0 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		86599F5B23CDEC1C00D723C0 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		86599F5D23CDEC1D00D723C0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		86599F6023CDEC1D00D723C0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		86599F6223CDEC1D00D723C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		86599F6323CDEC1D00D723C0 /* MUZ_Workshop_rough.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MUZ_Workshop_rough.entitlements; sourceTree = "<group>"; };
+		86599F6C23CDEC1D00D723C0 /* MUZ_Workshop_roughUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MUZ_Workshop_roughUITests.swift; sourceTree = "<group>"; };
+		86599F6E23CDEC1D00D723C0 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		86599F7923CDF1FF00D723C0 /* MUZ-Workshop-rough-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MUZ-Workshop-rough-Bridging-Header.h"; sourceTree = "<group>"; };
+		86599F7A23CDF1FF00D723C0 /* MuzBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MuzBridge.mm; sourceTree = "<group>"; };
+		86599F7D23CDFB6900D723C0 /* libmuzlib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libmuzlib.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		86FF6C6B23CE488200A70A77 /* libYAZE.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libYAZE.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		86FF6C7423CE4A7A00A70A77 /* MUZ-Workshop-roughTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MUZ-Workshop-roughTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		86FF6C7623CE4A7A00A70A77 /* MUZ_Workshop_roughTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MUZ_Workshop_roughTests.mm; sourceTree = "<group>"; };
+		86FF6C7823CE4A7A00A70A77 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		86599F5323CDEC1C00D723C0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86FF6C6C23CE488200A70A77 /* libYAZE.a in Frameworks */,
+				86599F7E23CDFB6900D723C0 /* libmuzlib.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86FF6C7123CE4A7A00A70A77 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		86599F4D23CDEC1C00D723C0 = {
+			isa = PBXGroup;
+			children = (
+				86599F5823CDEC1C00D723C0 /* MUZ-Workshop-rough */,
+				86599F6B23CDEC1D00D723C0 /* MUZ-Workshop-roughUITests */,
+				86FF6C7523CE4A7A00A70A77 /* MUZ-Workshop-roughTests */,
+				86599F5723CDEC1C00D723C0 /* Products */,
+				86599F7C23CDFB6900D723C0 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		86599F5723CDEC1C00D723C0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				86599F5623CDEC1C00D723C0 /* MUZ-Workshop-rough.app */,
+				86FF6C7423CE4A7A00A70A77 /* MUZ-Workshop-roughTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		86599F5823CDEC1C00D723C0 /* MUZ-Workshop-rough */ = {
+			isa = PBXGroup;
+			children = (
+				86599F7A23CDF1FF00D723C0 /* MuzBridge.mm */,
+				86599F5923CDEC1C00D723C0 /* AppDelegate.swift */,
+				86599F5B23CDEC1C00D723C0 /* ViewController.swift */,
+				86599F5D23CDEC1D00D723C0 /* Assets.xcassets */,
+				86599F5F23CDEC1D00D723C0 /* Main.storyboard */,
+				86599F6223CDEC1D00D723C0 /* Info.plist */,
+				86599F6323CDEC1D00D723C0 /* MUZ_Workshop_rough.entitlements */,
+				86599F7923CDF1FF00D723C0 /* MUZ-Workshop-rough-Bridging-Header.h */,
+			);
+			path = "MUZ-Workshop-rough";
+			sourceTree = "<group>";
+		};
+		86599F6B23CDEC1D00D723C0 /* MUZ-Workshop-roughUITests */ = {
+			isa = PBXGroup;
+			children = (
+				86599F6C23CDEC1D00D723C0 /* MUZ_Workshop_roughUITests.swift */,
+				86599F6E23CDEC1D00D723C0 /* Info.plist */,
+			);
+			path = "MUZ-Workshop-roughUITests";
+			sourceTree = "<group>";
+		};
+		86599F7C23CDFB6900D723C0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				86FF6C6B23CE488200A70A77 /* libYAZE.a */,
+				86599F7D23CDFB6900D723C0 /* libmuzlib.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		86FF6C7523CE4A7A00A70A77 /* MUZ-Workshop-roughTests */ = {
+			isa = PBXGroup;
+			children = (
+				86FF6C7623CE4A7A00A70A77 /* MUZ_Workshop_roughTests.mm */,
+				86FF6C7823CE4A7A00A70A77 /* Info.plist */,
+			);
+			path = "MUZ-Workshop-roughTests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		86599F5523CDEC1C00D723C0 /* MUZ-Workshop-rough */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 86599F7123CDEC1D00D723C0 /* Build configuration list for PBXNativeTarget "MUZ-Workshop-rough" */;
+			buildPhases = (
+				86599F5223CDEC1C00D723C0 /* Sources */,
+				86599F5323CDEC1C00D723C0 /* Frameworks */,
+				86599F5423CDEC1C00D723C0 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "MUZ-Workshop-rough";
+			productName = "MUZ-Workshop-rough";
+			productReference = 86599F5623CDEC1C00D723C0 /* MUZ-Workshop-rough.app */;
+			productType = "com.apple.product-type.application";
+		};
+		86FF6C7323CE4A7A00A70A77 /* MUZ-Workshop-roughTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 86FF6C7B23CE4A7A00A70A77 /* Build configuration list for PBXNativeTarget "MUZ-Workshop-roughTests" */;
+			buildPhases = (
+				86FF6C7023CE4A7A00A70A77 /* Sources */,
+				86FF6C7123CE4A7A00A70A77 /* Frameworks */,
+				86FF6C7223CE4A7A00A70A77 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				86FF6C7A23CE4A7A00A70A77 /* PBXTargetDependency */,
+			);
+			name = "MUZ-Workshop-roughTests";
+			productName = "MUZ-Workshop-roughTests";
+			productReference = 86FF6C7423CE4A7A00A70A77 /* MUZ-Workshop-roughTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		86599F4E23CDEC1C00D723C0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1130;
+				LastUpgradeCheck = 1130;
+				ORGANIZATIONNAME = "Francis Pierot";
+				TargetAttributes = {
+					86599F5523CDEC1C00D723C0 = {
+						CreatedOnToolsVersion = 11.3;
+						LastSwiftMigration = 1130;
+					};
+					86FF6C7323CE4A7A00A70A77 = {
+						CreatedOnToolsVersion = 11.3;
+						TestTargetID = 86599F5523CDEC1C00D723C0;
+					};
+				};
+			};
+			buildConfigurationList = 86599F5123CDEC1C00D723C0 /* Build configuration list for PBXProject "MUZ-Workshop-rough" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 86599F4D23CDEC1C00D723C0;
+			productRefGroup = 86599F5723CDEC1C00D723C0 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				86599F5523CDEC1C00D723C0 /* MUZ-Workshop-rough */,
+				86FF6C7323CE4A7A00A70A77 /* MUZ-Workshop-roughTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		86599F5423CDEC1C00D723C0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86599F5E23CDEC1D00D723C0 /* Assets.xcassets in Resources */,
+				86599F6123CDEC1D00D723C0 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86FF6C7223CE4A7A00A70A77 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		86599F5223CDEC1C00D723C0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86599F5C23CDEC1C00D723C0 /* ViewController.swift in Sources */,
+				86599F5A23CDEC1C00D723C0 /* AppDelegate.swift in Sources */,
+				86599F7B23CDF1FF00D723C0 /* MuzBridge.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		86FF6C7023CE4A7A00A70A77 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86FF6C7723CE4A7A00A70A77 /* MUZ_Workshop_roughTests.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		86FF6C7A23CE4A7A00A70A77 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 86599F5523CDEC1C00D723C0 /* MUZ-Workshop-rough */;
+			targetProxy = 86FF6C7923CE4A7A00A70A77 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		86599F5F23CDEC1D00D723C0 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				86599F6023CDEC1D00D723C0 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		86599F6F23CDEC1D00D723C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/../../../../MUZ",
+					"$(SOURCE_ROOT)/../../../../MUZ/muzlib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		86599F7023CDEC1D00D723C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/../../../../MUZ",
+					"$(SOURCE_ROOT)/../../../../MUZ/muzlib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		86599F7223CDEC1D00D723C0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = "MUZ-Workshop-rough/MUZ_Workshop_rough.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = "MUZ-Workshop-rough/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fpierot.MUZ-Workshop-rough";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "MUZ-Workshop-rough/MUZ-Workshop-rough-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		86599F7323CDEC1D00D723C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = "MUZ-Workshop-rough/MUZ_Workshop_rough.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = "MUZ-Workshop-rough/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fpierot.MUZ-Workshop-rough";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "MUZ-Workshop-rough/MUZ-Workshop-rough-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		86FF6C7C23CE4A7A00A70A77 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				INFOPLIST_FILE = "MUZ-Workshop-roughTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fpierot.MUZ-Workshop-roughTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MUZ-Workshop-rough.app/Contents/MacOS/MUZ-Workshop-rough";
+			};
+			name = Debug;
+		};
+		86FF6C7D23CE4A7A00A70A77 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = WNFC8B843E;
+				INFOPLIST_FILE = "MUZ-Workshop-roughTests/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.fpierot.MUZ-Workshop-roughTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MUZ-Workshop-rough.app/Contents/MacOS/MUZ-Workshop-rough";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		86599F5123CDEC1C00D723C0 /* Build configuration list for PBXProject "MUZ-Workshop-rough" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86599F6F23CDEC1D00D723C0 /* Debug */,
+				86599F7023CDEC1D00D723C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		86599F7123CDEC1D00D723C0 /* Build configuration list for PBXNativeTarget "MUZ-Workshop-rough" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86599F7223CDEC1D00D723C0 /* Debug */,
+				86599F7323CDEC1D00D723C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		86FF6C7B23CE4A7A00A70A77 /* Build configuration list for PBXNativeTarget "MUZ-Workshop-roughTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				86FF6C7C23CE4A7A00A70A77 /* Debug */,
+				86FF6C7D23CE4A7A00A70A77 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 86599F4E23CDEC1C00D723C0 /* Project object */;
+}
