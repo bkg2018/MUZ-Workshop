@@ -16,7 +16,8 @@
 #include "MUZ-Common/StrUtils.h"
 
 namespace MUZ {
-	
+
+
 	/** Returns true if current token is a comma, and go next token. Doesn't change current token if no comma found.
 	 @param codeline the parsed code line, with curtoken set to the start token for analysis
 	 @return true if a comma has been found

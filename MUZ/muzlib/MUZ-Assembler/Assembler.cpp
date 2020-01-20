@@ -7,16 +7,18 @@
 //
 
 #include "pch.h"
-#include <direct.h>
 #include "MUZ-Common/FileUtils.h"
 #include "MUZ-Common/Section.h"
 #include "Parser.h"
 #include "All-Directives.h"
-#include "Z80-Instructions.h"
+#include "Z180-Instructions.h"
+#include <list>
+#include <algorithm>
 
 using MUZ::BYTE;
 using MUZ::ADDRESSTYPE;
 using std::vector;
+using std::list;
 using std::string;
 
 #ifdef _WIN32
@@ -1500,7 +1502,11 @@ namespace MUZ {
 	Assembler::Assembler()
 	{
 		Reset();
-		
+
+		// enter known processors here
+		knownProcessors.push_back("Z80");
+		knownProcessors.push_back("Z180");
+
 		// Preprocessor directives
 		m_directives["DEFINE"] = new DirectiveDEFINE();
 		m_directives["UNDEF"] = new DirectiveUNDEFINE();
@@ -1567,7 +1573,7 @@ namespace MUZ {
 	/** Sets the instruction and operand set. */
 	void Assembler::SetInstructions(std::string name)
 	{
-		if (name=="Z80") {
+		if (name=="Z80" | name=="Z180") {
 			m_instructions.clear();
 			m_instructions["LD"] = new Z80::InstructionLD();
 			m_instructions["PUSH"] = new Z80::InstructionPUSH();
@@ -1637,6 +1643,20 @@ namespace MUZ {
 			m_instructions["OTIR"] = new Z80::InstructionOTIR();
 			m_instructions["OUTD"] = new Z80::InstructionOUTD();
 			m_instructions["OTDR"] = new Z80::InstructionOTDR();
+			if (name=="Z180") {
+				m_instructions["MLT"] = new Z180::InstructionMLT();
+				m_instructions["MULT"] = new Z180::InstructionMLT();
+				m_instructions["OTIM"] = new Z180::InstructionOTIM();
+				m_instructions["OTIMR"] = new Z180::InstructionOTIMR();
+				m_instructions["OTDM"] = new Z180::InstructionOTDM();
+				m_instructions["OTDMR"] = new Z180::InstructionOTDMR();
+				m_instructions["IN0"] = new Z180::InstructionIN0();
+				m_instructions["OUT0"] = new Z180::InstructionOUT0();
+				m_instructions["SLP"] = new Z180::InstructionSLP();
+				m_instructions["TST"] = new Z180::InstructionTST();
+				m_instructions["TSTIO"] = new Z180::InstructionTSTIO();
+
+			}
 		}
 	}
 
@@ -2072,6 +2092,15 @@ namespace MUZ {
 		// lines go from 1 to N
 		if (line < 1 || line > sourcefile->lines.size()) return nullptr;
 		return &sourcefile->lines.at(line - 1);
+	}
+
+	/** Known Processor check **/
+	bool Assembler::isKnownProcessor(std::string name)
+	{
+		if (std::find(knownProcessors.begin(), knownProcessors.end(), name)==knownProcessors.end()) {
+			return false;
+		}
+		return true;
 	}
 
 	//MARK: - Listing in memory

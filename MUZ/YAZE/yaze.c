@@ -324,10 +324,10 @@ main(int argc, char **argv)
 	    break;
 #endif
 	case 'h':
-	    term_height = strtol(optarg, NULL, 10);
+	    term_height = (int)strtol(optarg, NULL, 10);
 	    break;
 	case 'w':
-	    term_width = strtol(optarg, NULL, 10);
+	    term_width = (int)strtol(optarg, NULL, 10);
 	    break;
 	case '?':
 	    usage();

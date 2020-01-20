@@ -66,6 +66,7 @@
 		86ABFE6921F476260010245E /* StrUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFE2B21F476260010245E /* StrUtils.cpp */; };
 		86D47DE621F72F1C00AC055B /* pch.h in Headers */ = {isa = PBXBuildFile; fileRef = 86D47DE421F72F1B00AC055B /* pch.h */; };
 		86D47DE721F72F1C00AC055B /* pch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86D47DE521F72F1B00AC055B /* pch.cpp */; };
+		86FF6C8423CE4EFD00A70A77 /* Z180-Instructions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86FF6C8323CE4EFD00A70A77 /* Z180-Instructions.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -134,6 +135,8 @@
 		86ABFE2B21F476260010245E /* StrUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StrUtils.cpp; sourceTree = "<group>"; };
 		86D47DE421F72F1B00AC055B /* pch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pch.h; path = ../muzlib/pch.h; sourceTree = "<group>"; };
 		86D47DE521F72F1B00AC055B /* pch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pch.cpp; path = ../muzlib/pch.cpp; sourceTree = "<group>"; };
+		86FF6C7E23CE4D5000A70A77 /* Z180-Instructions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Z180-Instructions.h"; sourceTree = "<group>"; };
+		86FF6C8323CE4EFD00A70A77 /* Z180-Instructions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Z180-Instructions.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -234,6 +237,8 @@
 		86ABFE0321F476260010245E /* MUZ-Assembler */ = {
 			isa = PBXGroup;
 			children = (
+				86FF6C8C23CE938500A70A77 /* Z-180 */,
+				86FF6C8B23CE937D00A70A77 /* Z-80 */,
 				86ABFE0F21F476260010245E /* All-Directives.cpp */,
 				86ABFE1A21F476260010245E /* All-Directives.h */,
 				86ABFE0421F476260010245E /* All-Operators.cpp */,
@@ -260,10 +265,6 @@
 				86ABFE0821F476260010245E /* ParseToken.h */,
 				86ABFE1621F476260010245E /* ParsingMode.h */,
 				86ABFE1B21F476260010245E /* TokenType.h */,
-				86ABFE1221F476260010245E /* Z80-Instructions.cpp */,
-				86ABFE2121F476260010245E /* Z80-Instructions.h */,
-				86ABFE1021F476260010245E /* Z80-Operands.cpp */,
-				86ABFE2221F476260010245E /* Z80-Operands.h */,
 			);
 			path = "MUZ-Assembler";
 			sourceTree = "<group>";
@@ -281,6 +282,26 @@
 				86ABFE2621F476260010245E /* Types.h */,
 			);
 			path = "MUZ-Common";
+			sourceTree = "<group>";
+		};
+		86FF6C8B23CE937D00A70A77 /* Z-80 */ = {
+			isa = PBXGroup;
+			children = (
+				86ABFE1221F476260010245E /* Z80-Instructions.cpp */,
+				86ABFE2121F476260010245E /* Z80-Instructions.h */,
+				86ABFE1021F476260010245E /* Z80-Operands.cpp */,
+				86ABFE2221F476260010245E /* Z80-Operands.h */,
+			);
+			path = "Z-80";
+			sourceTree = "<group>";
+		};
+		86FF6C8C23CE938500A70A77 /* Z-180 */ = {
+			isa = PBXGroup;
+			children = (
+				86FF6C8323CE4EFD00A70A77 /* Z180-Instructions.cpp */,
+				86FF6C7E23CE4D5000A70A77 /* Z180-Instructions.h */,
+			);
+			path = "Z-180";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -396,6 +417,7 @@
 				86ABFE2C21F476260010245E /* Computer.cpp in Sources */,
 				86ABFE3021F476260010245E /* Module.cpp in Sources */,
 				86ABFE4321F476260010245E /* All-Operators.cpp in Sources */,
+				86FF6C8423CE4EFD00A70A77 /* Z180-Instructions.cpp in Sources */,
 				86ABFE3921F476260010245E /* PortMgr.cpp in Sources */,
 				86ABFE6921F476260010245E /* StrUtils.cpp in Sources */,
 				86ABFE5121F476260010245E /* Z80-Instructions.cpp in Sources */,

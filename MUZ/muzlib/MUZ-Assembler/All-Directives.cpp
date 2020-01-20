@@ -279,7 +279,7 @@ namespace MUZ {
 		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(false);// allow string expressions
 		ParseToken& proc = parser.NextToken();
-		if (proc.source != "Z80") {
+		if (! as.isKnownProcessor(proc.source)) {
 			return msg.Error(errorProcessor, codeline);
 			}
 		// sets the instructions set into the assembler

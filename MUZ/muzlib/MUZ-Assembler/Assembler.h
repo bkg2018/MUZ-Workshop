@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <vector>
 #include <unordered_map>
+#include <list>
 
 #include "MUZ-Common/Types.h"
 #include "MUZ-Common/Exceptions.h"
@@ -28,6 +29,9 @@ namespace MUZ {
 	
 	class Assembler
 	{
+		// list of known processors
+		std::list<std::string> knownProcessors;
+
 	public:
 		//MARK: - Public structures for API
 
@@ -285,6 +289,9 @@ namespace MUZ {
 		Listing GetListing(ErrorList& msg);
 		/** Terminates assembly at next line */
 		void Terminate();
+
+		/** Known Processor check **/
+		bool isKnownProcessor(std::string name);
 
 		/** Save a memory listing to a text file. Use "stdout" to print on standard output. */
 		void SaveListing( Listing & listing, std::string file, ErrorList& msg);

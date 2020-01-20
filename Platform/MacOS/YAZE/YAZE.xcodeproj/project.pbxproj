@@ -7,135 +7,120 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		86670A0921F5C3EC00B2811A /* libmuzlib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 86670A0821F5C3EC00B2811A /* libmuzlib.a */; };
-		86ABFDC721F405F30010245E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86ABFDC621F405F30010245E /* main.cpp */; };
-		86ABFE6D21F476A10010245E /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86ABFE6C21F476A10010245E /* QuartzCore.framework */; };
+		86599FA523CDFF0300D723C0 /* mem_mmu.h in Headers */ = {isa = PBXBuildFile; fileRef = 86599F9B23CDFF0300D723C0 /* mem_mmu.h */; };
+		86599FA823CDFF0300D723C0 /* mem_mmu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86599F9E23CDFF0300D723C0 /* mem_mmu.cpp */; };
+		86599FA923CDFF0300D723C0 /* simz80.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86599F9F23CDFF0300D723C0 /* simz80.cpp */; };
+		86599FAA23CDFF0300D723C0 /* ytypes.h in Headers */ = {isa = PBXBuildFile; fileRef = 86599FA023CDFF0300D723C0 /* ytypes.h */; };
+		86599FAB23CDFF0300D723C0 /* muz_mmu.h in Headers */ = {isa = PBXBuildFile; fileRef = 86599FA123CDFF0300D723C0 /* muz_mmu.h */; };
+		86599FAC23CDFF0300D723C0 /* muz_simz80.h in Headers */ = {isa = PBXBuildFile; fileRef = 86599FA223CDFF0300D723C0 /* muz_simz80.h */; };
+		86599FAD23CDFF0300D723C0 /* simz80.h in Headers */ = {isa = PBXBuildFile; fileRef = 86599FA323CDFF0300D723C0 /* simz80.h */; };
+		86599FAE23CDFF0300D723C0 /* dummy_yaze.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 86599FA423CDFF0300D723C0 /* dummy_yaze.cpp */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		86670A0D21F5CE2800B2811A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 86670A0621F5C3E300B2811A /* muzlib.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 86ABFDDA21F475F20010245E;
-			remoteInfo = muzlib;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		86ABFDC121F405F30010245E /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 1;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		86670A0621F5C3E300B2811A /* muzlib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = muzlib.xcodeproj; path = ../muzlib/muzlib.xcodeproj; sourceTree = "<group>"; };
-		86670A0821F5C3EC00B2811A /* libmuzlib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libmuzlib.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		86ABFDC321F405F30010245E /* asmuz */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = asmuz; sourceTree = BUILT_PRODUCTS_DIR; };
-		86ABFDC621F405F30010245E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		86ABFDCD21F4062D0010245E /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		86ABFE6C21F476A10010245E /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		86599F8D23CDFED800D723C0 /* libYAZE.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libYAZE.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		86599F9B23CDFF0300D723C0 /* mem_mmu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = mem_mmu.h; path = ../../../../MUZ/YAZE/mem_mmu.h; sourceTree = "<group>"; };
+		86599F9E23CDFF0300D723C0 /* mem_mmu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mem_mmu.cpp; path = ../../../../MUZ/YAZE/mem_mmu.cpp; sourceTree = "<group>"; };
+		86599F9F23CDFF0300D723C0 /* simz80.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = simz80.cpp; path = ../../../../MUZ/YAZE/simz80.cpp; sourceTree = "<group>"; };
+		86599FA023CDFF0300D723C0 /* ytypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ytypes.h; path = ../../../../MUZ/YAZE/ytypes.h; sourceTree = "<group>"; };
+		86599FA123CDFF0300D723C0 /* muz_mmu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = muz_mmu.h; path = ../../../../MUZ/YAZE/muz_mmu.h; sourceTree = "<group>"; };
+		86599FA223CDFF0300D723C0 /* muz_simz80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = muz_simz80.h; path = ../../../../MUZ/YAZE/muz_simz80.h; sourceTree = "<group>"; };
+		86599FA323CDFF0300D723C0 /* simz80.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = simz80.h; path = ../../../../MUZ/YAZE/simz80.h; sourceTree = "<group>"; };
+		86599FA423CDFF0300D723C0 /* dummy_yaze.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dummy_yaze.cpp; path = ../../../../MUZ/YAZE/dummy_yaze.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		86ABFDC021F405F30010245E /* Frameworks */ = {
+		86599F8B23CDFED800D723C0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				86670A0921F5C3EC00B2811A /* libmuzlib.a in Frameworks */,
-				86ABFE6D21F476A10010245E /* QuartzCore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		86670A0A21F5CE2800B2811A /* Products */ = {
+		86599F8423CDFED800D723C0 = {
 			isa = PBXGroup;
 			children = (
-				86670A0E21F5CE2800B2811A /* libmuzlib.a */,
+				86599F8F23CDFED800D723C0 /* YAZE */,
+				86599F8E23CDFED800D723C0 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		86599F8E23CDFED800D723C0 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				86599F8D23CDFED800D723C0 /* libYAZE.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		86ABFDBA21F405F30010245E = {
+		86599F8F23CDFED800D723C0 /* YAZE */ = {
 			isa = PBXGroup;
 			children = (
-				86ABFDCD21F4062D0010245E /* README.md */,
-				86ABFDC521F405F30010245E /* asmuz */,
-				86ABFDC421F405F30010245E /* Products */,
-				86ABFDCE21F473FB0010245E /* Frameworks */,
+				86599FA423CDFF0300D723C0 /* dummy_yaze.cpp */,
+				86599F9E23CDFF0300D723C0 /* mem_mmu.cpp */,
+				86599F9B23CDFF0300D723C0 /* mem_mmu.h */,
+				86599FA123CDFF0300D723C0 /* muz_mmu.h */,
+				86599FA223CDFF0300D723C0 /* muz_simz80.h */,
+				86599F9F23CDFF0300D723C0 /* simz80.cpp */,
+				86599FA323CDFF0300D723C0 /* simz80.h */,
+				86599FA023CDFF0300D723C0 /* ytypes.h */,
 			);
-			sourceTree = "<group>";
-		};
-		86ABFDC421F405F30010245E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				86ABFDC321F405F30010245E /* asmuz */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		86ABFDC521F405F30010245E /* asmuz */ = {
-			isa = PBXGroup;
-			children = (
-				86ABFDC621F405F30010245E /* main.cpp */,
-			);
-			name = asmuz;
-			path = ../../../MUZ/asmuz;
-			sourceTree = "<group>";
-		};
-		86ABFDCE21F473FB0010245E /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				86ABFE6C21F476A10010245E /* QuartzCore.framework */,
-				86670A0821F5C3EC00B2811A /* libmuzlib.a */,
-				86670A0621F5C3E300B2811A /* muzlib.xcodeproj */,
-			);
-			name = Frameworks;
+			path = YAZE;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		86599F8923CDFED800D723C0 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86599FA523CDFF0300D723C0 /* mem_mmu.h in Headers */,
+				86599FAB23CDFF0300D723C0 /* muz_mmu.h in Headers */,
+				86599FAA23CDFF0300D723C0 /* ytypes.h in Headers */,
+				86599FAC23CDFF0300D723C0 /* muz_simz80.h in Headers */,
+				86599FAD23CDFF0300D723C0 /* simz80.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
-		86ABFDC221F405F30010245E /* asmuz */ = {
+		86599F8C23CDFED800D723C0 /* YAZE */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 86ABFDCA21F405F30010245E /* Build configuration list for PBXNativeTarget "asmuz" */;
+			buildConfigurationList = 86599F9823CDFED800D723C0 /* Build configuration list for PBXNativeTarget "YAZE" */;
 			buildPhases = (
-				86ABFDBF21F405F30010245E /* Sources */,
-				86ABFDC021F405F30010245E /* Frameworks */,
-				86ABFDC121F405F30010245E /* CopyFiles */,
+				86599F8923CDFED800D723C0 /* Headers */,
+				86599F8A23CDFED800D723C0 /* Sources */,
+				86599F8B23CDFED800D723C0 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = asmuz;
-			productName = asmuz;
-			productReference = 86ABFDC321F405F30010245E /* asmuz */;
-			productType = "com.apple.product-type.tool";
+			name = YAZE;
+			productName = YAZE;
+			productReference = 86599F8D23CDFED800D723C0 /* libYAZE.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		86ABFDBB21F405F30010245E /* Project object */ = {
+		86599F8523CDFED800D723C0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = "Francis Pierot";
 				TargetAttributes = {
-					86ABFDC221F405F30010245E = {
-						CreatedOnToolsVersion = 10.1;
+					86599F8C23CDFED800D723C0 = {
+						CreatedOnToolsVersion = 11.3;
 					};
 				};
 			};
-			buildConfigurationList = 86ABFDBE21F405F30010245E /* Build configuration list for PBXProject "asmuz" */;
+			buildConfigurationList = 86599F8823CDFED800D723C0 /* Build configuration list for PBXProject "YAZE" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -143,49 +128,34 @@
 				en,
 				Base,
 			);
-			mainGroup = 86ABFDBA21F405F30010245E;
-			productRefGroup = 86ABFDC421F405F30010245E /* Products */;
+			mainGroup = 86599F8423CDFED800D723C0;
+			productRefGroup = 86599F8E23CDFED800D723C0 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 86670A0A21F5CE2800B2811A /* Products */;
-					ProjectRef = 86670A0621F5C3E300B2811A /* muzlib.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
-				86ABFDC221F405F30010245E /* asmuz */,
+				86599F8C23CDFED800D723C0 /* YAZE */,
 			);
 		};
 /* End PBXProject section */
 
-/* Begin PBXReferenceProxy section */
-		86670A0E21F5CE2800B2811A /* libmuzlib.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libmuzlib.a;
-			remoteRef = 86670A0D21F5CE2800B2811A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
-
 /* Begin PBXSourcesBuildPhase section */
-		86ABFDBF21F405F30010245E /* Sources */ = {
+		86599F8A23CDFED800D723C0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				86ABFDC721F405F30010245E /* main.cpp in Sources */,
+				86599FA923CDFF0300D723C0 /* simz80.cpp in Sources */,
+				86599FA823CDFF0300D723C0 /* mem_mmu.cpp in Sources */,
+				86599FAE23CDFF0300D723C0 /* dummy_yaze.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		86ABFDC821F405F30010245E /* Debug */ = {
+		86599F9623CDFED800D723C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ADDRESS_SANITIZER_CONTAINER_OVERFLOW = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -214,7 +184,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -233,10 +202,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"\"$(SRCROOT)/../../../MUZ\"",
-					"\"$(SRCROOT)/../../../MUZ/MUZlib\"",
-				);
+				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/../../../MUZ/muzlib";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -245,11 +211,10 @@
 			};
 			name = Debug;
 		};
-		86ABFDC921F405F30010245E /* Release */ = {
+		86599F9723CDFED800D723C0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_ADDRESS_SANITIZER_CONTAINER_OVERFLOW = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -278,7 +243,6 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -291,10 +255,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"\"$(SRCROOT)/../../../MUZ\"",
-					"\"$(SRCROOT)/../../../MUZ/MUZlib\"",
-				);
+				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/../../../MUZ/muzlib";
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -302,48 +263,54 @@
 			};
 			name = Release;
 		};
-		86ABFDCB21F405F30010245E /* Debug */ = {
+		86599F9923CDFED800D723C0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WNFC8B843E;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
-		86ABFDCC21F405F30010245E /* Release */ = {
+		86599F9A23CDFED800D723C0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WNFC8B843E;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		86ABFDBE21F405F30010245E /* Build configuration list for PBXProject "asmuz" */ = {
+		86599F8823CDFED800D723C0 /* Build configuration list for PBXProject "YAZE" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				86ABFDC821F405F30010245E /* Debug */,
-				86ABFDC921F405F30010245E /* Release */,
+				86599F9623CDFED800D723C0 /* Debug */,
+				86599F9723CDFED800D723C0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		86ABFDCA21F405F30010245E /* Build configuration list for PBXNativeTarget "asmuz" */ = {
+		86599F9823CDFED800D723C0 /* Build configuration list for PBXNativeTarget "YAZE" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				86ABFDCB21F405F30010245E /* Debug */,
-				86ABFDCC21F405F30010245E /* Release */,
+				86599F9923CDFED800D723C0 /* Debug */,
+				86599F9A23CDFED800D723C0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 86ABFDBB21F405F30010245E /* Project object */;
+	rootObject = 86599F8523CDFED800D723C0 /* Project object */;
 }
