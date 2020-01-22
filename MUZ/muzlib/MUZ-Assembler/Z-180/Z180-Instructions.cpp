@@ -6,9 +6,9 @@
 //  Copyright © 2018 Francis Pierot. All rights reserved.
 //
 #include "pch.h"
-#include "Assembler.h"
-#include "All-Directives.h"
-#include "Z80-Operands.h"
+#include "MUZ-Assembler\Assembler.h"
+#include "MUZ-Assembler\All-Directives.h"
+#include "MUZ-Assembler\Z-80\Z80-Operands.h"
 #include "Z180-Instructions.h"
 
 using namespace MUZ::Z80;

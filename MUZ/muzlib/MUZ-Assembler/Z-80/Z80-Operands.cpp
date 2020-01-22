@@ -7,11 +7,11 @@
 //
 #include "pch.h"
 #include "Z80-Operands.h"
-#include "ParseToken.h"
-#include "Expression.h"
-#include "CodeLine.h"
-#include "Assembler.h"
-#include "All-Directives.h"
+#include "MUZ-Assembler\ParseToken.h"
+#include "MUZ-Assembler\Expression.h"
+#include "MUZ-Assembler\CodeLine.h"
+#include "MUZ-Assembler\Assembler.h"
+#include "MUZ-Assembler\All-Directives.h"
 
 namespace MUZ {
 namespace Z80 {
