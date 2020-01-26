@@ -176,6 +176,11 @@ namespace MUZ {
 		 */
 		bool EvaluateAddress(ADDRESSTYPE & result) noexcept(false);
 
+		/** Evaluate nexxt tokens to produce a 32-bit integer number
+		 @throw EXPRESSIONLeftOperandMissing
+		 */
+		bool EvaluateInteger(DWORD & result) noexcept(false);
+
 		/** Cuts a string into a vector of tokens.
 		 Spaces and tabs are not stored in tokens, only the significant parts are stored.
 		 A vector of warnings can be returned.

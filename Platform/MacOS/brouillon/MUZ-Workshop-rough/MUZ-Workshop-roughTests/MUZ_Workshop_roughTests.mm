@@ -262,7 +262,7 @@ std::string RomHexFilePath ;
 - (void)testConditionnalsAssembler {
 	MUZ::Assembler as;
 	MUZ::ErrorList msg;
-	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testConditionnalsAssembler.LST");
 	as.AssembleFile(SourcesRootDir + "Conditionnals.asm", msg);
 	// dump warnings?
@@ -276,7 +276,7 @@ std::string RomHexFilePath ;
 - (void)testExpressionsAssembler {
 	MUZ::Assembler as;
 	MUZ::ErrorList msg;
-	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testExpressionsAssembler.LST");
 	as.AssembleFile(SourcesRootDir + "Expressions.asm", msg);
 }
@@ -285,9 +285,23 @@ std::string RomHexFilePath ;
 	MUZ::Assembler as;
 	MUZ::CodeLine codeline;
 	MUZ::ErrorList msg;
-	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testInclude.LST");
 	codeline = as.AssembleLine("#INCLUDE    /Users/bkg2018/Desktop/SCWorkshop019_SCMonitor100_20181027/SCMonitor/Source/Hardware\\Custom\\Config_R0.asm", msg);
+}
+
+- (void)testBigIntegerEquate {
+	MUZ::Assembler as;
+	MUZ::ErrorList msg;
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output");
+	as.SetListingFilename("testLongIntegerEqu.LST");
+	as.AssembleFile(SourcesRootDir + "LongIntegerEqu.asm", msg);
+	// dump warnings?
+	for (MUZ::ErrorMessage& m : msg) {
+		if (m.type == MUZ::errorTypeWARNING) {
+			printf("%s(%d): %s\n", as.GetFileName(m.file).c_str(), (int)m.line, msg.GetMessage(m.kind).c_str());
+		}
+	}
 }
 
 -(void) testEquate {
@@ -309,6 +323,26 @@ std::string RomHexFilePath ;
 	MUZ::CodeLine codeline;
 	MUZ::ErrorList msg;
 	codeline = as.AssembleLine(".DB  0xDB,0xFF,0x44,0x23,0x03", msg);
+}
+
+- (void)testHexchar {
+	MUZ::Assembler as;
+	MUZ::CodeLine codeline;
+	MUZ::ErrorList msg;
+	codeline = as.AssembleLine(".DB  \"0x\", HEXCHAR 255,  0", msg);
+	XCTAssertEqual(codeline.code.size(), 5);
+}
+
+- (void)testBignumber {
+	MUZ::Assembler as;
+	MUZ::CodeLine codeline;
+	MUZ::ErrorList msg;
+	codeline = as.AssembleLine("kCPUClock .EQU 18432000", msg);
+	auto kCPUClock = as.GetLabel("kCPUClock");
+	XCTAssertEqual(kCPUClock->addresses[0], 18432000);
+	codeline = as.AssembleLine("kDelay .EQU kCPUClock/1000", msg);
+	auto kDelay = as.GetLabel("kDelay");
+	XCTAssertEqual(kDelay->addresses[0], 18432);
 }
 
 -(void) testParseUnitaryExpressions {
@@ -615,7 +649,7 @@ std::string RomHexFilePath ;
 -(void) testInstructionCodes {
 	MUZ::Assembler as;
 	MUZ::ErrorList msg;
-	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testInstructionsCodes.LST");
 	as.SetMemoryFilename("testInstructionsCodesMemory.LST");
 	as.SetIntelHexFilename("testInstructionsCodesIntelHex.HEX");
@@ -625,7 +659,7 @@ std::string RomHexFilePath ;
 -(void) testZ80InstructionCodes {
 	MUZ::Assembler as;
 	MUZ::ErrorList msg;
-	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testZ80InstructionsCodes.LST");
 	as.SetMemoryFilename("testZ80InstructionsCodesMemory.LST");
 	as.SetIntelHexFilename("testZ80InstructionsCodesIntelHex.HEX");
@@ -637,7 +671,7 @@ std::string RomHexFilePath ;
 -(void) testErrors {
 	MUZ::Assembler as;
 	MUZ::ErrorList msg;
-	as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+	as.SetOutputDirectory("/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testErrors.LST");
 	as.SetMemoryFilename("testErrorsMemory.LST");
 	as.SetIntelHexFilename("testErrorsIntelHex.HEX");
@@ -660,7 +694,7 @@ std::string RomHexFilePath ;
 		as.Reset();
 		msg.Clear();
 		//printf("%d : start time %f\n", i+1, CACurrentMediaTime()-startTime);
-		as.SetOutputDirectory("/Users/bkg2018/Desktop/RC2014/MUZ-Workshop/Output");
+		as.SetOutputDirectory("/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output");
 		as.SetListingFilename("testAssembler20190124.LST");
 		as.SetMemoryFilename("testAssemblerMemory20190124.LST");
 		as.SetIntelHexFilename("testAssemblerIntelHex20190124.HEX");
@@ -679,5 +713,6 @@ std::string RomHexFilePath ;
 	printf("Time per assembly: %f\n", elapsedTime / nbloops);
 
 }
+
 
 @end

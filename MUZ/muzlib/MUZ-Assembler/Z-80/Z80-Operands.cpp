@@ -296,7 +296,7 @@ namespace Z80 {
 			value = 0;
 			return operrUNSOLVED;
 		}
-		value = evaluated.asNumber();
+		value = evaluated.asAddress();
 		return operrOK;
 	}
 
@@ -317,7 +317,7 @@ namespace Z80 {
 			return operrUNSOLVED;
 		}
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
-			int value = evaluated.asNumber();
+			int value = evaluated.asAddress();
 			if (value < 0 || value > 7) return operrNOTBIT;
 			if (value == 0) bit = bit0;
 			else if (value == 1) bit = bit1;
@@ -364,7 +364,7 @@ namespace Z80 {
 			return operrUNSOLVED;
 		}
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
-			value = evaluated.asNumber();
+			value = evaluated.asAddress();
 			if (value > 255) return operrTOOBIG;
 			curtoken = lasttoken + 1;
 			return operrOK;
@@ -383,7 +383,7 @@ namespace Z80 {
 			return operrUNSOLVED;
 		}
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
-			value = evaluated.asNumber();
+			value = evaluated.asAddress();
 			if (value > 65535) return operrTOOBIG;
 			curtoken = lasttoken + 1;
 			return operrOK;
@@ -423,7 +423,7 @@ namespace Z80 {
 			return operrUNSOLVED;
 		}
 		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
-			value = evaluated.asNumber();
+			value = evaluated.asAddress();
 			return operrOK;
 		}
 		return operrNOTNUMBER;

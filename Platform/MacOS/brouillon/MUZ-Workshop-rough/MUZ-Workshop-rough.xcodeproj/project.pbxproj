@@ -40,6 +40,7 @@
 		86599F7923CDF1FF00D723C0 /* MUZ-Workshop-rough-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MUZ-Workshop-rough-Bridging-Header.h"; sourceTree = "<group>"; };
 		86599F7A23CDF1FF00D723C0 /* MuzBridge.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MuzBridge.mm; sourceTree = "<group>"; };
 		86599F7D23CDFB6900D723C0 /* libmuzlib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libmuzlib.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		86D773DA23DC583F00DB7E1F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		86FF6C6B23CE488200A70A77 /* libYAZE.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libYAZE.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		86FF6C7423CE4A7A00A70A77 /* MUZ-Workshop-roughTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "MUZ-Workshop-roughTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		86FF6C7623CE4A7A00A70A77 /* MUZ_Workshop_roughTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = MUZ_Workshop_roughTests.mm; sourceTree = "<group>"; };
@@ -69,6 +70,7 @@
 		86599F4D23CDEC1C00D723C0 = {
 			isa = PBXGroup;
 			children = (
+				86D773DA23DC583F00DB7E1F /* README.md */,
 				86599F5823CDEC1C00D723C0 /* MUZ-Workshop-rough */,
 				86599F6B23CDEC1D00D723C0 /* MUZ-Workshop-roughUITests */,
 				86FF6C7523CE4A7A00A70A77 /* MUZ-Workshop-roughTests */,

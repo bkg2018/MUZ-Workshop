@@ -54,7 +54,7 @@ namespace MUZ {
 		/** Maximum clock cycles, generally when a jump happens because a condition is met. */
 		int					cyclesmax = 0;
 		/** Starting address for this line. */
-		ADDRESSTYPE			address = 0;
+		DWORD				address = 0;
 		/** Pointer to the code or data section where this line is stored iff it contains code. */
 		class Section*		section = nullptr;
 		/** File reference for the Assembler if this line includes another file. */

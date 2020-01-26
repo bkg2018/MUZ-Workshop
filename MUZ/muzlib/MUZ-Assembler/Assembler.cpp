@@ -14,6 +14,7 @@
 #include "Z180-Instructions.h"
 #include <list>
 #include <algorithm>
+#include <unistd.h>
 
 using MUZ::BYTE;
 using MUZ::ADDRESSTYPE;
@@ -30,7 +31,7 @@ namespace MUZ {
 
 	// Prototypes to avoid warnings
 	string buildCodes(vector<BYTE> code, size_t firstcode, size_t nbcodes);
-	Assembler::ListingLine buildOneListingLineStructure(ADDRESSTYPE address, vector<DATATYPE> code, size_t firstcode, size_t nbcodes, Label* label, std::string defsymbol, size_t file, size_t line, string source, int message);
+	Assembler::ListingLine buildOneListingLineStructure(DWORD address, vector<DATATYPE> code, size_t firstcode, size_t nbcodes, Label* label, std::string defsymbol, size_t file, size_t line, string source, int message);
 	Assembler::ListingLine buildOneListingLineStructure(size_t file, size_t line, string source, ErrorList& msg);
 	Assembler::Listing buildListingLineStructures(CodeLine& codeline, ErrorList& msg, bool all );
 
@@ -83,7 +84,7 @@ namespace MUZ {
 	 @param source the source code to display after address, code and line number
 	 @return the string containing the listing line
 	 */
-	Assembler::ListingLine buildOneListingLineStructure(ADDRESSTYPE address, vector<DATATYPE> code, size_t firstcode, size_t nbcodes, Label* label, std::string defsymbol, size_t file, size_t line, string source, int message)
+	Assembler::ListingLine buildOneListingLineStructure(DWORD address, vector<DATATYPE> code, size_t firstcode, size_t nbcodes, Label* label, std::string defsymbol, size_t file, size_t line, string source, int message)
 	{
 		Assembler::ListingLine ll;
 
@@ -146,9 +147,9 @@ namespace MUZ {
 			ll.line = line;
 			ll.parts.line = -1;
 			ll.source = instr;
-			ll.parts.source = instr.empty() ? 0 : 1;
+			ll.parts.source = instr.empty() ? 0 : -1;
 			ll.comment = comment;
-			ll.parts.comment = comment.empty() ? 0 : 1;
+			ll.parts.comment = comment.empty() ? 0 : -1;
 		}
 		// for all lines of code, include byte codes
 		if (! code.empty()) {
@@ -200,8 +201,8 @@ namespace MUZ {
 			// rest of listing
 			if (all) {
 				// each packet of 4 code bytes
-				for (size_t start = 4 ; start < codeline.code.size() ; start += 4) {
-					result.push_back(buildOneListingLineStructure((ADDRESSTYPE)(ADDRESSMASK & (codeline.address + start)), code, start, 4, nullptr, "", 0, 0, "", -1));
+				for (DWORD start = 4 ; start < codeline.code.size() ; start += 4) {
+					result.push_back(buildOneListingLineStructure(codeline.address + start, code, start, 4, nullptr, "", 0, 0, "", -1));
 				}
 			} else {
 				// one line only with 1 to 3 bytes of code bytes 4 to 7, then "..." if there's more
@@ -575,14 +576,14 @@ namespace MUZ {
 		// '4CC101A0FF4DC101B0FF4EC10144FF4F' - up to nbbytes data
 		// '2A' - control byte
 		string line;
-		ADDRESSTYPE nbbytes;
+		DWORD nbbytes;
 		Section* asmsection;
 		
 		// for each address range in the parameter section
 		for (auto &range: section.m_ranges) {
 			
 			// for each address in the range
-			for (ADDRESSTYPE dumpaddress = range.start ; dumpaddress <= range.end ; dumpaddress += 16) {
+			for (DWORD dumpaddress = range.start ; dumpaddress <= range.end ; dumpaddress += 16) {
 				
 				// prepare up to <m_hexbytes>
 				nbbytes = m_hexbytes;
@@ -601,8 +602,8 @@ namespace MUZ {
 				// code comes from a code or saved-data section
 				line = ":";
 				line = line + data_to_hex((DATATYPE)(DATAMASK & nbbytes)) + address_to_base(dumpaddress, 16, 4) + "00"; // nbbytes, address, record type
-				int sum = nbbytes + (dumpaddress >> 8) + (dumpaddress & 0xFF); // start control sum with bytes after ':'
-				for (ADDRESSTYPE address = dumpaddress ; address < dumpaddress + nbbytes ; address += 1) {
+				DWORD sum = nbbytes + (dumpaddress >> 8) + (dumpaddress & 0xFF); // start control sum with bytes after ':'
+				for (DWORD address = dumpaddress ; address < dumpaddress + nbbytes ; address += 1) {
 					line = line + data_to_hex(memory[address]);
 					sum = sum + memory[address];
 				}
@@ -758,8 +759,8 @@ namespace MUZ {
 		std::map<ADDRESSTYPE, string> addressSortedLabels;	// map ordered by address
 		for (auto label: labels) {
 			if ( ! label.second->equate) {
-				nameSortedLabels[label.first] = label.second->addresses[0];
-				addressSortedLabels[label.second->addresses[0]] = label.first;
+				nameSortedLabels[label.first] = (ADDRESSTYPE)label.second->addresses[0];
+				addressSortedLabels[(ADDRESSTYPE)label.second->addresses[0]] = label.first;
 			}
 		}
 		// list global labels sorted by value then name
@@ -819,7 +820,7 @@ namespace MUZ {
 				FillFromFile(codeline.includefile, memory, section, msg);
 			} else if (codeline.code.size() > 0) {
 				// copy this line code in memory image
-				ADDRESSTYPE address = codeline.address;
+				DWORD address = codeline.address;
 				for (auto c: codeline.code) {
 					memory[address] = c;
 					section.SetAddress(address);
@@ -1691,8 +1692,8 @@ namespace MUZ {
 	void Assembler::SetOutputDirectory(std::string directory)
 	{
 		m_outputdir = directory;
-		if (!ExistDir(directory)) {
-			_mkdir(directory.c_str());
+		if (!ExistDir(m_outputdir)) {
+			_mkdir(m_outputdir.c_str());
 		}
 	}
 	
@@ -1806,7 +1807,7 @@ namespace MUZ {
 	{
 		if (advance) {
 			// touch current address to just before current address
-			ADDRESSTYPE start = GetAddress();
+			DWORD start = GetAddress();
 			for (size_t i = 0 ; i < advance ; i++)
 				 SetAddress((ADDRESSTYPE)(ADDRESSMASK & (start + i)));
 			// set new current address
@@ -1815,20 +1816,21 @@ namespace MUZ {
 	}
 	
 	/** Returns the current address in current section. */
-	ADDRESSTYPE Assembler::GetAddress()
+	DWORD Assembler::GetAddress()
 	{
 		if (m_status.cursection == nullptr) SetCodeSection();
 		return m_status.cursection->curaddress();
 	}
-	
-	/** Returns the current section. */
+
+
+/** Returns the current section. */
 	Section* Assembler::GetSection()
 	{
 		return m_status.cursection;
 	}
 	
 	/** Finds a section from an address range. */
-	Section* Assembler::FindSection(ADDRESSTYPE s, ADDRESSTYPE e)
+	Section* Assembler::FindSection(DWORD s, DWORD e)
 	{
 		for (auto& section: m_sections) {
 			int range = section.second->FindRange(s, e);
@@ -2113,6 +2115,8 @@ namespace MUZ {
 		if (file) {
 			if (SaveListing(listing,file,msg) == errorTypeOK) {
 				SaveTables(file);
+			} else {
+				perror("fopen failed? ");
 			}
 			CloseListing(file);
 		}
@@ -2122,6 +2126,7 @@ namespace MUZ {
 	ErrorType Assembler::SaveListing( Listing & listing, FILE* file, ErrorList& msg )
 	{
 		FILE* output = (file == nullptr ? stdout : file);
+		int leftpartsize = 22;
 
 		// when this flag is set, finish listing by writing only the line.parts.file lines
 		ErrorType error = errorTypeOK;
@@ -2134,16 +2139,16 @@ namespace MUZ {
 				string mainfile = sourcefile->fileprefix + sourcefile->filepath + NORMAL_DIR_SEPARATOR + sourcefile->filename;
 				// condense if following a fatal error
 				if (error == errorTypeFATAL) {
-					s = spaces(20) + mainfile + "\n";
+					s = spaces(leftpartsize) + mainfile + "\n";
 				} else {
-					s ="\n" + spaces(20) + mainfile + "\n\n";
+					s ="\n" + spaces(leftpartsize) + mainfile + "\n\n";
 				}
 				fprintf(output, "%s", s.c_str());
 			} else if ((error != errorTypeFATAL) && line.parts.message) {
 				// display a warning or error
 				ErrorMessage & m =  msg.at((size_t)line.message);
 				CodeLine& codeline = sourcefile->lines.at(m.line - 1);
-				string prefix = spaces(20);
+				string prefix = spaces(leftpartsize);
 				if (m.type == MUZ::errorTypeWARNING) {
 					prefix += "      Warning W";
 				} else if (m.type == MUZ::errorTypeERROR) {
@@ -2163,18 +2168,23 @@ namespace MUZ {
 					if (ExistDefSymbol(line.defsymbol)) {
 						DefSymbol* defsymbol = m_defsymbols[line.defsymbol];
 						if (defsymbol->singledefine) {
-							s = spaces(18) + "* ";
+							s = spaces(leftpartsize-2) + "* ";
 						} else {
-							s = string("*") + defsymbol->value.substr(0,17);
-							if (s.length() < 18) s += spaces(18 - (int)s.length());
+							s = string("*") + defsymbol->value.substr(0,(size_t)leftpartsize-3);
+							if (s.length() < (size_t)leftpartsize-2) s += spaces(leftpartsize-2 - (int)s.length());
 							s += "* ";
 						}
 					} else if (ExistReqSymbol(line.defsymbol)) {
-						s = spaces(18) + "* ";
+						s = spaces(leftpartsize-2) + "* ";
 					}
 				} else {
 					if (line.parts.address) {
-						s = address_to_base(line.address, 16, 4);
+						int digits = 4;
+						if (line.address > 0xFFFF) {
+							digits = 8;
+						}
+						s = spaces(8-digits) + address_to_base(line.address, 16, digits);
+
 						if (line.parts.warnaddress) {
 							s += "? ";
 						} else {
@@ -2182,16 +2192,15 @@ namespace MUZ {
 						}
 					} else {
 						if (line.parts.warnaddress) {
-							s += "??" + spaces(4);
+							s += "??" + spaces(8);
 						} else {
-							s = spaces(6);
+							s = spaces(10);
 						}
 					}
 					if (line.parts.code) {
-						s += line.codebytes + "  ";
-					} else {
-						s += spaces(14);
+						s += line.codebytes;
 					}
+					s += spaces(leftpartsize - (int)s.length());
 				}
 				if (line.parts.line) {
 					string linenum = std::to_string(line.line);

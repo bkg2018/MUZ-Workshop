@@ -702,7 +702,7 @@ namespace Z80 {
 		int d;
 		OperandError operr = optools.GetNum16(codeline, d);
 		if (operr == operrOK) {
-			int depl = codeline.as->GetAddress() + 2 - d;
+			int depl = (int)codeline.as->GetAddress() + 2 - d;
 			if (depl < -126 || depl > +129) {
 				msg.Warning(warningTooFar, codeline, 2);
 			}
@@ -1093,7 +1093,7 @@ namespace Z80 {
 				if (GetComma(codeline)) {
 					operr = optools.GetNum16(codeline, d);
 					if (operr == operrOK) {
-						int depl = codeline.as->GetAddress() + 2 - d;
+						int depl = (int)codeline.as->GetAddress() + 2 - d;
 						if ( depl < -126 || depl > +129) {
 							msg.Warning(warningTooFar, codeline, 2);
 						}
@@ -1112,7 +1112,7 @@ namespace Z80 {
 		// JR nn
 		operr = optools.GetNum16(codeline, d);
 		if (operr == operrOK) {
-			int depl = codeline.as->GetAddress() + 2 - d;
+			int depl = (int)codeline.as->GetAddress() + 2 - d;
 			if (depl < -126 || depl > +129) {
 				msg.Warning(warningTooFar, codeline, 2);
 			}

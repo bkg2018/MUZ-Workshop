@@ -21,7 +21,7 @@ namespace MUZ {
 		size_t							file;
 		size_t 							line;
 	public:
-		std::vector<ADDRESSTYPE>		addresses;		// addresses of this label, unique for global label, multiple for local
+		std::vector<DWORD>				addresses;		// addresses of this label, unique for global label, multiple for local
 		bool							equate=false;	// this label is set by a .EQU
 		std::vector<struct CodeLine*>	referencers;	// Code lines where it is used
 		bool							multiple=false;	// true to authorize more than one address
@@ -45,14 +45,14 @@ namespace MUZ {
 			equate = true;
 			multiple = false;
 			ClearAddresses();
-			addresses.push_back((ADDRESSTYPE)(integer & ADDRESSMASK));
+			addresses.push_back(integer);
 		}
 		
-		/** Sets an address into the label. If the label accepts multiple values, it is added to eisting values, else it replaces the current value. */
+		/** Sets an address into the label. If the label accepts multiple values, it is added to existing values, else it replaces the current value. */
 		void SetAddress( unsigned int integer ) {
 			if (equate) Equate(integer);
 			if (!multiple) ClearAddresses();
-			addresses.push_back((ADDRESSTYPE)(integer & ADDRESSMASK));
+			addresses.push_back(integer);
 		}
 		
 		/** Tells if the label has assigned addresses. */
@@ -67,23 +67,23 @@ namespace MUZ {
 		
 		/** Computes the 2-complement displacement value from a given address to the nearest available addresses.
 		 	This value is used for JR and DJNZ relative jumps */
-		int DeltaFrom(ADDRESSTYPE from) {
+		int DeltaFrom(DWORD from) {
 			// compute delta
-			int delta = AddressFrom(from) - from;
+			int delta = (int)AddressFrom(from) - (int)from;
 			// then 2-complement
 			return ((((int)MEMMAXSIZE) - delta) & ADDRESSMASK);
 		}
 		
 		/** Returns the nearest available address. It returns max possible address if no address is assigned. */
-		ADDRESSTYPE AddressFrom(ADDRESSTYPE from) {
+		DWORD AddressFrom(DWORD from) {
 			// find closest address
-			int closest = INT_MAX;
-			for (auto addr: addresses) {
-				if (abs(addr - from) <= abs(closest - from)) {
+			DWORD closest = INT_MAX;
+			for (DWORD addr: addresses) {
+				if (abs((int)addr - (int)from) <= abs((int)closest - (int)from)) {
 					closest = addr;
 				}
 			}
-			return (ADDRESSTYPE)(closest & ADDRESSMASK);
+			return closest;
 		}
 	};
 

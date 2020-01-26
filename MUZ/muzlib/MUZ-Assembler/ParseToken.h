@@ -52,38 +52,47 @@ namespace MUZ {
 		 	Character will return its first character code.
 		 	Hexa, decimal, binary and octal numbers will return their value
 		 	String will return the appropriate values for accepptable prefixes (0x, 0b, 0) and suffixes (H, B)  */
-		ADDRESSTYPE asNumber() {
+		ADDRESSTYPE asAddress() {
+			return (ADDRESSTYPE)(ADDRESSMASK & asInteger());
+		}
+		/** Convert to a number depending on type and value.
+		 	Empty and non-convertible tokens will return 0.
+		 	Character will return its first character code.
+		 	Hexa, decimal, binary and octal numbers will return their value
+		 	String will return the appropriate values for accepptable prefixes (0x, 0b, 0) and suffixes (H, B)  */
+		DWORD asInteger() {
 			if (source.empty()) return 0;
 			if (type <= tokenTypeFIRSTCONVERTIBLE || type >= tokenTypeLASTCONVERTIBLE) return 0;
 			switch (type) {
-				case tokenTypeHEXNUMBER:	return (ADDRESSTYPE)(ADDRESSMASK & hex_to_unsigned(source));
-				case tokenTypeBINNUMBER:	return (ADDRESSTYPE)(ADDRESSMASK & bin_to_unsigned(source));
-				case tokenTypeOCTNUMBER:	return (ADDRESSTYPE)(ADDRESSMASK & oct_to_unsigned(source));
-				case tokenTypeDECNUMBER:	return (ADDRESSTYPE)(ADDRESSMASK & dec_to_unsigned(source));
-				case tokenTypeBOOL:			return (ADDRESSTYPE)(source.empty() ? !0 : 0);
-				case tokenTypeCHAR:			return (ADDRESSTYPE)(source[0]);
+				case tokenTypeHEXNUMBER:	return hex_to_unsigned(source);
+				case tokenTypeBINNUMBER:	return bin_to_unsigned(source);
+				case tokenTypeOCTNUMBER:	return oct_to_unsigned(source);
+				case tokenTypeDECNUMBER:	return dec_to_unsigned(source);
+				case tokenTypeBOOL:			return source.empty() ? !0 : 0;
+				case tokenTypeCHAR:			return (DWORD)(source[0]);
 				case tokenTypeUNKNOWN:
 				default:
 					// 0x or 0b prefix?
 					if (source.size() > 2 && source[0]=='0') {
-						if (source[1]=='x' ||source[1]=='X') return (ADDRESSTYPE)(ADDRESSMASK & hex_to_unsigned(source.substr(2)));
-						if (source[1]=='b' || source[1]=='B') return (ADDRESSTYPE)(ADDRESSMASK & bin_to_unsigned(source.substr(2)));
+						if (source[1]=='x' ||source[1]=='X') return hex_to_unsigned(source.substr(2));
+						if (source[1]=='b' || source[1]=='B') return bin_to_unsigned(source.substr(2));
 					}
 					// 0octal?
 					if (source.size() > 1 && source[0]=='0') {
-						if (isOctal(source.substr(1))) return (ADDRESSTYPE)(ADDRESSMASK & oct_to_unsigned(source.substr(1)));
+						if (isOctal(source.substr(1))) return oct_to_unsigned(source.substr(1));
 					}
-					if (source.size() <= 1) return (ADDRESSTYPE)(ADDRESSMASK & dec_to_unsigned(source));
+					if (source.size() <= 1) return dec_to_unsigned(source);
 					std::string start = source.substr(0, source.length() - 1);
 					char lastchar = source[source.length()-1];
 					// H suffix?
-					if ((lastchar=='h'|| lastchar=='H') && isHexa(start)) 	return (ADDRESSTYPE)(ADDRESSMASK & hex_to_unsigned(start));
+					if ((lastchar=='h'|| lastchar=='H') && isHexa(start)) 	return hex_to_unsigned(start);
 					// B suffix?
-					if ((lastchar=='b'|| lastchar=='B') && isBinary(start)) return (ADDRESSTYPE)(ADDRESSMASK & bin_to_unsigned(start));
+					if ((lastchar=='b'|| lastchar=='B') && isBinary(start)) return bin_to_unsigned(start);
 			};
 			// default for anything else
-			return (ADDRESSTYPE)(ADDRESSMASK & dec_to_unsigned(source));
+			return dec_to_unsigned(source);
 		}
+
 	};
 } // namespace
 

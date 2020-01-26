@@ -20,7 +20,7 @@
 /* OS Timing APIs */
 #ifdef __APPLE__
 #include <sys/stat.h>
-#define _mkdir(x) mkdir(x,0x777)
+#define _mkdir(x) mkdir(x,0x775)
 #elif _WIN32
 #include <windows.h>
 #include <mmsystem.h>

@@ -596,7 +596,8 @@ namespace MUZ {
 				type = tokenTypeCHAR;
 				continue;
 			}
-			
+
+			// check next character availability
 			hasNext = ((size_t)pos + 1 < source->length());
 			nextc = hasNext ? (*source)[(size_t)pos + 1] : '\0';
 			uppernextc = upperchar(nextc);
@@ -671,6 +672,13 @@ namespace MUZ {
 						continue;
 					}
 				}
+			}
+
+			// HEXCHAR operator?
+			if (word == "HEXCHAR") {
+				type = tokenTypeOP_HEXCHAR;
+				StoreToken();
+				continue;
 			}
 
 			// "$" prefix of hex numbers?
@@ -777,7 +785,7 @@ namespace MUZ {
 				continue;
 			if (findOperator('^', tokenTypeOP_BINXOR))
 				continue;
-			
+
 			// continue running text sequence?
 			if (status == inLetters) {
 				word += c;
@@ -820,7 +828,7 @@ namespace MUZ {
 		ParseToken evaluated = evalBool->Evaluate(*tokens, (int)*curtoken, lasttoken);
 		if (evaluated.type == tokenTypeDECNUMBER) {
 			*curtoken = (size_t)lasttoken;
-			result = evaluated.asNumber() != 0;
+			result = evaluated.asInteger() != 0;
 			return true;
 		}
 		if ((evaluated.type == tokenTypeBOOL) || (evaluated.type == tokenTypeSTRING)) {
@@ -871,7 +879,31 @@ namespace MUZ {
 				}
 			}
 			// else, interpret as a number or return 0
-			result = evaluated.asNumber();
+			result = evaluated.asAddress();
+			return true;
+		}
+		return false;
+	}
+
+/** Evaluate next tokens to produce a 32-bits integer number.
+	 @throw EXPRESSIONLeftOperandMissing
+	 */
+	bool Parser::EvaluateInteger(DWORD & result)
+	{
+		int lasttoken = -1;
+		ParseToken evaluated;
+		evaluated = evalNumber->Evaluate(*tokens, (int)*curtoken, lasttoken);
+		if ((evaluated.type == tokenTypeSTRING) || (evaluated.type == tokenTypeDECNUMBER)) {
+			*curtoken = (size_t)lasttoken;
+			// special case with one character: return character code
+			if (evaluated.type == tokenTypeSTRING) {
+				if (evaluated.source.length() == 1) {
+					result = (ADDRESSTYPE)evaluated.source.at(0);
+					return true;
+				}
+			}
+			// else, interpret as a number or return 0
+			result = evaluated.asInteger();
 			return true;
 		}
 		return false;

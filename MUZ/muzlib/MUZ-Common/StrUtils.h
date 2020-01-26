@@ -43,7 +43,7 @@ unsigned int oct_to_unsigned(std::string s);
 unsigned int dec_to_unsigned(std::string s);
 
 /** Converts an address to an hexa, octal or binary string. */
-std::string address_to_base(MUZ::ADDRESSTYPE address, int base, int nbdigits);
+std::string address_to_base(unsigned int address, unsigned int base, int nbdigits);
 
 /** Converts a byte to an hexa string. */
 std::string data_to_hex(MUZ::DATATYPE data);

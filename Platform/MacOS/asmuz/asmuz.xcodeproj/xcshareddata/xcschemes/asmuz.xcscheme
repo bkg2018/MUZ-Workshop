@@ -61,23 +61,23 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "--outputdir &quot;/Users/bkg2018/Desktop/RETROCOMP/RC2014/SCM-SCW/SCWorkshop-2019-09-07/Output&quot; "
+            argument = "--outputdir &quot;/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output&quot; "
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--log &quot;testAssembler.LOG&quot;"
+            argument = "--log &quot;SCM.LOG&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--hex &quot;testAssemblerIntelHex.HEX&quot;"
+            argument = "--hex &quot;SCM.HEX&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--listing &quot;testAssembler.LST&quot;"
+            argument = "--listing &quot;SCM.LST&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--memory &quot;testAssemblerMemory.LST&quot;"
+            argument = "--memory &quot;SCMMemory.LST&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

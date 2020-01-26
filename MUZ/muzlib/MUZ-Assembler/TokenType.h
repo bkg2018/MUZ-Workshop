@@ -83,6 +83,7 @@ namespace MUZ {
 		tokenTypeOP_MUL,	/// *
 		tokenTypeOP_DIV,	/// \ /  
 		tokenTypeOP_MOD,	/// %
+		tokenTypeOP_HEXCHAR, /// hexchar
 		
 		tokenTypeIGNORE,	/// used by parser to neutralize colons in label definitions
 		

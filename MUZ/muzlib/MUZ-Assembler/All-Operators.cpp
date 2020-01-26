@@ -49,7 +49,7 @@ namespace MUZ {
 			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER && arg1.type != tokenTypeBOOL) return nop;
 			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER && arg2.type != tokenTypeBOOL) return nop;
 			if (arg1.type == tokenTypeDECNUMBER || arg1.type == tokenTypeSTRING) {
-				unsigned int n = (~arg1.asNumber()) & ADDRESSMASK;
+				DWORD n = ~arg1.asInteger();
 				ParseToken result;
 				to_numtoken(n, result);
 				return result;
@@ -68,7 +68,7 @@ namespace MUZ {
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
 			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
 			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
-			unsigned int n = (arg1.asNumber() * arg2.asNumber()) & ADDRESSMASK;
+			DWORD n = arg1.asInteger() * arg2.asInteger() ;
 			ParseToken result ;
 			to_numtoken(n, result);
 			return result;
@@ -81,7 +81,7 @@ namespace MUZ {
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
 			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
 			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
-			unsigned int n = (arg1.asNumber() / arg2.asNumber()) & ADDRESSMASK;
+			DWORD n = arg1.asInteger() / arg2.asInteger();
 			ParseToken result;
 			to_numtoken(n, result);
 			return result;
@@ -94,7 +94,7 @@ namespace MUZ {
 		virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
 			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
 			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
-			unsigned int n = (arg1.asNumber() % (arg2.asNumber() & ADDRESSMASK)) & ADDRESSMASK;
+			DWORD n = arg1.asInteger() % arg2.asInteger() ;
 			ParseToken result;
 			to_numtoken(n, result);
 			return result;
@@ -121,7 +121,7 @@ namespace MUZ {
 			// string + number?
 			if (arg1.type == tokenTypeSTRING && arg2.type == tokenTypeDECNUMBER) {
 				std::string s;
-				unsigned int num = arg2.asNumber();
+				unsigned int num = arg2.asAddress();
 				for (auto c: arg1.source) {
 					s = s + (char)(((int)c + (int)num) & 0xff);
 				}
@@ -134,7 +134,7 @@ namespace MUZ {
 				return result;
 			}
 			// consider both are decimal numbers
-			unsigned int n = (arg1.asNumber() + arg2.asNumber()) & ADDRESSMASK;
+			DWORD n = arg1.asInteger() + arg2.asInteger();
 			to_numtoken(n, result);
 			return result;
 		}
@@ -150,14 +150,14 @@ namespace MUZ {
 			// string - number?
 			if (arg1.type == tokenTypeSTRING && arg2.type == tokenTypeDECNUMBER) {
 				std::string s;
-				unsigned int num = arg2.asNumber();
+				ADDRESSTYPE num = arg2.asAddress();
 				for (auto c: arg1.source) {
 					s = s + (char)(((int)c - (int)num) & DATAMASK);
 				}
 				to_stringtoken( s, result);
 				return result;
 			}
-			unsigned int n = (arg1.asNumber() - arg2.asNumber()) & ADDRESSMASK;
+			DWORD n = arg1.asInteger() - arg2.asInteger();
 			to_numtoken(n, result);
 			return result;
 		}
@@ -170,7 +170,7 @@ namespace MUZ {
 			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
 			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
 			ParseToken result;
-			unsigned int n = (arg1.asNumber() << arg2.asNumber()) & ADDRESSMASK;
+			DWORD n = arg1.asInteger() << arg2.asInteger();
 			to_numtoken(n, result);
 			return result;
 		}
@@ -183,7 +183,7 @@ namespace MUZ {
 			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
 			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
 			ParseToken result;
-			unsigned int n = (arg1.asNumber() >> arg2.asNumber()) & ADDRESSMASK;
+			DWORD n = arg1.asInteger() >> arg2.asInteger();
 			to_numtoken(n, result);
 			return result;
 		}
@@ -202,7 +202,7 @@ namespace MUZ {
 			}
 			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
 			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
-			unsigned int n = (arg1.asNumber() & ADDRESSMASK) & (arg2.asNumber() & ADDRESSMASK);
+			DWORD n = arg1.asInteger() & arg2.asInteger() ;
 			to_numtoken(n, result);
 			return result;
 		}
@@ -221,7 +221,7 @@ namespace MUZ {
 			}
 			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
 			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
-			unsigned int n = (arg1.asNumber() & ADDRESSMASK) | (arg2.asNumber() & ADDRESSMASK);
+			DWORD n = arg1.asInteger() | arg2.asInteger();
 			to_numtoken(n, result);
 			return result;
 		}
@@ -240,7 +240,7 @@ namespace MUZ {
 			}
 			if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER) return nop;
 			if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER) return nop;
-			unsigned int n = (arg1.asNumber() & ADDRESSMASK) ^ (arg2.asNumber() & ADDRESSMASK);
+			DWORD n = arg1.asInteger() ^ arg2.asInteger();
 			to_numtoken(n, result);
 			return result;
 		}
@@ -289,7 +289,7 @@ namespace MUZ {
 			}
 			
 			// consider both decimal numbers
-			bool inferior = (arg1.asNumber() & ADDRESSMASK) < (arg2.asNumber() & ADDRESSMASK);
+			bool inferior = arg1.asInteger() < arg2.asInteger();
 			to_booltoken(inferior, result);
 			return result;
 		}
@@ -341,7 +341,7 @@ namespace MUZ {
 			}
 			
 			// consider both decimal numbers
-			bool inferior = (arg1.asNumber() & ADDRESSMASK) < (arg2.asNumber() & ADDRESSMASK);
+			bool inferior = arg1.asInteger() < arg2.asInteger() ;
 			to_booltoken(inferior, result);
 			return result;
 		}
@@ -389,7 +389,7 @@ namespace MUZ {
 				return result;
 			}
 			// consider both decimal numbers
-			bool inferior = (arg1.asNumber() & ADDRESSMASK) <= (arg2.asNumber() & ADDRESSMASK);
+			bool inferior = arg1.asInteger() <= arg2.asInteger() ;
 			to_booltoken(inferior, result);
 			return result;
 		}
@@ -437,7 +437,7 @@ namespace MUZ {
 				return result;
 			}
 			// consider both decimal numbers
-			bool superior = (arg1.asNumber() & ADDRESSMASK) >= (arg2.asNumber() & ADDRESSMASK);
+			bool superior = arg1.asInteger() >= arg2.asInteger();
 			to_booltoken(superior, result);
 			return result;
 		}
@@ -489,7 +489,7 @@ namespace MUZ {
 			}
 			
 			// consider both decimal numbers
-			bool diff = (arg1.asNumber() & ADDRESSMASK) != (arg2.asNumber() & ADDRESSMASK);
+			bool diff = arg1.asInteger() != arg2.asInteger() ;
 			to_booltoken(diff, result);
 			return result;
 		}
@@ -538,11 +538,32 @@ namespace MUZ {
 			}
 			
 			// consider both decimal numbers
-			bool equal = (arg1.asNumber() & ADDRESSMASK) == (arg2.asNumber() & ADDRESSMASK);
+			bool equal = arg1.asInteger() == arg2.asInteger() ;
 			to_booltoken(equal, result);
 			return result;
 		}
 	} & opEQUAL = *new OperatorEQUAL; // singleton
+
+// HEXCHAR number / label
+struct OperatorHEXCHAR : public Operator
+{
+	virtual ParseToken Exec(ParseToken& arg1, ParseToken& arg2) {
+		if (arg1.type != tokenTypeSTRING && arg1.type != tokenTypeDECNUMBER && arg1.type != tokenTypeBOOL) return nop;
+		if (arg2.type != tokenTypeSTRING && arg2.type != tokenTypeDECNUMBER && arg2.type != tokenTypeBOOL) return nop;
+		if (arg1.type == tokenTypeDECNUMBER || arg1.type == tokenTypeSTRING) {
+			unsigned int n = (~arg1.asAddress()) & ADDRESSMASK;
+			ParseToken result;
+			to_numtoken(n, result);
+			return result;
+		}else if (arg1.type == tokenTypeBOOL) {
+			ParseToken result;
+			to_booltoken(arg1.source.empty(), result);
+			return result;
+		}
+		throw ASMOperandTypeException();
+	}
+} & opHEXCHAR = *new OperatorHEXCHAR; // singleton
+
 
 	
 	/** Externally accessible array for the operators coresponding to each token type. This array must have exactly one member for each
@@ -566,7 +587,7 @@ namespace MUZ {
 		{9999, &nop, tokenTypeLASTCONVERTIBLE},
 
 		// final stored tokens
-		{9999, &nop, tokenTypeFILENAME},		// a "0" prefixed octal number - followed by at least one 0-7 digit (before decimal translation)
+		{9999, &nop, tokenTypeFILENAME},		// a filename
 		{9999, &nop, tokenTypeCOMMENT},			// ';' and all that follows on line
 		{9999, &nop, tokenTypeDIRECTIVE},		// a '.' or '#' directive
 		{9999, &nop, tokenTypeCOMMA},			// a ','
@@ -595,7 +616,8 @@ namespace MUZ {
 		{1, &opMUL, tokenTypeOP_MUL},			// 	*			2			number				- as arg -
 		{1, &opDIV, tokenTypeOP_DIV},			// 	/ \\		2			number				- as arg -
 		{1, &opMOD, tokenTypeOP_MOD},			// %			2			number				- as arg -
-		
+		{0, &opHEXCHAR, tokenTypeOP_HEXCHAR}, 	// HEXCHAR		1			number				string (2 hex digits)
+
 		{9999, &nop, tokenTypeIGNORE},	
 	};
 

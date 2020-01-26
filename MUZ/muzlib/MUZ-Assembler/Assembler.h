@@ -57,7 +57,7 @@ namespace MUZ {
 			//ListingLine* prev = nullptr;
 
 			/** Address or value part. (left most). Enabled by parts.address */
-			ADDRESSTYPE address = 0;
+			DWORD address = 0;
 			/** Up to 4 bytes of code. Enabled by parts.code */
 			std::string codebytes;
 			/** Reference to a #DEFINE symbol */
@@ -313,11 +313,11 @@ namespace MUZ {
 		/** Advances the current assembling address. */
 		void AdvanceAddress( ADDRESSTYPE advance );
 		/** Returns the current address. */
-		ADDRESSTYPE GetAddress();
+		DWORD GetAddress();
 		/** Returns the current section. */
 		Section* GetSection();
 		/** Finds a section from an address range. */
-		Section* FindSection(ADDRESSTYPE a, ADDRESSTYPE e);
+		Section* FindSection(DWORD a, DWORD e);
 
 		
 		//MARK: - Pass 1 / 2 setting

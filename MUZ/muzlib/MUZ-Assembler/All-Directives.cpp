@@ -365,13 +365,13 @@ namespace MUZ {
 	{
 		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		std::vector<size_t> unsolved = parser.ResolveNextSymbols(false);
-		ADDRESSTYPE address = 0;
+		DWORD number = 0;
 		if (unsolved.size() > 0 && ! as.IsFirstPass()) {
 			msg.ForceWarning(warningUnsolvedExpression, codeline);
 		}
 		// compute address, unsolved symbols have been replaced by "0"
 		parser.JumpTokens(1); // skip after .EQU
-		try { parser.EvaluateAddress(address); }
+		try { parser.EvaluateInteger(number); }
 		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
@@ -380,7 +380,7 @@ namespace MUZ {
 			label = codeline.label;
 		// set label address/value
 		if (label) {
-			label->Equate(address);
+			label->Equate(number);
 			codeline.label = label;
 			return errorTypeOK;
 		}
@@ -437,7 +437,11 @@ namespace MUZ {
 	}
 	
 	/** .DB <num8> [, <num8> [...]]
-	 	encode the given bytes into the codeline.
+	 	Encode the given bytes into the codeline.
+		Accepts one or more :
+			- 8-bit number
+			- character string
+			- HEXCHAR <num8>
 	 */
 	ErrorType DirectiveBYTE::Parse(class Assembler& as, Parser& parser, CodeLine& codeline, class Label* , ErrorList& msg)
 	{
@@ -456,6 +460,18 @@ namespace MUZ {
 				for (auto c: result) {
 					codeline.AddCode((DATATYPE)c);
 				}
+			} else if (token.type == tokenTypeOP_HEXCHAR) {
+				ADDRESSTYPE address;
+				token = parser.JumpNextToken();
+				try { parser.EvaluateAddress(address); }
+				catch (... /*const std::exception & e*/) {
+					return msg.Error(errorInvalidExpression, codeline);
+				}
+				if ((address > 255)  && ! as.IsFirstPass()) {
+					msg.ForceWarning(warningTooBig8, codeline);
+				}
+				codeline.AddCode('0' + ((address & 0xF0) >> 4));
+				codeline.AddCode('0' +  (address & 0x0F));
 			} else if (token.type == tokenTypeDECNUMBER) {
 				ADDRESSTYPE address;
 				try { parser.EvaluateAddress(address); }
@@ -531,8 +547,8 @@ namespace MUZ {
 		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		parser.ResolveNextSymbols(false);
 		ParseToken& token = parser.NextToken();
-		int size = token.asNumber();
-		for (int i = 0 ; i < size ; i++) {
+		DWORD size = token.asInteger();
+		for (DWORD i = 0 ; i < size ; i++) {
 			codeline.AddCode(0xFF);
 		}
 		return errorTypeOK;

@@ -55,6 +55,12 @@ namespace MUZ {
 				tokens.erase((int)i+1, 1);
 				end -= 1;
 				tokens[(size_t)i] = result;
+			} else if (type == tokenTypeOP_HEXCHAR) {
+				ParseToken zero = {"0", tokenTypeDECNUMBER};
+				result = allOps[type].op->Exec(zero, tokens[(size_t)i+1]);
+				tokens.erase((int)i+1, 1);
+				end -= 1;
+				tokens[(size_t)i] = result;
 			} else {
 				// 5a-2) find next prioritary operator
 				int found = -1;
@@ -209,6 +215,7 @@ namespace MUZ {
 				case tokenTypeOP_MUL:
 				case tokenTypeOP_DIV:
 				case tokenTypeOP_MOD:
+				case tokenTypeOP_HEXCHAR:
 					stack.push_back(token);
 					break;
 					
@@ -241,7 +248,7 @@ namespace MUZ {
 			// if new type is numeric, adjust
 			if (newType >= tokenTypeFIRSTNUMERIC && newType <= tokenTypeLASTNUMERIC) {
 				// smart conversion of current value to decimal number (handles prefixes and all kind of convertible token types)
-				ADDRESSTYPE number = token.asNumber();
+				DWORD number = token.asInteger();
 				// -> back convert to destination type
 				if (newType == tokenTypeDECNUMBER) {
 					token.source = std::to_string(number);
@@ -258,7 +265,7 @@ namespace MUZ {
 				std::string newValue = "";
 				if (newType==tokenTypeDECNUMBER || newType==tokenTypeHEXNUMBER || newType==tokenTypeOCTNUMBER || newType==tokenTypeBINNUMBER) {
 					// non null numbers considered as "true" value
-					newValue = token.asNumber() == 0 ? "" : "t";
+					newValue = token.asInteger() == 0 ? "" : "t";
 				} else {
 					// non empty strings considered true
 					newValue = token.source.empty() ? "" : "t";
