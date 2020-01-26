@@ -28,8 +28,9 @@
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\ExpVector.cpp" />
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Operator.cpp" />
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Parser.cpp" />
-    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Instructions.cpp" />
-    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Operands.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-180\Z180-Instructions.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-80\Z80-Instructions.cpp" />
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-80\Z80-Operands.cpp" />
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Common\FileUtils.cpp" />
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Common\Section.cpp" />
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Common\StrUtils.cpp" />
@@ -67,8 +68,9 @@
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\ParseToken.h" />
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\ParsingMode.h" />
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\TokenType.h" />
-    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Instructions.h" />
-    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Operands.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-180\Z180-Instructions.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-80\Z80-Instructions.h" />
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-80\Z80-Operands.h" />
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\Exceptions.h" />
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\FileUtils.h" />
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\Section.h" />

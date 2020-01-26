@@ -22,6 +22,12 @@
     <Filter Include="MUZ-Computer">
       <UniqueIdentifier>{9cdabe32-30fe-4168-8f76-b8de32c57035}</UniqueIdentifier>
     </Filter>
+    <Filter Include="MUZ-Assembler\Z-80">
+      <UniqueIdentifier>{310a547b-9805-4937-b2c1-a914e1ab89aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MUZ-Assembler\Z-180">
+      <UniqueIdentifier>{e073e900-c1e5-48b1-bad8-28df2b77a3c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\All-Directives.cpp">
@@ -84,17 +90,20 @@
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Computer\ROMPagingPort.cpp">
       <Filter>MUZ-Computer</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Instructions.cpp">
-      <Filter>MUZ-Assembler</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Operands.cpp">
-      <Filter>MUZ-Assembler</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Common\Section.cpp">
       <Filter>MUZ-Common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Common\StrUtils.cpp">
       <Filter>MUZ-Common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-180\Z180-Instructions.cpp">
+      <Filter>MUZ-Assembler\Z-180</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-80\Z80-Instructions.cpp">
+      <Filter>MUZ-Assembler\Z-80</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-80\Z80-Operands.cpp">
+      <Filter>MUZ-Assembler\Z-80</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -182,16 +191,10 @@
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Computer\ROMPagingPort.h">
       <Filter>MUZ-Computer</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Operands.h">
-      <Filter>MUZ-Assembler</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\TokenType.h">
       <Filter>MUZ-Assembler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\Types.h">
-      <Filter>MUZ-Assembler</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z80-Instructions.h">
       <Filter>MUZ-Assembler</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\Section.h">
@@ -199,6 +202,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Common\StrUtils.h">
       <Filter>MUZ-Common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-180\Z180-Instructions.h">
+      <Filter>MUZ-Assembler\Z-180</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-80\Z80-Instructions.h">
+      <Filter>MUZ-Assembler\Z-80</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\MUZ\muzlib\MUZ-Assembler\Z-80\Z80-Operands.h">
+      <Filter>MUZ-Assembler\Z-80</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

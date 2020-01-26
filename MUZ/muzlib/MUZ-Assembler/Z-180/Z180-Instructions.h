@@ -9,7 +9,7 @@
 #ifndef Z180_Instructions_h
 #define Z180_Instructions_h
 
-#include "Z80-Instructions.h"
+#include "MUZ-Assembler\Z-80\Z80-Instructions.h"
 
 namespace MUZ {
 namespace Z180 {
