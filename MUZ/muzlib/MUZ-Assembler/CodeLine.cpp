@@ -18,9 +18,9 @@ namespace MUZ {
 	}
 	
 	/** Set machine cycles. */
-	void CodeLine::SetCycles(int mintime, int maxtime) {
-		cyclesmin = mintime;
-		cyclesmax = maxtime > 0 ? maxtime : mintime;
+	void CodeLine::SetStates(int mintime, int maxtime) {
+		statesmin = mintime;
+		statesmax = maxtime > 0 ? maxtime : mintime;
 	}
 	
 	/** Pushes codes. */

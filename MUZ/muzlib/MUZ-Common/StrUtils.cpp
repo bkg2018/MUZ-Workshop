@@ -145,10 +145,10 @@ unsigned int dec_to_unsigned(string s)
 /** Converts an address to a binary, octal or hexa string. */
 const char allChars[] = "0123456789ABCDEF";// includes a final \0
 
-string address_to_base(MUZ::ADDRESSTYPE address, int base, int nbdigits)
+string address_to_base(unsigned int address, unsigned int base, int nbdigits)
 {
 	if (base < 0 || base > 16) return "";
-	int value = address;
+	unsigned int value = address;
 	// enough space for binary 64 bits
 	char result[] = {
 		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -168,6 +168,12 @@ string address_to_base(MUZ::ADDRESSTYPE address, int base, int nbdigits)
 string data_to_hex(MUZ::DATATYPE data)
 {
 	return address_to_base(data, 16, 2);
+}
+
+/** Converts a 0-15 value in hexadecimal character '0' to 'F'. */
+char byte_to_hexchar(unsigned int b)
+{
+	return (char)((b < 10) ? ('0' + b) : ('A' + b - 10));
 }
 
 /** Unescapes the escape sequences in a character string.

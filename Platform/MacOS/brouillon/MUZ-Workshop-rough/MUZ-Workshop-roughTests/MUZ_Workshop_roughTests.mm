@@ -295,6 +295,9 @@ std::string RomHexFilePath ;
 	MUZ::ErrorList msg;
 	as.SetOutputDirectory("/Users/bkg2018/Desktop/RETROCOMP/RC2014/MUZ-Workshop/Output");
 	as.SetListingFilename("testLongIntegerEqu.LST");
+	as.SetMemoryFilename("testLongIntergerEqu.mem.LST");
+	as.SetSymbolsFilename("testLongIntergerEqu.sym.LST");
+	as.SetIntelHexFilename("testLongIntergerEqu.HEX");
 	as.AssembleFile(SourcesRootDir + "LongIntegerEqu.asm", msg);
 	// dump warnings?
 	for (MUZ::ErrorMessage& m : msg) {

@@ -404,13 +404,13 @@ namespace MUZ {
 	{
 		if (!parser.ExistMoreToken(1))  return msg.Error(errorMissingToken, codeline);
 		std::vector<size_t> unsolved = parser.ResolveNextSymbols(false);
-		ADDRESSTYPE address = 0;
+		DWORD number = 0;
 		if (unsolved.size() > 0 && !as.IsFirstPass()) {
 			msg.ForceWarning(warningUnsolvedExpression, codeline);
 		}
 		// compute address, unsolved symbols have been replaced by "0"
 		parser.JumpTokens(1); // skip after .EQU
-		try { parser.EvaluateAddress(address); }
+		try { parser.EvaluateInteger(number); }
 		catch (... /*const std::exception & e*/) {
 			return msg.Error(errorInvalidExpression, codeline);
 		}
@@ -419,7 +419,7 @@ namespace MUZ {
 			label = codeline.label;
 		// set label address/value
 		if (label) {
-			label->Equate(address);
+			label->Equate(number);
 			codeline.label = label;
 			return errorTypeOK;
 		}
@@ -470,8 +470,11 @@ namespace MUZ {
 				if ((address > 255)  && ! as.IsFirstPass()) {
 					msg.ForceWarning(warningTooBig8, codeline);
 				}
-				codeline.AddCode('0' + ((address & 0xF0) >> 4));
-				codeline.AddCode('0' +  (address & 0x0F));
+				if (address > 15) {
+					codeline.AddCode( byte_to_hexchar((address & 0xF0) >> 4));
+				}
+				codeline.AddCode( byte_to_hexchar(address & 0xF) );
+
 			} else if (token.type == tokenTypeDECNUMBER) {
 				ADDRESSTYPE address;
 				try { parser.EvaluateAddress(address); }

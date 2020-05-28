@@ -11,7 +11,7 @@
 #include "MUZ-Common/Section.h"
 #include "Parser.h"
 #include "All-Directives.h"
-#include "Z-180\Z180-Instructions.h"
+#include "Z-180/Z180-Instructions.h"
 #include <list>
 #include <algorithm>
 #include <unistd.h>
@@ -1574,7 +1574,7 @@ namespace MUZ {
 	/** Sets the instruction and operand set. */
 	void Assembler::SetInstructions(std::string name)
 	{
-		if (name=="Z80" | name=="Z180") {
+		if (name=="Z80") {
 			m_instructions.clear();
 			m_instructions["LD"] = new Z80::InstructionLD();
 			m_instructions["PUSH"] = new Z80::InstructionPUSH();
@@ -1644,20 +1644,90 @@ namespace MUZ {
 			m_instructions["OTIR"] = new Z80::InstructionOTIR();
 			m_instructions["OUTD"] = new Z80::InstructionOUTD();
 			m_instructions["OTDR"] = new Z80::InstructionOTDR();
-			if (name=="Z180") {
-				m_instructions["MLT"] = new Z180::InstructionMLT();
-				m_instructions["MULT"] = new Z180::InstructionMLT();
-				m_instructions["OTIM"] = new Z180::InstructionOTIM();
-				m_instructions["OTIMR"] = new Z180::InstructionOTIMR();
-				m_instructions["OTDM"] = new Z180::InstructionOTDM();
-				m_instructions["OTDMR"] = new Z180::InstructionOTDMR();
-				m_instructions["IN0"] = new Z180::InstructionIN0();
-				m_instructions["OUT0"] = new Z180::InstructionOUT0();
-				m_instructions["SLP"] = new Z180::InstructionSLP();
-				m_instructions["TST"] = new Z180::InstructionTST();
-				m_instructions["TSTIO"] = new Z180::InstructionTSTIO();
+		} else if (name=="Z180") {
+			// Z-80 compatible, shorter states
+			m_instructions.clear();
+			m_instructions["LD"] = new Z180::InstructionLD();
+			m_instructions["PUSH"] = new Z180::InstructionPUSH();
+			m_instructions["POP"] = new Z180::InstructionPOP();
+			m_instructions["EXX"] = new Z180::InstructionEXX();
+			m_instructions["EX"] = new Z180::InstructionEX();
+			m_instructions["LDI"] = new Z180::InstructionLDI();
+			m_instructions["LDIR"] = new Z180::InstructionLDIR();
+			m_instructions["LDD"] = new Z180::InstructionLDD();
+			m_instructions["LDDR"] = new Z180::InstructionLDDR();
+			m_instructions["CPI"] = new Z180::InstructionCPI();
+			m_instructions["CPIR"] = new Z180::InstructionCPIR();
+			m_instructions["CPD"] = new Z180::InstructionCPD();
+			m_instructions["CPDR"] = new Z180::InstructionCPDR();
+			m_instructions["ADD"] = new Z180::InstructionADD();
+			m_instructions["ADC"] = new Z180::InstructionADC();
+			m_instructions["SUB"] = new Z180::InstructionSUB();
+			m_instructions["SBC"] = new Z180::InstructionSBC();
+			m_instructions["AND"] = new Z180::InstructionAND();
+			m_instructions["OR"] = new Z180::InstructionOR();
+			m_instructions["XOR"] = new Z180::InstructionXOR();
+			m_instructions["CP"] = new Z180::InstructionCP();
+			m_instructions["INC"] = new Z180::InstructionINC();
+			m_instructions["DEC"] = new Z180::InstructionDEC();
+			m_instructions["DAA"] = new Z180::InstructionDAA();
+			m_instructions["CPL"] = new Z180::InstructionCPL();
+			m_instructions["NEG"] = new Z180::InstructionNEG();
+			m_instructions["CCF"] = new Z180::InstructionCCF();
+			m_instructions["SCF"] = new Z180::InstructionSCF();
+			m_instructions["NOP"] = new Z180::InstructionNOP();
+			m_instructions["HALT"] = new Z180::InstructionHALT();
+			m_instructions["DI"] = new Z180::InstructionDI();
+			m_instructions["EI"] = new Z180::InstructionEI();
+			m_instructions["IM"] = new Z180::InstructionIM();
+			m_instructions["RLCA"] = new Z180::InstructionRLCA();
+			m_instructions["RLA"] = new Z180::InstructionRLA();
+			m_instructions["RRCA"] = new Z180::InstructionRRCA();
+			m_instructions["RRA"] = new Z180::InstructionRRA();
+			m_instructions["RLC"] = new Z180::InstructionRLC();
+			m_instructions["RL"] = new Z180::InstructionRL();
+			m_instructions["RRC"] = new Z180::InstructionRRC();
+			m_instructions["RR"] = new Z180::InstructionRR();
+			m_instructions["SLA"] = new Z180::InstructionSLA();
+			m_instructions["SLL"] = new Z180::InstructionSLL();//undoc
+			m_instructions["SRA"] = new Z180::InstructionSRA();
+			m_instructions["SRL"] = new Z180::InstructionSRL();
+			m_instructions["RLD"] = new Z180::InstructionRLD();
+			m_instructions["RRD"] = new Z180::InstructionRRD();
+			m_instructions["BIT"] = new Z180::InstructionBIT();
+			m_instructions["SET"] = new Z180::InstructionSET();
+			m_instructions["RES"] = new Z180::InstructionRES();
+			m_instructions["JP"] = new Z180::InstructionJP();
+			m_instructions["JR"] = new Z180::InstructionJR();
+			m_instructions["DJNZ"] = new Z180::InstructionDJNZ();
+			m_instructions["CALL"] = new Z180::InstructionCALL();
+			m_instructions["RET"] = new Z180::InstructionRET();
+			m_instructions["RETI"] = new Z180::InstructionRETI();
+			m_instructions["RETN"] = new Z180::InstructionRETN();
+			m_instructions["RST"] = new Z180::InstructionRST();
+			m_instructions["IN"] = new Z180::InstructionIN();
+			m_instructions["INI"] = new Z180::InstructionINI();
+			m_instructions["INIR"] = new Z180::InstructionINIR();
+			m_instructions["IND"] = new Z180::InstructionIND();
+			m_instructions["INDR"] = new Z180::InstructionINDR();
+			m_instructions["OUT"] = new Z180::InstructionOUT();
+			m_instructions["OUTI"] = new Z180::InstructionOUTI();
+			m_instructions["OTIR"] = new Z180::InstructionOTIR();
+			m_instructions["OUTD"] = new Z180::InstructionOUTD();
+			m_instructions["OTDR"] = new Z180::InstructionOTDR();
+			// Z-180 specifics
+			m_instructions["MLT"] = new Z180::InstructionMLT();
+			m_instructions["MULT"] = new Z180::InstructionMLT();
+			m_instructions["OTIM"] = new Z180::InstructionOTIM();
+			m_instructions["OTIMR"] = new Z180::InstructionOTIMR();
+			m_instructions["OTDM"] = new Z180::InstructionOTDM();
+			m_instructions["OTDMR"] = new Z180::InstructionOTDMR();
+			m_instructions["IN0"] = new Z180::InstructionIN0();
+			m_instructions["OUT0"] = new Z180::InstructionOUT0();
+			m_instructions["SLP"] = new Z180::InstructionSLP();
+			m_instructions["TST"] = new Z180::InstructionTST();
+			m_instructions["TSTIO"] = new Z180::InstructionTSTIO();
 
-			}
 		}
 	}
 

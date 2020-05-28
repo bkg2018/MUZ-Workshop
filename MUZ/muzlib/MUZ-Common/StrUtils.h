@@ -48,6 +48,9 @@ std::string address_to_base(unsigned int address, unsigned int base, int nbdigit
 /** Converts a byte to an hexa string. */
 std::string data_to_hex(MUZ::DATATYPE data);
 
+/** Converts a 0-15 value in hexadecimal character '0' to 'F'. */
+char byte_to_hexchar(unsigned int b);
+
 /** Tells if a character is a binary digit. */
 inline bool isBinDigit(char c) { return c == '0' || c == '1'; }
 /** Tells if a character is an octal digit. */

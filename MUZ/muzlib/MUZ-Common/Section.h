@@ -21,7 +21,7 @@ namespace MUZ {
 		/** Array of all the address ranges stored in the Section. */
 		std::vector<AddressRange>	m_ranges;
 		/** Current address for the section. */
-		ADDRESSTYPE 				m_curaddress = 0;
+		DWORD		 				m_curaddress = 0;
 		/** Index of the current address range for the current address. */
 		size_t						m_currange = 0;
 		/** Name of the section. This is the same as the m_sections index in Assembler. */
@@ -31,34 +31,34 @@ namespace MUZ {
 		
 	public:
 		/** Tests if an address merges to the left of a range.*/
-		bool mergesLeft(ADDRESSTYPE address, size_t rangeindex);
+		bool mergesLeft(DWORD address, size_t rangeindex);
 		
 		/** Tests if an address merges to the right of a range.*/
-		bool mergesRight( ADDRESSTYPE address, size_t rangeindex);
+		bool mergesRight( DWORD address, size_t rangeindex);
 		
 		/** Tests if an address is inside a range. */
-		bool isInside(ADDRESSTYPE address, size_t rangeindex);
+		bool isInside(DWORD address, size_t rangeindex);
 		
 		/** Tests if this section contains an address range in its ranges and returns its index, returns -1 if not. */
-		int FindRange(ADDRESSTYPE s, ADDRESSTYPE e);
+		int FindRange(DWORD s, DWORD e);
 		
 		/** Enters an address into an existing or new address range. Merges two existing ranges when address links them. */
-		void SetAddress(ADDRESSTYPE address);
+		void SetAddress(DWORD address);
 		
 		/** Returns the lowest starting address of all ranges. */
-		ADDRESSTYPE absoluteStart();
+		DWORD absoluteStart();
 		
 		/** Returns the highest ending address of all ranges. */
-		ADDRESSTYPE absoluteEnd();
+		DWORD absoluteEnd();
 		
 		/** Returns starting address for current range. */
-		ADDRESSTYPE start() const ;
+		DWORD start() const ;
 		
 		/** Returns ending address for current range. */
-		ADDRESSTYPE end() const ;
+		DWORD end() const ;
 		
 		/** Returns current address for current range. */
-		ADDRESSTYPE curaddress() const;
+		DWORD curaddress() const;
 		
 		/** Returns this section name. */
 		std::string name() const;
@@ -73,7 +73,7 @@ namespace MUZ {
 		void SetName(std::string name);
 		
 		/** Sets the current address. */
-		void SetOrg(ADDRESSTYPE address);
+		void SetOrg(DWORD address);
 		
 		/** Sets the SAVE attribute to enable/disable the HEX output. */
 		void SetSave(bool yes);

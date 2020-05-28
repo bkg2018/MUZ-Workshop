@@ -49,10 +49,10 @@ namespace MUZ {
 		ErrorType			assembled = errorTypeFALSE;
 		/** Array of code bytes once assembled. May be empty. */
 		std::vector<BYTE>	code;
-		/** Minimum clock cycles spent in the code. */
-		int					cyclesmin = 0 ;
-		/** Maximum clock cycles, generally when a jump happens because a condition is met. */
-		int					cyclesmax = 0;
+		/** Minimum states  */
+		int					statesmin = 0 ;
+		/** Maximum states, generally when a jump happens because a condition is met. */
+		int					statesmax = 0;
 		/** Starting address for this line. */
 		DWORD				address = 0;
 		/** Pointer to the code or data section where this line is stored iff it contains code. */
@@ -74,7 +74,7 @@ namespace MUZ {
 		void ResetInstruction(size_t start);
 		
 		/** Set machine cycles. */
-		void SetCycles(int mintime, int maxtime = -1);
+		void SetStates(int mintime, int maxtime = -1);
 		
 		/** Set 1 to 4 code values (bytes). int values given in parameters are masked to DATATYPE */
 		void ResetCode();

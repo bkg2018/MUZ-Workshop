@@ -7,64 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "06DC2BE1-3942-4C37-8A21-ED4D022B25D8"
+            uuid = "94F60085-CC79-422F-876A-D8B9CE27AAC6"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../../../MUZ/MUZlib/MUZ-Assembler/Expression.cpp"
+            filePath = "../../../MUZ/MUZlib/MUZ-Assembler/All-Directives.cpp"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "59"
-            endingLineNumber = "59"
-            landmarkName = "ExpressionEvaluator::EvaluateExpression(tokens, start, end)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "C13D9AA7-ED9E-405E-AB18-5074FE57EA8E"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "MUZ-Workshop-rough/MUZ-Workshop-roughTests/MUZ_Workshop_roughTests.mm"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "296"
-            endingLineNumber = "296"
-            landmarkName = "-testBigIntegerEquate"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "4A0B71E1-939F-40C5-85B4-4F4F1BB42436"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../MUZ/MUZlib/MUZ-Assembler/Assembler.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1897"
-            endingLineNumber = "1897"
-            landmarkName = "Assembler::AssembleFile(file, msg)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "E78BB25E-AAD0-4A91-91E0-F7097D247957"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../MUZ/MUZlib/MUZ-Assembler/Assembler.cpp"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2138"
-            endingLineNumber = "2138"
-            landmarkName = "Assembler::SaveListing(listing, file, msg)"
+            startingLineNumber = "627"
+            endingLineNumber = "627"
+            landmarkName = "DirectiveHEXBYTES::Parse(as, parser, codeline, Label, msg)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

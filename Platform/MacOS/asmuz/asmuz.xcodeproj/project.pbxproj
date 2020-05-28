@@ -35,6 +35,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		863FB4C823E185C800F95115 /* Z80-Instructions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; name = "Z80-Instructions.asm"; path = "../../../../MUZ/TestSources/Z80-Instructions.asm"; sourceTree = "<group>"; };
+		863FB4C923E185C800F95115 /* LongIntegerEqu.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; name = LongIntegerEqu.asm; path = ../../../../MUZ/TestSources/LongIntegerEqu.asm; sourceTree = "<group>"; };
+		863FB4CA23E185C800F95115 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../../../../MUZ/TestSources/README.md; sourceTree = "<group>"; };
+		863FB4CB23E185C800F95115 /* Instructions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; name = Instructions.asm; path = ../../../../MUZ/TestSources/Instructions.asm; sourceTree = "<group>"; };
+		863FB4CC23E185C800F95115 /* Expressions.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; name = Expressions.asm; path = ../../../../MUZ/TestSources/Expressions.asm; sourceTree = "<group>"; };
+		863FB4CD23E185C800F95115 /* IntelHex.hex */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = IntelHex.hex; path = ../../../../MUZ/TestSources/IntelHex.hex; sourceTree = "<group>"; };
+		863FB4CE23E185C800F95115 /* Errors.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; name = Errors.asm; path = ../../../../MUZ/TestSources/Errors.asm; sourceTree = "<group>"; };
+		863FB4CF23E185C800F95115 /* Conditionnals.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; name = Conditionnals.asm; path = ../../../../MUZ/TestSources/Conditionnals.asm; sourceTree = "<group>"; };
+		863FB4D023E185C800F95115 /* DoubleEqu.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; name = DoubleEqu.asm; path = ../../../../MUZ/TestSources/DoubleEqu.asm; sourceTree = "<group>"; };
+		863FB4D823E186A300F95115 /* Manager.asm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.asm.asm; name = Manager.asm; path = "../../../../../../SCM-SCW/SCWorkshop-2019-09-07/SCMonitor/Source/BIOS/RC_Z180_native/Manager.asm"; sourceTree = "<group>"; };
 		86670A0621F5C3E300B2811A /* muzlib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = muzlib.xcodeproj; path = ../muzlib/muzlib.xcodeproj; sourceTree = "<group>"; };
 		86670A0821F5C3EC00B2811A /* libmuzlib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libmuzlib.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		86ABFDC321F405F30010245E /* asmuz */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = asmuz; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,6 +66,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		863FB4C623E1858E00F95115 /* Test Sources */ = {
+			isa = PBXGroup;
+			children = (
+				863FB4D823E186A300F95115 /* Manager.asm */,
+				863FB4CF23E185C800F95115 /* Conditionnals.asm */,
+				863FB4D023E185C800F95115 /* DoubleEqu.asm */,
+				863FB4CE23E185C800F95115 /* Errors.asm */,
+				863FB4CC23E185C800F95115 /* Expressions.asm */,
+				863FB4CB23E185C800F95115 /* Instructions.asm */,
+				863FB4CD23E185C800F95115 /* IntelHex.hex */,
+				863FB4C923E185C800F95115 /* LongIntegerEqu.asm */,
+				863FB4CA23E185C800F95115 /* README.md */,
+				863FB4C823E185C800F95115 /* Z80-Instructions.asm */,
+			);
+			path = "Test Sources";
+			sourceTree = "<group>";
+		};
 		86670A0A21F5CE2800B2811A /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -67,6 +94,7 @@
 		86ABFDBA21F405F30010245E = {
 			isa = PBXGroup;
 			children = (
+				863FB4C623E1858E00F95115 /* Test Sources */,
 				86ABFDCD21F4062D0010245E /* README.md */,
 				86ABFDC521F405F30010245E /* asmuz */,
 				86ABFDC421F405F30010245E /* Products */,

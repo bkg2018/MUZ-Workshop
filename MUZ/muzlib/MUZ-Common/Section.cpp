@@ -12,22 +12,22 @@
 namespace MUZ {
 
 	/** Tests if an address merges to the left of a range.*/
-	bool Section::mergesLeft(ADDRESSTYPE address, size_t rangeindex) {
+	bool Section::mergesLeft(DWORD address, size_t rangeindex) {
 		return (address + 1 == m_ranges[rangeindex].start);
 	}
 	
 	/** Tests if an address merges to the right of a range.*/
-	bool Section::mergesRight( ADDRESSTYPE address, size_t rangeindex) {
+	bool Section::mergesRight( DWORD address, size_t rangeindex) {
 		return (m_ranges[rangeindex].end + 1 == address);
 	}
 	
 	/** Tests if an address is inside a range. */
-	bool Section::isInside(ADDRESSTYPE address, size_t rangeindex) {
+	bool Section::isInside(DWORD address, size_t rangeindex) {
 		return ((m_ranges[rangeindex].start <= address) && (address <= m_ranges[rangeindex].end));
 	}
 	
 	/** Tests if this section contains an address range in its ranges and returns its index, returns -1 if not. */
-	int Section::FindRange(ADDRESSTYPE s, ADDRESSTYPE e) {
+	int Section::FindRange(DWORD s, DWORD e) {
 		for (size_t i = 0 ; i < m_ranges.size() ; i++) {
 			if (m_ranges[i].start <= s && e <= m_ranges[i].end) return (int)i;
 		}
@@ -35,7 +35,7 @@ namespace MUZ {
 	}
 	
 	/** Enters an address into an xxisting or new address range. Merges two existing ranges when address links them. */
-	void Section::SetAddress(ADDRESSTYPE address) {
+	void Section::SetAddress(DWORD address) {
 		
 		// All pathes set the current address
 		m_curaddress = address;
@@ -111,9 +111,9 @@ namespace MUZ {
 	}
 	
 	/** Returns the lowest starting address of all ranges. */
-	ADDRESSTYPE Section::absoluteStart() {
+	DWORD Section::absoluteStart() {
 		if (m_ranges.size()==0) return 0;
-		ADDRESSTYPE start = ADDRESSMASK;
+		DWORD start = ADDRESSMASK;
 		for (auto &range : m_ranges) {
 			if (range.start < start) start = range.start;
 		}
@@ -121,8 +121,8 @@ namespace MUZ {
 	}
 	
 	/** Returns the highest ending address of all ranges. */
-	ADDRESSTYPE Section::absoluteEnd() {
-		ADDRESSTYPE end = 0;
+	DWORD Section::absoluteEnd() {
+		DWORD end = 0;
 		for (auto &range : m_ranges) {
 			if (range.end > end) end = range.end;
 		}
@@ -130,19 +130,19 @@ namespace MUZ {
 	}
 	
 	/** Returns starting address for current range. */
-	ADDRESSTYPE Section::start() const {
+	DWORD Section::start() const {
 		if (m_ranges.size()==0) return 0;
 		return m_ranges[m_currange].start;
 	}
 	
 	/** Returns ending address for current range. */
-	ADDRESSTYPE Section::end() const {
+	DWORD Section::end() const {
 		if (m_ranges.size()==0) return 0;
 		return m_ranges[m_currange].end;
 	}
 	
 	/** Returns current address for current range. */
-	ADDRESSTYPE Section::curaddress() const {
+	DWORD Section::curaddress() const {
 		return m_curaddress;
 	}
 
@@ -176,7 +176,7 @@ namespace MUZ {
 	}
 	
 	/** Sets the current address. */
-	void Section::SetOrg(ADDRESSTYPE address) {
+	void Section::SetOrg(DWORD address) {
 		m_curaddress = address; // do NOT touch m_ranges
 	}
 	

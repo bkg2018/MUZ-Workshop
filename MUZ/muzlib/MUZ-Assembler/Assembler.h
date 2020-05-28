@@ -172,7 +172,7 @@ namespace MUZ {
 		/** file name for errors/warnings log */
 		std::string					m_logfilename;
 		/** Number of bytes in HEX output */
-		ADDRESSTYPE					m_hexbytes;
+		ADDRESSTYPE					m_hexbytes = 0x10;
 
 		//MARK: - Private Assembler functions
 		/** Assembles a prepared code line. */

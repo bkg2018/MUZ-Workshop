@@ -50,8 +50,8 @@ namespace MUZ {
 	const ADDRESSSIZETYPE MEMMAXSIZE = (ADDRESSSIZETYPE)ADDRESSMASK + 1;
 
 	struct AddressRange {
-		ADDRESSTYPE start = ADDRESSMASK;	// starting address
-		ADDRESSTYPE end = 0;				// last address, updated by each write
+		DWORD start = ADDRESSMASK;	// starting address
+		DWORD end = 0;				// last address, updated by each write
 	};
 		
 
